@@ -1,0 +1,91 @@
+{
+
+  "_comment"  : [
+    "====================================================================================",
+    "                    jsCoFE Configuration for desktop setup mode                     ",
+    "===================================================================================="
+  ],
+
+  "Desktop"  : {
+    "clientApp"  : "/bin/bash",
+    "args"       : ["-c","open -a Firefox $feURL$clientURL"]
+  },
+
+  "FrontEnd" : {
+    "protocol"         : "http",
+    "host"             : "localhost",
+    "port"             : 0,
+    "externalURL"      : "",
+    "exclusive"        : true,
+    "stoppable"        : false,
+    "fsmount"          : "/",
+    "userDataPath"     : "./cofe-users",
+    "projectsPath"     : "./cofe-projects",
+    "bootstrapHTML"    : "jscofe.html",
+    "fileCapSize"      : 500000
+  },
+
+  "NumberCrunchers" : [
+    {
+      "serNo"            : 0,
+      "name"             : "local-nc",
+      "in_use"           : true,
+      "protocol"         : "http",
+      "host"             : "localhost",
+      "port"             : 0,
+      "externalURL"      : "",
+      "exclusive"        : true,
+      "stoppable"        : false,
+      "fsmount"          : "/",
+      "capacity"         : 4,
+      "exclude_tasks"    : [],
+      "fasttrack"        : 1,
+      "storage"          : "./cofe-nc-storage",
+      "exeType"          : "SHELL",
+      "exeData"          : "",
+      "jobCheckPeriod"   : 2000,
+      "sendDataWaitTime" : 1000,
+      "maxSendTrials"    : 10,
+      "jobRemoveTimeout" : 30000,
+      "fileCapSize"      : 500000
+    },
+    {
+      "serNo"            : 1,
+      "name"             : "client",
+      "in_use"           : true,
+      "protocol"         : "http",
+      "host"             : "localhost",
+      "port"             : 0,
+      "externalURL"      : "",
+      "exclusive"        : true,
+      "stoppable"        : false,
+      "fsmount"          : "/",
+      "capacity"         : 4,
+      "exclude_tasks"    : [],
+      "fasttrack"        : 1,
+      "storage"          : "./cofe-client-storage",
+      "exeType"          : "CLIENT",
+      "exeData"          : "",
+      "jobCheckPeriod"   : 2000,
+      "sendDataWaitTime" : 1000,
+      "maxSendTrials"    : 10,
+      "jobRemoveTimeout" : 10000,
+      "fileCapSize"      : 500000
+    }
+  ],
+
+  "Emailer" : {
+    "type"               : "desktop",
+    "type_bak"           : "nodemailer",
+    "emailFrom"          : "My Name <my.name@gmail.com>",
+    "maintainerEmail"    : "my.name@gmail.com",
+    "host"               : "smtp.gmail.com",
+    "port"               : 465,
+    "secure"             : true,
+    "auth"               : {
+      "user" : "my.name@gmail.com",
+      "pass" : "***"
+    }
+  }
+
+}
