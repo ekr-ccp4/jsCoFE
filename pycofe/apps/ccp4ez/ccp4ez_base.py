@@ -326,7 +326,7 @@ class Base(object):
     def start_branch ( self,branch_title,page_title,subdir,branch_id,
                             tree_header_id,logtab_id,errtab_id ):
 
-        # make work directory
+        # make work directory 1
         sdir = os.path.join ( self.workdir,subdir )
         if not os.path.isdir(sdir):
             os.mkdir ( sdir )
