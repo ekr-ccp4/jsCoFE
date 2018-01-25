@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    30.09.17   <--  Date of Last Modification.
+ *    25.01.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  Configuration Module
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -218,13 +218,13 @@ function assignPorts ( assigned_callback )  {
                 setServer ( 2,0 );
             break;
 
-      case 2: if (fe_server.port<=0)
+      case 2: if ((fe_server.host=='localhost') && (fe_server.port<=0))
                     set_server ( fe_server,function(){ setServer(3,0); } );
               else  setServer(3,0);
             break;
 
       case 3: if (n<nc_servers.length)  {
-                if (nc_servers[n].port<=0)
+                if ((nc_servers[n].host=='localhost') && (nc_servers[n].port<=0))
                       set_server ( nc_servers[n],function(){ setServer(3,n+1); } );
                 else  setServer(3,n+1);
               } else
@@ -243,8 +243,10 @@ function assignPorts ( assigned_callback )  {
   // ===========================================================================
 
   function checkServers ( callback )  {
-    var b = (fe_server.port>0);
-    nc_servers.forEach ( function(config){ b = b && (config.port>0);} );
+    var b = (fe_server.host!='localhost') || (fe_server.port>0);
+    nc_servers.forEach ( function(config){
+      b = b && ((config.host!='localhost') || (config.port>0));
+    });
     if (b)
       callback();
     else
@@ -259,10 +261,16 @@ function assignPorts ( assigned_callback )  {
                        ' type=' + nc_servers[i].exeType +
                        ' url='  + nc_servers[i].url() );
 
-    servers.forEach ( function(server){ server.close(); } );
+    var nServers = servers.length;
+    function oneDown()  {
+      nServers--;
+      if ((nServers<=0) && (assigned_callback))
+        assigned_callback();
+    }
 
-    if (assigned_callback)
-      assigned_callback();
+    servers.forEach ( function(server){
+      server.close ( oneDown );
+    });
 
   });
 

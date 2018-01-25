@@ -2,7 +2,7 @@
 
   "_comment"  : [
     "====================================================================================",
-    "                    jsCoFE Configuration for desktop setup mode                     ",
+    "               jsCoFE Configuration for desktop-remote setup mode                   ",
     "===================================================================================="
   ],
 
@@ -13,9 +13,9 @@
 
   "FrontEnd" : {
     "protocol"         : "http",
-    "host"             : "localhost",
-    "port"             : 8081,
-    "externalURL"      : "http://localhost:808",
+    "host"             : "ccp4serv6.rc-harwell.ac.uk/jscofe/",
+    "port"             : 0,
+    "externalURL"      : "ccp4serv6.rc-harwell.ac.uk/jscofe/",
     "exclusive"        : true,
     "stoppable"        : false,
     "fsmount"          : "/",
@@ -28,35 +28,12 @@
   "NumberCrunchers" : [
     {
       "serNo"            : 0,
-      "name"             : "local-nc",
-      "in_use"           : true,
-      "protocol"         : "http",
-      "host"             : "localhost",
-      "port"             : 8082,
-      "externalURL"      : "http://localhost:8082",
-      "exclusive"        : true,
-      "stoppable"        : false,
-      "fsmount"          : "/",
-      "capacity"         : 4,
-      "exclude_tasks"    : [],
-      "fasttrack"        : 1,
-      "storage"          : "./cofe-nc-storage",
-      "exeType"          : "SHELL",
-      "exeData"          : "",
-      "jobCheckPeriod"   : 2000,
-      "sendDataWaitTime" : 1000,
-      "maxSendTrials"    : 10,
-      "jobRemoveTimeout" : 10000,
-      "fileCapSize"      : 500000
-    },
-    {
-      "serNo"            : 1,
       "name"             : "client",
       "in_use"           : true,
       "protocol"         : "http",
       "host"             : "localhost",
       "port"             : 8083,
-      "externalURL"      : "http://localhost:8083",
+      "externalURL"      : "",
       "exclusive"        : true,
       "stoppable"        : false,
       "fsmount"          : "/",

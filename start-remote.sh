@@ -17,4 +17,4 @@ cd $server_dir
 
 killall node
 
-node ./desktop.js ./config/conf.desktop.json
+node ./desktop.js ./config/conf.remote.json

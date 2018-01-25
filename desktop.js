@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    06.10.17   <--  Date of Last Modification.
+ *    25.01.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  Local (on-desktop) jsCoFE launcher
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -77,8 +77,8 @@ if (msg)  {
 var feConfig  = conf.getFEConfig ();
 var ncConfigs = conf.getNCConfigs();
 
-var forceStart = true;  // debugging option forcing start of servers with fixed
-                           // port numbers
+var forceStart = false;  // debugging option forcing start of servers with fixed
+                        // port numbers
 
 // the following two lines should be commented out in production environment
 //if ((feConfig.host=='localhost') && (feConfig.port<=0))
@@ -91,12 +91,13 @@ if (forceStart)  {
   startFE = true;
   startNC = [true,true];
 } else  {
-  startFE = (feConfig.host=='localhost') && (feConfig.port<=0);
+  startFE = (feConfig.host=='localhost');
   startNC = [];
   for (var i=0;i<ncConfigs.length;i++)
     startNC.push ( (ncConfigs[i].exeType=='CLIENT') ||
-                   (ncConfigs[i].host=='localhost') && (ncConfigs[i].port<=0) );
+                   (ncConfigs[i].host=='localhost') );
 }
+
 
 /*
 var locked  = false;
