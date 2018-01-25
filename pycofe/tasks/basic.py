@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    18.01.18   <--  Date of Last Modification.
+#    23.01.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -331,6 +331,15 @@ class TaskDriver(object):
 
     def putMessage1 ( self,pageId,message_str,row,colSpan=1 ):
         pyrvapi.rvapi_set_text ( message_str,pageId,row,0,1,colSpan )
+        return
+
+    def putWaitMessageLF ( self,message_str ):
+        gridId = "wait_message_" + str(self.widget_no)
+        pyrvapi.rvapi_add_grid ( gridId,False,self.report_page_id(),self.rvrow,0,1,1 )
+        pyrvapi.rvapi_set_text ( "<font style='font-size:120%;'>" + message_str +
+                                 "</font>",gridId,0,0,1,1 )
+        pyrvapi.rvapi_set_text ( "<div class='activity_bar'/>",gridId,0,1,1,1 )
+        self.widget_no += 1
         return
 
     def putTitle ( self,title_str ):
@@ -692,6 +701,7 @@ class TaskDriver(object):
                 structure.addXYZSubtype()
                 if title!="":
                     self.putTitle ( title )
+                self.putMessage ( "&nbsp;" )
                 self.putStructureWidget   ( "structure_btn_",
                                             "Structure and electron density",
                                             structure )
@@ -811,8 +821,8 @@ class TaskDriver(object):
                             ",'DataRevision','" + revision.dataId + "')",
                             False,gridId, row,0,1,1 )
         pyrvapi.rvapi_set_text ( message,gridId, row,1,1,1 )
-        pyrvapi.rvapi_set_text ( "<font size='+1'>\"" + revision.dname + "\"</font>",
-                                         gridId, row,2,1,1 )
+        pyrvapi.rvapi_set_text ( "<font style='font-size:120%;'>\"" + revision.dname +
+                                 "\"</font>", gridId, row,2,1,1 )
         return
 
 
@@ -1083,7 +1093,7 @@ class TaskDriver(object):
         solSpg = sol_spg.replace(" ", "")
         if solSpg and (solSpg!=hkl.getSpaceGroup().replace(" ", "")):
 
-            self.putMessage ( "<font size='+1'><b>Space Group changed to " +\
+            self.putMessage ( "<font style='font-size:120%;'><b>Space Group changed to " +\
                               sol_spg + "</b></font>" )
             rvrow0      = self.rvrow
             self.rvrow += 1
@@ -1125,7 +1135,7 @@ class TaskDriver(object):
         solSpg = sol_spg.replace(" ", "")
         if solSpg and (solSpg!=hkl_list[0].getSpaceGroup().replace(" ", "")):
 
-            self.putMessage ( "<font size='+1'><b>Space Group changed to " +\
+            self.putMessage ( "<font style='font-size:120%;'><b>Space Group changed to " +\
                               sol_spg + "</b></font>" )
             #rvrow0      = self.rvrow
             self.rvrow += 1

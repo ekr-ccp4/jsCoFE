@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    18.11.17   <--  Date of Last Modification.
+#    23.01.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -20,7 +20,7 @@
 #      jobDir/report  : directory receiving HTML report
 #
 #
-#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017
+#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017-2018
 #
 # ============================================================================
 #
@@ -378,12 +378,13 @@ class Crank2(basic.TaskDriver):
 
     # ------------------------------------------------------------------------
 
-    def finalise(self):
+    def finalise ( self,structure=None ):
         # ========================================================================
         # check solution and register data
 
-        self.structure = None
-        self.rvrow    += 20
+        self.structure = structure
+        #if not structure:
+        self.rvrow += 20
 
         if os.path.isfile(self.xyzout_fpath):
 
@@ -392,12 +393,13 @@ class Crank2(basic.TaskDriver):
                                         self.file_stderr )
 
             # register output data
-            self.structure = self.registerStructure1 (
-                            self.xyzout_fpath,self.hklout_fpath,
-                            self.hklout_fpath + ".map",
-                            self.hklout_fpath + "_diff.map",
-                            None,
-                            self.outputFName )
+            if not structure:
+                self.structure = self.registerStructure1 (
+                                self.xyzout_fpath,self.hklout_fpath,
+                                self.hklout_fpath + ".map",
+                                self.hklout_fpath + "_diff.map",
+                                None,
+                                self.outputFName )
 
             if self.structure:
 

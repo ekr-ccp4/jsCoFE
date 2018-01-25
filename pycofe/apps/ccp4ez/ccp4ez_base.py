@@ -65,7 +65,7 @@ import command
 class Base(object):
 
     workdir        = None       # work directory (current directory at start)
-    reportdir      = ""         # report directory within work directory
+    reportdir      = "report"   # report directory within work directory
     outputdir      = "output"   # directpry for output files (fixed name)
     outputname     = "ccp4ez"   # template for output file names
     scriptsdir     = "scripts"  # directory to keep all scripts
@@ -326,7 +326,7 @@ class Base(object):
     def start_branch ( self,branch_title,page_title,subdir,branch_id,
                             tree_header_id,logtab_id,errtab_id ):
 
-        # make work directory 1
+        # make work directory
         sdir = os.path.join ( self.workdir,subdir )
         if not os.path.isdir(sdir):
             os.mkdir ( sdir )
@@ -383,7 +383,8 @@ class Base(object):
         if branch_data:
             self.setOutputPage ( branch_data["cursor0"] )
             if message:
-                self.putMessageLF ( "<i>" + message + "</>" )
+                self.putMessageLF ( "<b>" + str(self.stage_no) + ". " +
+                                    message + "</b>" )
         self.mk_std_streams ( None )
         if self.layout == 0:
             pyrvapi.rvapi_set_tab_proxy ( self.navTreeId,"" )
@@ -411,6 +412,7 @@ class Base(object):
     # ----------------------------------------------------------------------
 
     def write_meta ( self ):
+        self.output_meta["report_row"] = self.page_cursor[1]
         meta = json.dumps ( self.output_meta )
         with open(os.path.join(self.workdir,"ccp4ez.meta.json"),"w") as f:
             f.write ( meta )
@@ -444,8 +446,8 @@ class Base(object):
         return
 
     def putMessageLF ( self,message_str ):
-        pyrvapi.rvapi_set_text ( "<font size='+1'>" + message_str + "</font>",
-                                self.page_cursor[0],self.page_cursor[1],0,1,1 )
+        pyrvapi.rvapi_set_text ( "<font style='font-size:120%;'>" + message_str +
+                        "</font>",self.page_cursor[0],self.page_cursor[1],0,1,1 )
         self.page_cursor[1] += 1
         return
 
@@ -459,6 +461,15 @@ class Base(object):
         pyrvapi.rvapi_add_section ( sec_id,sectionName,self.page_cursor[0],
                                     self.page_cursor[1],0,1,1,openState_bool )
         self.page_cursor[1] += 1
+        return
+
+    def putWaitMessageLF ( self,message_str ):
+        gridId = self.page_cursor[0] + str(self.page_cursor[1])
+        pyrvapi.rvapi_add_grid ( gridId,False,self.page_cursor[0],
+                                              self.page_cursor[1],0,1,1 )
+        pyrvapi.rvapi_set_text ( "<font style='font-size:120%;'>" + message_str +
+                                 "</font>",gridId,0,0,1,1 )
+        pyrvapi.rvapi_set_text ( "<div class='activity_bar'/>",gridId,0,1,1,1 )
         return
 
     def flush(self):
@@ -531,3 +542,10 @@ class Base(object):
         self.script_file = None
 
         return rc
+
+    # ----------------------------------------------------------------------
+
+    def saveResults ( self ):
+
+
+        return

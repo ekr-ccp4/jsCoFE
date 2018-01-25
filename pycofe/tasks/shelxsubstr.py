@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    24.09.17   <--  Date of Last Modification.
+#    23.01.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -19,7 +19,7 @@
 #                       all successful imports
 #      jobDir/report  : directory receiving HTML report
 #
-#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017
+#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017-2018
 #
 # ============================================================================
 #
@@ -75,7 +75,7 @@ class ShelxSubstr(crank2.Crank2):
         self.add_createfree()
         self.add_faest     ()
         self.add_substrdet ()
-        self.add_phas      ()
+        #self.add_phas      ()
 
         """
         if self.expType == "MAD":
@@ -96,6 +96,7 @@ class ShelxSubstr(crank2.Crank2):
 
     def finalise(self):
 
+        """
         # add FreeR_flag to the resulting mtz
         cad_mtz = "cad.mtz"
 
@@ -113,6 +114,84 @@ class ShelxSubstr(crank2.Crank2):
         mappath = os.path.join ( self.reportDir(),"3-phas","convert","fft.map" )
         if os.path.isfile(mappath):
             shutil.copy2 ( mappath,self.hklout_fpath+".map" )
+        """
+
+
+        hkls = None
+        for hkli in self.hkl:
+            if not hkls:
+                hkls = hkli
+            elif hkli.wtype=="peak":
+                hkls = hkli
+                break
+            elif hkli.wtype=="inflection":
+                hkls = hkli
+
+        self.rvrow += 20
+        rvrow0 = self.rvrow
+        self.putTitle ( "Substructure Found" )
+        structure = self.finaliseStructure ( self.xyzout_fpath,self.outputFName,
+                                             hkls,None,[],0,False,"" )
+        if structure:
+
+            self.putMessage ( "&nbsp;" )
+
+            anom_structure = self.finaliseAnomSubstructure ( self.xyzout_fpath,
+                                        "anom_substructure",hkls,[],"",False )
+            if anom_structure:
+                anom_structure.setAnomSubstrSubtype() # substructure
+                anom_structure.setHLLabels()
+            else:
+                self.putMessage ( "Anomalous substructure calculations failed." )
+
+            # finalise output revision(s)
+            super ( ShelxSubstr,self ).finalise ( structure )
+
+            """
+            if self.structure:
+
+                self.putTitle ( "Substructure Found" )
+
+                self.putStructureWidget ( "structure_btn",
+                            "Structure and electron density",self.structure,-1 )
+                self.putMessage ( "&nbsp;" )
+
+                hkls = None
+                for hkli in self.hkl:
+                    if not hkls:
+                        hkls = hkli
+                    elif hkli.wtype=="peak":
+                        hkls = hkli
+                        break
+                    elif hkli.wtype=="inflection":
+                        hkls = hkli
+
+                structure = self.finaliseAnomSubstructure (
+                            os.path.join(self.outputDir(),self.structure.files[0]),
+                            "anom_substructure",hkls,[],"",False )
+                if structure:
+                    structure.setAnomSubstrSubtype() # substructure
+                    structure.setHLLabels()
+
+            else:
+                self.putTitle ( "No Substructure Found" )
+            """
+
+
+        else:
+            self.rvrow = rvrow0
+            self.putTitle ( "No Substructure Found" )
+            for i in range(10):
+                self.putTitle ( "&nbsp;" )
+
+        """
+        structure = self.finaliseAnomSubstructure (
+                    self.xyzout_fpath,
+                    "anom_substructure",hkls,[],"",False )
+        if structure:
+            structure.setAnomSubstrSubtype() # substructure
+            structure.setHLLabels()
+
 
         # finalise output structure
         super ( ShelxSubstr,self ).finalise()
@@ -144,6 +223,7 @@ class ShelxSubstr(crank2.Crank2):
 
         else:
             self.putTitle ( "No Substructure Found" )
+        """
 
         self.flush()
 

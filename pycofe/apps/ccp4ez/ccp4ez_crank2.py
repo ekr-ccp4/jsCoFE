@@ -7,7 +7,7 @@
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
-#  CCP4EZ Combined Auto-Solver MoRDa module
+#  CCP4EZ Combined Auto-Solver Crank-2 module
 #
 #  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017
 #
@@ -29,10 +29,11 @@ import ccp4ez_morda
 
 class Crank2(ccp4ez_morda.MoRDa):
 
-    def crank2_header_id(self):  return "ccp4ez_crank2_header_tab"
-    def crank2_page_id  (self):  return "ccp4ez_crank2_tab"
-    def crank2_logtab_id(self):  return "ccp4ez_crank2_log_tab"
-    def crank2_errtab_id(self):  return "ccp4ez_crank2_err_tab"
+    #def crank2_header_id(self):  return "ccp4ez_crank2_header_tab"
+    def crank2_results_tab_id(self):  return "results_tab"
+    def crank2_page_id       (self):  return "ccp4ez_crank2_tab"
+    def crank2_logtab_id     (self):  return "ccp4ez_crank2_log_tab"
+    def crank2_errtab_id     (self):  return "ccp4ez_crank2_err_tab"
 
     def crank2_dir      (self):  return "crank2data"
 
@@ -40,10 +41,14 @@ class Crank2(ccp4ez_morda.MoRDa):
 
     def crank2 ( self,mtz_branch_id ):
 
-        branch_data = self.start_branch ( "Auto-EP",
-                        "Automated Experimental Phasing",
-                        self.crank2_dir      (),mtz_branch_id,
-                        self.crank2_header_id(),self.crank2_logtab_id(),
+        self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
+                                ". Auto-EP with Crank-2</b>" )
+
+        branch_data = self.start_branch ( "Auto-EP (Crank-2)",
+                        "CCP4ez Automated Structure Solver: Auto-EP " +
+                        "with Crank-2",
+                        self.crank2_dir(),mtz_branch_id,
+                        self.crank2_results_tab_id(),self.crank2_logtab_id(),
                         self.crank2_errtab_id() )
 
         # check data availability
@@ -86,8 +91,8 @@ class Crank2(ccp4ez_morda.MoRDa):
                                    " sigf=" + self.hkl.Fpm.minus.sigma + "\n" )
 
         exp_num_atoms = ""
-        if self.ha_number>0:
-            exp_num_atoms = " exp_num_atoms=" + str(self.ha_number)
+        #if self.ha_number>0:
+        #    exp_num_atoms = " exp_num_atoms=" + str(self.ha_number)
 
         self.write_script (
             "target::SAD\n"

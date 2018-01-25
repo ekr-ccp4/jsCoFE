@@ -83,22 +83,18 @@ class PrepareMTZ(ccp4ez_base.Base):
             self.hkl     = self.input_hkl
             self.mtzpath = self.hklpath
             self.stdout ( " ... given reflections are merged\n" )
-            self.putMessageLF ( "<i>Refection data is merged -- no scaling and merging</i>" )
+            #self.putMessageLF ( "<b>" + str(self.stage_no) +
+            #                    ". Refection data is merged -- no " +
+            #                    "scaling and merging<b>" )
             return ""
+
 
         # reflections should be merged, use pointless - aimless pipeline
 
-        """
-        branch_data = self.start_branch ( "Data reduction",
-                                "Merge and scale reflections",
-                                self.datared_dir  (),tree_branch_id,
-                                self.mtz_header_id(),self.mtz_logtab_id(),
-                                self.mtz_errtab_id() )
+        self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
+                                ". Scaling and Merging</b>" )
 
-        cursor2 = self.insertTab ( self.mtz_page_id(),"Report",
-                                   self.mtz_logtab_id(),True )
-        """
-        branch_data = self.start_branch ( "Data reduction",
+        branch_data = self.start_branch ( "Scaling and Merging",
                                 "CCP4ez Automated Structure Solver: Scaling and Merging",
                                 self.datared_dir  (),tree_branch_id,
                                 self.mtz_page_id  (),self.mtz_logtab_id(),
@@ -260,6 +256,6 @@ class PrepareMTZ(ccp4ez_base.Base):
                                  self.page_cursor[0],self.page_cursor[1],
                                  0,1,1,-1 )
 
-        self.quit_branch ( branch_data,"<b>-- Refection data scaled and merged</b>" )
+        self.quit_branch ( branch_data,"Refection data scaled and merged" )
 
         return self.mtz_page_id()

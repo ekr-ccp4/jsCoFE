@@ -3,13 +3,13 @@
 #
 # ============================================================================
 #
-#    20.12.17   <--  Date of Last Modification.
+#    22.01.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
 #  CCP4EZ Combined Auto-Solver Simbad stages 1 and 2 class
 #
-#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017
+#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017-2018
 #
 # ============================================================================
 #
@@ -31,10 +31,11 @@ import ccp4ez_mtz
 
 class Simbad12(ccp4ez_mtz.PrepareMTZ):
 
-    def simbad12_header_id(self):  return "ccp4ez_simbad12_header_tab"
-    def simbad12_page_id  (self):  return "ccp4ez_simbad12_tab"
-    def simbad12_logtab_id(self):  return "ccp4ez_simbad12_log_tab"
-    def simbad12_errtab_id(self):  return "ccp4ez_simbad12_err_tab"
+    #def simbad12_header_id(self):  return "ccp4ez_simbad12_header_tab"
+    def simbad12_summary_id(self):  return "summary_tab"
+    def simbad12_page_id   (self):  return "ccp4ez_simbad12_tab"
+    def simbad12_logtab_id (self):  return "ccp4ez_simbad12_log_tab"
+    def simbad12_errtab_id (self):  return "ccp4ez_simbad12_err_tab"
 
     def simbad12_dir      (self):  return "simbad12"
 
@@ -55,15 +56,20 @@ class Simbad12(ccp4ez_mtz.PrepareMTZ):
 
     def simbad12 ( self,mtz_branch_id ):
 
+        self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
+                                ". Lattice and Contaminant Searches</b>" )
+
         branch_data = self.start_branch ( "DB Searches",
-                        "Lattice and Contaminant Searches",
-                        self.simbad12_dir      (),mtz_branch_id,
-                        self.simbad12_header_id(),self.simbad12_logtab_id(),
+                        "CCP4ez Automated Structure Solver: Lattice and " +
+                        "Contaminant Searches",
+                        self.simbad12_dir       (),mtz_branch_id,
+                        self.simbad12_summary_id(),self.simbad12_logtab_id(),
                         self.simbad12_errtab_id() )
 
         # store document before making command line, because document name
         # can be changed by the framework
         self.storeReportDocument ( self.simbad12_logtab_id() )
+        self.flush()
 
         # Prepare simbad input -- script file
         cmd = [ "-nproc"          ,"1",
@@ -116,6 +122,9 @@ class Simbad12(ccp4ez_mtz.PrepareMTZ):
 
         if simbad_meta:
 
+            simbad_meta["rfree"] = rfree
+            self.output_meta["simbad12"] = simbad_meta
+
             if simbad_meta["nResults"] > 0:
 
                 simbad12dir = "simbad12"
@@ -123,10 +132,10 @@ class Simbad12(ccp4ez_mtz.PrepareMTZ):
                 if not os.path.isdir(sdir):
                     os.mkdir ( sdir )
 
-                simbad_xyz  = os.path.join ( self.outputdir,simbad12dir,self.output_xyz )
-                simbad_mtz  = os.path.join ( self.outputdir,simbad12dir,self.output_mtz )
-                simbad_map  = os.path.join ( self.outputdir,simbad12dir,self.output_map )
-                simbad_dmap = os.path.join ( self.outputdir,simbad12dir,self.output_dmap )
+                simbad_xyz  = os.path.join ( self.outputdir,simbad12dir,self.outputname+".pdb" )
+                simbad_mtz  = os.path.join ( self.outputdir,simbad12dir,self.outputname+".mtz" )
+                simbad_map  = os.path.join ( self.outputdir,simbad12dir,self.outputname+".map" )
+                simbad_dmap = os.path.join ( self.outputdir,simbad12dir,self.outputname+"_dmap.map" )
 
                 meta = simbad_meta["results"][0]
                 shutil.copy2 ( os.path.join(self.reportdir,meta["pdb"]),simbad_xyz )
@@ -141,19 +150,23 @@ class Simbad12(ccp4ez_mtz.PrepareMTZ):
 
                 self.output_meta["best"] = "simbad12"
 
-            simbad_meta["rfree"] = rfree
-            self.output_meta["simbad12"] = simbad_meta
-
-            self.page_cursor[1] -= 1
-            if rfree < 0.4:
-                self.output_meta["retcode"] = "solved"     # solution
-                self.end_branch ( branch_data,"solution found" )
-            elif rfree < 0.45:
-                self.output_meta["retcode"] = "candidate"  # possible solution
-                self.end_branch ( branch_data,"possible solution found" )
+                #self.page_cursor[1] -= 1
+                if rfree < 0.4:
+                    self.output_meta["retcode"] = "solved"     # solution
+                    self.quit_branch ( branch_data,"Lattice and Contaminant " +
+                                        "Searches (Simbad): solution found" )
+                elif rfree < 0.45:
+                    self.output_meta["retcode"] = "candidate"  # possible solution
+                    self.quit_branch ( branch_data,"Lattice and Contaminant " +
+                                    "Searches (Simbad): possible solution found" )
+                else:
+                    self.output_meta["retcode"] = "not solved" # no solution
+                    self.quit_branch ( branch_data,"Lattice and Contaminant " +
+                                    "Searches (Simbad): no solution found" )
             else:
                 self.output_meta["retcode"] = "not solved" # no solution
-                self.end_branch ( branch_data,"no solution found" )
+                self.quit_branch ( branch_data,"Lattice and Contaminant " +
+                                "Searches (Simbad): no solution found" )
 
         else:
             simbad_meta = {}
@@ -162,6 +175,8 @@ class Simbad12(ccp4ez_mtz.PrepareMTZ):
             self.page_cursor[1] -= 1
             self.output_meta["retcode"]  = "errors"
             self.output_meta["simbad12"] = simbad_meta
-            self.end_branch ( branch_data,"errors" )
+            self.quit_branch ( branch_data,"Lattice and Contaminant " +
+                                "Searches (Simbad): errors encountered" )
+            #self.end_branch ( branch_data,"errors" )
 
-        return
+        return self.simbad12_summary_id()

@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    06.01.18   <--  Date of Last Modification.
+#    23.01.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -121,9 +121,13 @@ class Simbad(asudef.ASUDef):
         }
         """
 
-        rvapi_meta  = pyrvapi.rvapi_get_meta()
+        rvapi_meta = pyrvapi.rvapi_get_meta()
         if rvapi_meta:
-            simbad_meta = json.loads ( rvapi_meta )
+            try:
+                simbad_meta = json.loads ( rvapi_meta )
+            except:
+                self.putMessage ( "<b>Program error:</b> <i>unparseable metadata from Simbad</i>" +
+                                  "<p>'" + rvapi_meta + "'" )
         else:
             self.putMessage ( "<b>Program error:</b> <i>no metadata from Simbad</i>" )
             simbad_meta = {}

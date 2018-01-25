@@ -65,17 +65,18 @@ class CCP4ez(ccp4ez_crank2.Crank2):
         #self.putMessage ( "<h2>CCP4 Easy (Combined Automated Structure Solution)</h2>" )
         #self.putMessage ( "<h3><i>Structure solution in progress ...</i></h3>" )
 
-        mtz_branch_id = self.prepare_mtz ( "" )
+        branch_id = self.prepare_mtz ( "" )
+
+        if not self.output_meta["retcode"]:
+            self.simbad12 ( "" )
+            #self.simbad12 ( branch_id )
+
+        if self.output_meta["retcode"] != "solved":
+            self.crank2 ( "" )
 
         """
-        if not self.output_meta["retcode"]:
-            self.simbad12 ( mtz_branch_id )
-
         if self.output_meta["retcode"] != "solved":
-            self.morda ( mtz_branch_id )
-
-        if self.output_meta["retcode"] != "solved":
-            self.crank2 ( mtz_branch_id )
+            self.morda ( branch_id )
 
         """
 

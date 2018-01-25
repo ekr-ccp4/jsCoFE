@@ -55,6 +55,9 @@ class CCP4ez(import_task.Import):
 
     def importData(self):
 
+        self.putWaitMessageLF ( "<b>1. Data Import</b>" )
+        self.rvrow -= 1
+
         # -------------------------------------------------------------------
         # import uploaded data
         # make import tab and redirect output to it
@@ -122,7 +125,7 @@ class CCP4ez(import_task.Import):
 
         tableId = "ccp4ez_summary_table"
 
-        self.putTable ( tableId,"<font size='+1'>Input Data</font>",
+        self.putTable ( tableId,"<font style='font-style:normal;font-size:125%;'>1. Input Data</font>",
                                 self.report_page_id(),self.rvrow,0 )
         self.rvrow += 1
         self.setTableHorzHeaders ( tableId,["Assigned Name","View"],
@@ -211,10 +214,20 @@ class CCP4ez(import_task.Import):
             ccp4ez_path = os.path.normpath ( os.path.join (
                                 os.path.dirname(os.path.abspath(__file__)),
                                 "../apps/ccp4ez/ccp4ez.py" ) )
-            cmd = [ccp4ez_path,"--rvapi-document",self.reportDocumentName()]
+            cmd = [ccp4ez_path,"--rdir","report",
+                               "--rvapi-document",self.reportDocumentName()]
 
             self.runApp ( "ccp4-python",cmd )
-            self.restoreReportDocument()
+            rvapi_meta = self.restoreReportDocument()
+
+            if rvapi_meta:
+                try:
+                    rvapi_meta = json.loads ( rvapi_meta )
+                    self.rvrow = rvapi_meta["report_row"]
+                except:
+                    self.putMessage (
+                        "<b>Program error:</b> <i>unparseable metadata " +
+                        "from CCP4ez</i>" + "<p>'" + str(rvapi_meta) + "'" )
 
 
         # close execution logs and quit
