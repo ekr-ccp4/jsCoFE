@@ -3,13 +3,13 @@
 #
 # ============================================================================
 #
-#    29.12.17   <--  Date of Last Modification.
+#    27.01.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
 #  CCP4EZ Combined Auto-Solver Crank-2 module
 #
-#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017
+#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017-2018
 #
 # ============================================================================
 #
@@ -35,14 +35,14 @@ class Crank2(ccp4ez_morda.MoRDa):
     def crank2_logtab_id     (self):  return "ccp4ez_crank2_log_tab"
     def crank2_errtab_id     (self):  return "ccp4ez_crank2_err_tab"
 
-    def crank2_dir      (self):  return "crank2data"
+    def crank2_dir           (self):  return "crank2_results"
 
     # ----------------------------------------------------------------------
 
     def crank2 ( self,mtz_branch_id ):
 
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
-                                ". Auto-EP with Crank-2</b>" )
+                            ". Automated Experimental Phasing (Crank-2)</b>" )
 
         branch_data = self.start_branch ( "Auto-EP (Crank-2)",
                         "CCP4ez Automated Structure Solver: Auto-EP " +
@@ -119,8 +119,13 @@ class Crank2(ccp4ez_morda.MoRDa):
         #crank2_xyz  = os.path.join ( self.crank2_dir(),self.output_xyz )
         #crank2_mtz  = os.path.join ( self.crank2_dir(),self.output_mtz )
 
-        crank2_xyz = "crank2.xyz"
-        crank2_mtz = "crank2.mtz"
+        #crank2_xyz = "crank2.xyz"
+        #crank2_mtz = "crank2.mtz"
+
+        crank2_xyz  = os.path.join ( self.crank2_dir(),self.outputname + ".pdb" )
+        crank2_mtz  = os.path.join ( self.crank2_dir(),self.outputname + ".mtz" )
+        crank2_map  = os.path.join ( self.crank2_dir(),self.outputname + ".map" )
+        crank2_dmap = os.path.join ( self.crank2_dir(),self.outputname + "_dmap.pdb" )
 
         cmd = [
             os.path.join(os.environ["CCP4"],"share","ccp4i","crank2","crank2.py"),
@@ -140,103 +145,21 @@ class Crank2(ccp4ez_morda.MoRDa):
 
         self.end_branch ( branch_data,"no solution found" )
 
-
-        """
-         ccp4-python \
-              '/Applications/ccp4-7.0/share/ccp4i/crank2/crank2.py' '--xyzout'         \
-              '/Users/eugene/Projects/jsCoFE/cofe-nc-storage/jobs/job_955/output/0139-01_crank2.pdb'  \
-              '--hklout'                                                               \
-              '/Users/eugene/Projects/jsCoFE/cofe-nc-storage/jobs/job_955/output/0139-01_crank2.mtz'  \
-              '--dirout' 'report' '--rvapi-viewer' '0' '--rvapi-uri-prefix' './'       \
-              '--rvapi-document'                                                       \
-              '/Users/eugene/Projects/jsCoFE/cofe-nc-storage/jobs/job_955/rvapi_document'  \
-              '--rvapi-no-tree'
-
-        --------------------------------------------------------------------------------
-        ## KEYWORD INPUT:
-
-        fsigf plus dname=peak file=input/0093-01.mtz i=I(+) sigi=SIGI(+)
-        fsigf minus dname=peak i=I(-) sigi=SIGI(-)
-        target::SAD
-        model substr atomtype=Se d_name=peak
-        sequence monomers_asym=1 solvent_content=0.5618624 file=crank2.seq
-        createfree no_output_to_next_step::True
-        faest
-        substrdet
-        refatompick
-        handdet
-        dmfull
-        comb_phdmmb exclude obj_from=0,typ=freeR mb buccaneer
-        ref target::MLHL exclude obj_from=0,typ=freeR
-        """
-        #
-        """
-        morda_xyz  = os.path.join ( self.morda_dir(),self.output_xyz )
-        morda_mtz  = os.path.join ( self.morda_dir(),self.output_mtz )
-        morda_map  = os.path.join ( self.morda_dir(),self.output_map )
-        morda_dmap = os.path.join ( self.morda_dir(),self.output_dmap )
-
-        self.storeReportDocument (
-            '{ "jobId"     : "' + self.jobId              + '",' +
-            '  "logTabId"  : "' + self.morda_logtab_id()  + '",' +
-            '  "name_xyz"  : "' + morda_xyz               + '",' +
-            '  "name_mtz"  : "' + morda_mtz               + '",' +
-            '  "name_map"  : "' + morda_map               + '",' +
-            '  "name_dmap" : "' + morda_dmap              + '",' +
-            '  "sge_q"     : "' + self.queueName          + '",' +
-            '  "sge_tc"    : "' + str(self.nSubJobs)      + '",' +
-            '  "subjobs"   : "subjobs" ' +
-            '}'
-        )
-
-        # make command-line parameters for morda_sge.py
-        cmd = [ "-m","morda",
-                "--sge" if self.SGE else "--mp",
-                "-f",self.mtzpath,
-                "-s",self.seqpath,
-                "-d",self.rvapi_doc_path,
-                #"-a",
-                "-n","1"
-              ]
-
-        #if self.task.parameters.sec1.contains.NMODELS.value:
-        #    cmd = cmd + [ "-n",str(self.task.parameters.sec1.contains.NMODELS.value) ]
-
-        # run morda
-        self.runApp ( "ccp4-python",cmd )
-
-        self.restoreReportDocument()
-
-        #  MoRDa puts final files in "output" directory, so update our paths
-        morda_xyz = os.path.join ( self.outputdir,morda_xyz )
-
         # check for solution
-        morda_meta = {}
-        if os.path.isfile(morda_xyz):
-            self.output_meta["retcode"] = "solved"     # solution
-            f = open ( os.path.join(self.outputdir,"morda.res") )
-            flines = f.readlines()
-            f.close()
-            rfree = float(flines[1])
-            morda_meta["nResults"] = 1
-            morda_meta["rfree"] = rfree
-            morda_meta["pdb"]   = morda_xyz
-            morda_meta["mtz"]   = os.path.join ( self.outputdir,morda_mtz )
-            morda_meta["map"]   = os.path.join ( self.outputdir,morda_map )
-            morda_meta["dmap"]  = os.path.join ( self.outputdir,morda_dmap )
-            if self.output_meta["best"]:
-                if rfree < self.output_meta[self.output_meta["best"]]["rfree"]:
-                    self.output_meta["best"] = "morda"
-            else:
-                self.output_meta["best"] = "morda"
-            self.output_meta["morda"] = morda_meta
-            self.end_branch ( branch_data,"solution found" )
+        nResults = 0
+        rfree    = 1.0
+        if os.path.isfile(crank2_xyz):
+            nResults = 1
+            #f = open ( os.path.join(self.outputdir,"morda.res") )
+            #flines = f.readlines()
+            #f.close()
+            #rfree = float(flines[1])
+            rfree = 0.33
 
-        else:
-            self.output_meta["retcode"] = "not solved" # no solution
-            morda_meta["nResults"] = 0
-            self.output_meta["morda"] = morda_meta
-            self.end_branch ( branch_data,"no solution found" )
-        """
+        quit_message = self.saveResults ( self.crank2_dir(),nResults,rfree,
+                                crank2_xyz,crank2_mtz,crank2_map,crank2_dmap )
 
-        return
+        self.quit_branch ( branch_data,"Automated Experimental Phasing (Crank-2): " +
+                                       quit_message )
+
+        return self.crank2_results_tab_id()

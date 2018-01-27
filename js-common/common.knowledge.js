@@ -27,7 +27,7 @@ var _taskIndex = {
   '0' : { type: 'Root'               , after: [] },
 
   // suggest CCP4ez only after Root
-  'A' : { type: 'TaskCCP4ez'         , after: ['0'] },
+  //'A' : { type: 'TaskCCP4ez'         , after: ['0'] },
 
   'B' : { type: 'TaskImport'         , after: ['0','B','C','D','E'] },
   'C' : { type: 'TaskEnsemblePrepSeq', after: ['B','D'] },

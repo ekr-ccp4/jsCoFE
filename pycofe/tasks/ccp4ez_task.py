@@ -214,8 +214,11 @@ class CCP4ez(import_task.Import):
             ccp4ez_path = os.path.normpath ( os.path.join (
                                 os.path.dirname(os.path.abspath(__file__)),
                                 "../apps/ccp4ez/ccp4ez.py" ) )
-            cmd = [ccp4ez_path,"--rdir","report",
-                               "--rvapi-document",self.reportDocumentName()]
+            cmd = [ ccp4ez_path,
+                    "--sge" if self.exeType == "SGE" else "--mp",
+                    "--rdir","report",
+                    "--rvapi-document",self.reportDocumentName()
+                  ]
 
             self.runApp ( "ccp4-python",cmd )
             rvapi_meta = self.restoreReportDocument()

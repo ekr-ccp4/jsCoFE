@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    21.01.18   <--  Date of Last Modification.
+#    26.01.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -52,6 +52,7 @@
 import os
 import sys
 import json
+import shutil
 
 #  ccp4-python imports
 import pyrvapi
@@ -74,7 +75,7 @@ class Base(object):
     rvapi_doc_path = None       # path to rvapi document
 
     jobId          = ""         # jobId (comind from jsCoFE)
-    SGE            = False      # whether the pipeline runs on SGE cluster
+    exeType        = "--mp"     # or "--sge" if the pipeline runs on SGE cluster
     queueName      = ""         # SGE queue
     nSubJobs       = 1          # permissible number of sub-jobs to launch
     stage_no       = 0          # stage number for headers
@@ -185,8 +186,8 @@ class Base(object):
         while narg<len(args):
             key   = args[narg]
             narg += 1
-            if key=="--sge":
-                self.SGE = True
+            if key=="--sge" or key=="--mp":
+                self.exeType = key
             elif narg<len(args):
                 value = args[narg]
                 if   key == "--wkdir"          : self.workdir        = value
@@ -369,6 +370,7 @@ class Base(object):
 
         return {"title":title, "cursor0":cursor0, "cursor1":cursor1}
 
+
     def end_pipeline ( self,branch_data,message,detail_message=None ):
         if branch_data:
             self.setOutputPage ( branch_data["cursor1"] )
@@ -545,7 +547,61 @@ class Base(object):
 
     # ----------------------------------------------------------------------
 
-    def saveResults ( self ):
+    def saveResults ( self, name,nResults,rfree,
+                            fpath_xyz,fpath_mtz,fpath_map,fpath_dmap ):
+
+        meta = {}
+        meta["rfree"]    = rfree
+        meta["nResults"] = nResults
+        quit_message     = ""
+
+        if nResults>0:
+
+            # store results in dedicated subdirectory of "output" directory
+            resdir = os.path.join ( self.outputdir,name )
+            if not os.path.isdir(resdir):
+                os.mkdir ( resdir )
+
+            # make new file names in dedicated result directory
+            f_xyz  = os.path.join ( resdir, self.outputname + ".pdb" )
+            f_mtz  = os.path.join ( resdir, self.outputname + ".mtz" )
+            f_map  = os.path.join ( resdir, self.outputname + ".map" )
+            f_dmap = os.path.join ( resdir, self.outputname + "_dmap.map" )
+
+            # copy result files with new names
+            if fpath_xyz!=f_xyz:
+                shutil.copy2 ( fpath_xyz ,f_xyz  )
+                shutil.copy2 ( fpath_mtz ,f_mtz  )
+                shutil.copy2 ( fpath_map ,f_map  )
+                shutil.copy2 ( fpath_dmap,f_dmap )
+
+            # store new file names in meta structure
+            meta["pdb"]  = f_xyz
+            meta["mtz"]  = f_mtz
+            meta["map"]  = f_map
+            meta["dmap"] = f_dmap
+
+            # calculate return code and quit message
+            if rfree < 0.4:
+                self.output_meta["retcode"] = "solved"     # solution
+                quit_message = "solution found"
+            elif rfree < 0.45:
+                self.output_meta["retcode"] = "candidate"  # possible solution
+                quit_message = "possible solution found"
+            else:
+                self.output_meta["retcode"] = "not solved" # no solution
+                quit_message = "no solution found"
+
+        elif nResults==0:
+            self.output_meta["retcode"] = "not solved" # no solution
+            quit_message = "no solution found"
+
+        else:
+            self.output_meta["retcode"] = "errors"
+            quit_message = "errors encountered"
 
 
-        return
+        # put meta structure in output meta data
+        self.output_meta[name] = meta
+
+        return quit_message

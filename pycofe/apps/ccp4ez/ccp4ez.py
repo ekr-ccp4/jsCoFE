@@ -67,17 +67,16 @@ class CCP4ez(ccp4ez_crank2.Crank2):
 
         branch_id = self.prepare_mtz ( "" )
 
+        if self.output_meta["retcode"] != "solved":
+            self.morda ( branch_id )
+
+        """
         if not self.output_meta["retcode"]:
             self.simbad12 ( "" )
             #self.simbad12 ( branch_id )
 
         if self.output_meta["retcode"] != "solved":
             self.crank2 ( "" )
-
-        """
-        if self.output_meta["retcode"] != "solved":
-            self.morda ( branch_id )
-
         """
 
         #self.page_cursor[1] -= 1

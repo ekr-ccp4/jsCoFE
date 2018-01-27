@@ -140,7 +140,7 @@ class Gesamt(basic.TaskDriver):
 
             if os.path.isfile(self.gesamt_json()):
 
-                hitlist  = jsonut.readjObject  ( self.gesamt_json() )
+                hitlist  = jsonut.readjObject ( self.gesamt_json() )
 
                 pyrvapi.rvapi_add_table ( self.query_table_id(),"Query structure",
                                     self.report_page_id(),self.rvrow,0,1,1, 0 )
@@ -160,7 +160,7 @@ class Gesamt(basic.TaskDriver):
                 querySize = float(hitlist.query.size)
 
                 nColumns = len(hitlist.columns)
-                if nColumns<1:
+                if nColumns<1 or not hasattr(hitlist.columns[0],"value"):
                     nHits = 0
                 elif type(hitlist.columns[0].value) is list:
                     nHits = min ( len(hitlist.columns[0].value),
@@ -169,7 +169,11 @@ class Gesamt(basic.TaskDriver):
                     nHits = 1
 
                 if nHits<1:
-                    self.putTitle ( "No PDB matches found" )
+                    self.putTitle   ( "No PDB matches found" )
+                    self.putMessage ( "<i>Hint:</i> try to reduce report thresholds " +
+                        "(ultimately down to 0) in order to see any hits;<br>" +
+                        "doing so will increase computation time and report " +
+                        "lower-quality (less relevant) matches." )
                 else:
 
                     self.putSection ( self.hits_table_sec_id(),"PDB Hits Table",False )

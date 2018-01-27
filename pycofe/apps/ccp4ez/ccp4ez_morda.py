@@ -3,13 +3,13 @@
 #
 # ============================================================================
 #
-#    20.12.17   <--  Date of Last Modification.
+#    26.01.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
 #  CCP4EZ Combined Auto-Solver MoRDa module
 #
-#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017
+#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017-2018
 #
 # ============================================================================
 #
@@ -34,28 +34,28 @@ class MoRDa(ccp4ez_simbad12.Simbad12):
     def morda_logtab_id(self):  return "ccp4ez_morda_log_tab"
     def morda_errtab_id(self):  return "ccp4ez_morda_err_tab"
 
-    def morda_dir      (self):  return "mordadata"
+    def morda_dir      (self):  return "morda_results"
 
     # ----------------------------------------------------------------------
 
     def morda ( self,mtz_branch_id ):
 
+        if not self.seqpath:
+            return ""
+
+        self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
+                                ". Automated Molecular Replacement (MoRDa)</b>" )
+
         branch_data = self.start_branch ( "Auto-MR",
-                        "Automated Molecular Replacement",
+                        "CCP4ez Automated Structure Solver: Auto-MR with MoRDa",
                         self.morda_dir      (),mtz_branch_id,
                         self.morda_header_id(),self.morda_logtab_id(),
                         self.morda_errtab_id() )
 
-        if not self.seqpath:
-            self.end_branch ( branch_data,"not attempted",
-                              "Automated MR not attempted because no sequence "
-                              "data are given." )
-            return
-
-        morda_xyz  = os.path.join ( self.morda_dir(),self.output_xyz )
-        morda_mtz  = os.path.join ( self.morda_dir(),self.output_mtz )
-        morda_map  = os.path.join ( self.morda_dir(),self.output_map )
-        morda_dmap = os.path.join ( self.morda_dir(),self.output_dmap )
+        morda_xyz  = os.path.join ( self.morda_dir(),self.outputname + ".pdb" )
+        morda_mtz  = os.path.join ( self.morda_dir(),self.outputname + ".mtz" )
+        morda_map  = os.path.join ( self.morda_dir(),self.outputname + ".map" )
+        morda_dmap = os.path.join ( self.morda_dir(),self.outputname + "_dmap.pdb" )
 
         self.flush()
         self.storeReportDocument (
@@ -73,7 +73,7 @@ class MoRDa(ccp4ez_simbad12.Simbad12):
 
         # make command-line parameters for morda_sge.py
         cmd = [ "-m","morda",
-                "--sge" if self.SGE else "--mp",
+                self.exeType,
                 "-f",self.mtzpath,
                 "-s",self.seqpath,
                 "-d",self.rvapi_doc_path,
@@ -90,34 +90,25 @@ class MoRDa(ccp4ez_simbad12.Simbad12):
         self.restoreReportDocument()
 
         #  MoRDa puts final files in "output" directory, so update our paths
-        morda_xyz = os.path.join ( self.outputdir,morda_xyz )
+        morda_xyz  = os.path.join ( self.outputdir,morda_xyz )
+        morda_mtz  = os.path.join ( self.outputdir,morda_mtz )
+        morda_map  = os.path.join ( self.outputdir,morda_map )
+        morda_dmap = os.path.join ( self.outputdir,morda_dmap )
 
         # check for solution
-        morda_meta = {}
+        nResults = 0
+        rfree    = 1.0
         if os.path.isfile(morda_xyz):
-            self.output_meta["retcode"] = "solved"     # solution
+            nResults = 1
             f = open ( os.path.join(self.outputdir,"morda.res") )
             flines = f.readlines()
             f.close()
             rfree = float(flines[1])
-            morda_meta["nResults"] = 1
-            morda_meta["rfree"] = rfree
-            morda_meta["pdb"]   = morda_xyz
-            morda_meta["mtz"]   = os.path.join ( self.outputdir,morda_mtz )
-            morda_meta["map"]   = os.path.join ( self.outputdir,morda_map )
-            morda_meta["dmap"]  = os.path.join ( self.outputdir,morda_dmap )
-            if self.output_meta["best"]:
-                if rfree < self.output_meta[self.output_meta["best"]]["rfree"]:
-                    self.output_meta["best"] = "morda"
-            else:
-                self.output_meta["best"] = "morda"
-            self.output_meta["morda"] = morda_meta
-            self.end_branch ( branch_data,"solution found" )
 
-        else:
-            self.output_meta["retcode"] = "not solved" # no solution
-            morda_meta["nResults"] = 0
-            self.output_meta["morda"] = morda_meta
-            self.end_branch ( branch_data,"no solution found" )
+        quit_message = self.saveResults ( self.morda_dir(),nResults,rfree,
+                                    morda_xyz,morda_mtz,morda_map,morda_dmap )
 
-        return
+        self.quit_branch ( branch_data,"Automated Molecular Replacement (MoRDa): " +
+                                       quit_message )
+
+        return self.morda_header_id()
