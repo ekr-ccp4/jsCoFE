@@ -37,6 +37,7 @@ class Crank2(ccp4ez_morda.MoRDa):
 
     def crank2 ( self,parent_branch_id ):
 
+        self.putMessage       ( "&nbsp;" )
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                             ". Automated Experimental Phasing (Crank-2)</b>" )
         self.page_cursor[1] -= 1

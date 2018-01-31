@@ -49,11 +49,11 @@
 #  }
 #
 
-import ccp4ez_buccaneer
+import ccp4ez_lorestr
 
 # ============================================================================
 
-class CCP4ez(ccp4ez_buccaneer.Buccaneer):
+class CCP4ez(ccp4ez_lorestr.Lorestr):
 
     #def summary_page_id  (self):  return "ccp4ez_summary_tab"
 
@@ -70,8 +70,8 @@ class CCP4ez(ccp4ez_buccaneer.Buccaneer):
         if not self.output_meta["retcode"]:
             self.dimple ( "" )
 
-        if self.output_meta["retcode"] != "solved":
-            self.simbad12 ( "" )
+        #if self.output_meta["retcode"] != "solved":
+        #    self.simbad12 ( "" )
 
         if self.output_meta["retcode"] != "solved":
             self.morda ( "" )
@@ -89,7 +89,9 @@ class CCP4ez(ccp4ez_buccaneer.Buccaneer):
                     dirname = d
 
         if d:
+            #self.lorestr   ( d,"" )
             self.buccaneer ( d,"" )
+            self.lorestr   ( self.buccaneer_dir(),"" )
 
         #self.page_cursor[1] -= 1
         #self.putMessage ( "<h3><i>Structure solution workflow completed.</i></h3>" )

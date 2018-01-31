@@ -252,14 +252,14 @@ body {
   margin-top      : 0px ;
   padding-top     : 0px ;
   border          : 0px ;
-  /* border-collapse : collapse; */
+  border-collapse : collapse;
 }
 .grid-layout td {
   vertical-align  : top ;
   margin-top      : 0px ;
   padding-top     : 0px ;
   border          : 0px ;
-  /* border-collapse : collapse; */
+  border-collapse : collapse;
 }
 
 .grid-layout-compact {
@@ -269,7 +269,7 @@ body {
   margin-top      : 0px ;
   padding-top     : 0px ;
   border          : 0px ;
-  /* border-collapse : collapse; */
+  border-collapse : collapse;
 }
 .grid-layout-compact td {
   vertical-align  : top ;
@@ -279,7 +279,7 @@ body {
   padding-left    : 0px ;
   padding-right   : 8px ;
   border          : 0px ;
-  /* border-collapse : collapse; */
+  border-collapse : collapse;
 }
 
 .dropdown-layout {

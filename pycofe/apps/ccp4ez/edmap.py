@@ -19,7 +19,12 @@ import os
 import sys
 
 #  application imports
-import command
+sys.path.append ( os.path.join(os.path.dirname(os.path.abspath(__file__)),os.pardir) )
+try:
+    from varut import command
+except:
+    print " import failed in 'proc/edmap'"
+    sys.exit ( 200 )
 
 
 # ============================================================================
@@ -47,7 +52,7 @@ def calcCCP4Maps ( mtzin,output_file_prefix,job_dir,file_stdout,file_stderr,
                    source_key="refmac",log_parser=None ):
 
     # Calculate CCP4 Maps from refinement mtz, given in mtzin. The maps will be
-    # placed in files output_file_prefix.map and output_file_prefix_dmap.map
+    # placed in files output_file_prefix_map.map and output_file_prefix_dmap.map
     #
     #  Sigmaa style 2mfo-dfc map with restored data
 

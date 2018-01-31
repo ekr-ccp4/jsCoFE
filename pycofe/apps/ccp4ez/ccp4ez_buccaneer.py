@@ -40,6 +40,7 @@ class Buccaneer(ccp4ez_crank2.Crank2):
         if datadir.endswith(self.crank2_dir()) or not self.seqpath:
             return ""
 
+        self.putMessage       ( "&nbsp;" )
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                                 ". Automated Model Building (Buccaneer)</b>" )
         self.page_cursor[1] -= 1
@@ -99,8 +100,9 @@ class Buccaneer(ccp4ez_crank2.Crank2):
         self.unsetLogParser()
 
         # check for solution
-        nResults    = 0
-        rfree       = 1.0
+        nResults       = 0
+        rfree          = 1.0
+        quit_message   = ""
         buccaneer_xyz  = os.path.join ( self.buccaneer_dir(),"refine.pdb" )
         buccaneer_mtz  = os.path.join ( self.buccaneer_dir(),"refine.mtz" )
         buccaneer_map  = os.path.join ( self.buccaneer_dir(),"refine.map" )
@@ -119,26 +121,30 @@ class Buccaneer(ccp4ez_crank2.Crank2):
                         list = filter ( None,line.split() )
                         rfree = float(list[len(list)-1])
 
-            self.putMessage ( "<h2><i>Solution found</i></h2>" )
+            self.putMessage ( "<h2><i>Structure built with <i>R<sub>free</sub>=" +
+                              str(rfree) +"</i></h2>" )
             dfpath = os.path.join ( "..",self.outputdir,self.buccaneer_dir(),"buccaneer" )
             self.putStructureWidget ( "Structure and density map",
                                     [ dfpath+".pdb",dfpath+".mtz",dfpath+".map",
                                       dfpath+"_dmap.map" ],-1 )
 
+            quit_message = "built with <i>R<sub>free</sub>=" + str(rfree) + "</i>"
+
         else:
             buccaneer_xyz = ""
+            quit_message  = "FAILED."
 
-        columns = {
-          "F"    : self.hkl.Fmean.value,
-          "SIGF" : self.hkl.Fmean.sigma,
-          "FREE" : self.hkl.FREE,
+        buccaneer_columns = {
+          "F"    : columns["F"],
+          "SIGF" : columns["SIGF"],
+          "FREE" : columns["FREE"],
           "PHI"  : "PHIC_ALL_LS",
           "FOM"  : "FOM"
         }
 
-        quit_message = self.saveResults ( "Buccanneer",self.buccaneer_dir(),
+        self.saveResults ( "Buccanneer",self.buccaneer_dir(),
             nResults,rfree,"buccaneer", buccaneer_xyz,buccaneer_mtz,
-            buccaneer_map,buccaneer_dmap,columns )
+            buccaneer_map,buccaneer_dmap,buccaneer_columns )
 
         self.quit_branch ( branch_data,"Automated Model Building (Buccaneer): " +
                                        quit_message )

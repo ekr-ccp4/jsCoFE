@@ -41,6 +41,7 @@ class Dimple(ccp4ez_mtz.PrepareMTZ):
         if not self.xyzpath:
             return ""
 
+        self.putMessage       ( "&nbsp;" )
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                                 ". Homologue Molecular Replacement (Dimple)</b>" )
         self.page_cursor[1] -= 1
@@ -84,7 +85,8 @@ class Dimple(ccp4ez_mtz.PrepareMTZ):
                         list = filter ( None,line.replace("/"," ").split() )
                         rfree = float(list[len(list)-1])
 
-            self.putMessage ( "<h2><i>Solution found</i></h2>" )
+            self.putMessage ( "<h2><i>Solution found (<i>R<sub>free</sub>=" +
+                              str(rfree) +"</i>)</h2>" )
             dfpath = os.path.join ( "..",self.outputdir,self.dimple_dir(),"dimple" )
             self.putStructureWidget ( "Structure and density map",
                                     [ dfpath+".pdb",dfpath+".mtz",dfpath+".map",

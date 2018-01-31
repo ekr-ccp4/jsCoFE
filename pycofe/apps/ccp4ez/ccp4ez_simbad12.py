@@ -52,6 +52,7 @@ class Simbad12(ccp4ez_dimple.Dimple):
 
     def simbad12 ( self,parent_branch_id ):
 
+        self.putMessage       ( "&nbsp;" )
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                                 ". Lattice and Contaminant Searches</b>" )
         self.page_cursor[1] -= 1

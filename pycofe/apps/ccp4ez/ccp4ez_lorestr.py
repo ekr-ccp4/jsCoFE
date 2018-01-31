@@ -40,6 +40,7 @@ class Lorestr(ccp4ez_buccaneer.Buccaneer):
         if datadir.endswith(self.crank2_dir()) or not self.seqpath:
             return ""
 
+        self.putMessage       ( "&nbsp;" )
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                                 ". Refinement (Lorestr)</b>" )
         self.page_cursor[1] -= 1
@@ -53,92 +54,90 @@ class Lorestr(ccp4ez_buccaneer.Buccaneer):
 
         self.flush()
 
-        ccp4    = os.environ["CCP4"]
+        # prepare data
         meta    = self.output_meta["results"][datadir]
         columns = meta["columns"]
-        refpath = os.path.join(ccp4,"lib","data","reference_structures","reference-1tqw")
 
-        self.open_script  ( "lorestr" )
-        self.write_script (
-            "title Job "    + self.jobId.zfill(4) + "-"   +
-                              str(self.stage_no).zfill(2) + "\n" +
-            "pdbin-ref "    + refpath  + ".pdb\n" +
-            "mtzin-ref "    + refpath  + ".mtz\n" +
-            "colin-ref-fo FP.F_sigF.F,FP.F_sigF.sigF\n" +
-            "colin-ref-hl FC.ABCD.A,FC.ABCD.B,FC.ABCD.C,FC.ABCD.D\n" +
-            "seqin "        + self.seqpath    + "\n" +
-            "mtzin "        + meta["mtz"]     + "\n" +
-            "colin-fo "     + columns["F"]    + ","  + columns["SIGF"] + "\n" +
-            "colin-free "   + columns["FREE"] + "\n" +
-            "colin-phifom " + columns["PHI"]  + ","  + columns["FOM"]  + "\n" +
-            "pdbout " + os.path.join(self.lorestr_dir(),"lorestr.pdb") + "\n" +
-            "cycles 5\n" +
-            "lorestr-anisotropy-correction\n" +
-            "lorestr-build-semet\n" +
-            "lorestr-fast\n" +
-            "lorestr-1st-cycles 3\n" +
-            "lorestr-1st-sequence-reliability 0.95\n" +
-            "lorestr-nth-cycles 2\n" +
-            "lorestr-nth-sequence-reliability 0.95\n" +
-            "lorestr-nth-correlation-mode\n" +
-            "lorestr-resolution 2\n" +
-            "lorestr-new-residue-name UNK\n" +
-            "lorestr-keyword mr-model-filter-sigma 3\n" +
-            "jobs 2\n"  +
-            "pdbin-mr " + meta["pdb"] + "\n" +
-            "prefix ./" + self.lorestr_dir() + "/\n"
-        )
-        self.close_script()
+        lorestr_xyz  = os.path.join ( self.lorestr_dir(),"lorestr.pdb" )
+        lorestr_mtz  = os.path.join ( self.lorestr_dir(),"lorestr.mtz" )
+        lorestr_map  = os.path.join ( self.lorestr_dir(),"lorestr.map" )
+        lorestr_dmap = os.path.join ( self.lorestr_dir(),"lorestr.diff.map" )
 
-        # make command-line parameters for lorestr_sge.py
-        cmd = [ "-u",os.path.join(ccp4,"bin","lorestr_pipeline"),"-stdin" ]
+        cmd = [ "-p1",meta["pdb"],
+                "-f" ,meta["mtz"],
+                "-save_space",
+                "-xyzout",lorestr_xyz,
+                "-hklout",lorestr_mtz,
+                "-labin" ,"FP="     + columns["F"]    +
+                          " SIGFP=" + columns["SIGF"] +
+                          " FREE="  + columns["FREE"],
+                "-auto"
+              ]
 
-        # run lorestr
+        """
+        if self.getParameter(self.task.parameters.sec1.contains.PDB_CBX)=="True":
+            cmd += [ "-auto" ]
+
+        minres = self.getParameter(self.task.parameters.sec1.contains.MINRES)
+        if minres:
+            cmd += [ "-minres",minres ]
+
+        if self.getParameter(self.task.parameters.sec1.contains.DNA_CBX)=="True":
+            cmd += [ "-dna" ]
+
+        if self.getParameter(self.task.parameters.sec1.contains.MR_CBX)=="True":
+            cmd += [ "-mr" ]
+        """
+
+        #cmd += ["-xml","lorestr.xml"]
+
+        # Start lorestr
         self.setGenericLogParser ( True )
-        self.runApp ( "ccp4-python",cmd )
+        self.runApp ( "lorestr",cmd )
         self.unsetLogParser()
 
-        # check for solution
-        nResults    = 0
-        rfree       = 1.0
-        lorestr_xyz  = os.path.join ( self.lorestr_dir(),"refine.pdb" )
-        lorestr_mtz  = os.path.join ( self.lorestr_dir(),"refine.mtz" )
-        lorestr_map  = os.path.join ( self.lorestr_dir(),"refine.map" )
-        lorestr_dmap = os.path.join ( self.lorestr_dir(),"refine.diff.map" )
+        # check solution and register data
+        nResults     = 0
+        rfree        = 1.0
+        quit_message = ""
         if os.path.isfile(lorestr_xyz):
 
-            edmap.calcCCP4Maps ( lorestr_mtz,os.path.join(self.lorestr_dir(),"refine"),
+            edmap.calcCCP4Maps ( lorestr_mtz,os.path.join(self.lorestr_dir(),"lorestr"),
                         "./",self.file_stdout,self.file_stderr,"refmac",None )
 
             nResults = 1
             self.mk_std_streams ( None )
-            rfree_pattern = "             R free"
+            rfree_pattern = "Rfree (before/after):"
             with open(os.path.join(self.lorestr_dir(),self.file_stdout_path()),'r') as logf:
                 for line in logf:
                     if line.find(rfree_pattern)>=0:
                         list = filter ( None,line.split() )
                         rfree = float(list[len(list)-1])
 
-            self.putMessage ( "<h2><i>Solution found</i></h2>" )
+            self.putMessage ( "<h2><i>Refined solution</i></h2>" )
             dfpath = os.path.join ( "..",self.outputdir,self.lorestr_dir(),"lorestr" )
             self.putStructureWidget ( "Structure and density map",
                                     [ dfpath+".pdb",dfpath+".mtz",dfpath+".map",
                                       dfpath+"_dmap.map" ],-1 )
 
-        else:
-            lorestr_xyz = ""
+            quit_message = "refined to <i>R<sub>free</sub>=" + str(rfree) + "</i>"
 
-        columns = {
-          "F"    : self.hkl.Fmean.value,
-          "SIGF" : self.hkl.Fmean.sigma,
-          "FREE" : self.hkl.FREE,
+        else:
+            lorestr_xyz  = ""
+            quit_message = "FAILED."
+
+        lorestr_columns = {
+          "F"    : columns["F"],
+          "SIGF" : columns["SIGF"],
+          "FREE" : columns["FREE"],
           "PHI"  : "PHIC_ALL_LS",
           "FOM"  : "FOM"
         }
 
-        quit_message = self.saveResults ( "Lorestr",self.lorestr_dir(),nResults,
+
+        self.saveResults ( "Lorestr",self.lorestr_dir(),nResults,
             rfree,"lorestr", lorestr_xyz,lorestr_mtz,lorestr_map,lorestr_dmap,
-            columns )
+            lorestr_columns )
 
         self.quit_branch ( branch_data,"Refinement (Lorestr): " +
                                        quit_message )

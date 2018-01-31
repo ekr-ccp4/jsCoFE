@@ -39,6 +39,7 @@ class MoRDa(ccp4ez_simbad12.Simbad12):
         if not self.seqpath:
             return ""
 
+        self.putMessage       ( "&nbsp;" )
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                                 ". Automated Molecular Replacement (MoRDa)</b>" )
         self.page_cursor[1] -= 1

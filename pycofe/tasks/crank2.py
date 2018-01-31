@@ -562,6 +562,7 @@ class Crank2(basic.TaskDriver):
         # run crank-2
         self.runApp ( "ccp4-python",cmd )
         self.restoreReportDocument()
+        pyrvapi.rvapi_reset_task()
 
         self.finalise()
 
