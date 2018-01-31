@@ -96,8 +96,9 @@ class Base(object):
                           # termination
     #
     #  output_meta = {
-    #    "retcode" : "",
-    #    "best"    : {}
+    #    "retcode"    : "",
+    #    "report_row" : 0,
+    #    "results"    : {}
     #  }
     #
 
@@ -171,8 +172,9 @@ class Base(object):
         self.rvapi_version[2] = int(rvapi_v[2].replace("\x00",""))
 
         self.workdir = os.getcwd()
-        self.output_meta["retcode"] = ""
-        self.output_meta["best"]    = ""
+        self.output_meta["retcode"]    = ""
+        self.output_meta["report_row"] = 0
+        self.output_meta["results"]    = {}
 
         self.file_stdout = sys.stdout
         self.file_stderr = sys.stderr
@@ -472,10 +474,25 @@ class Base(object):
         pyrvapi.rvapi_set_text ( "<font style='font-size:120%;'>" + message_str +
                                  "</font>",gridId,0,0,1,1 )
         pyrvapi.rvapi_set_text ( "<div class='activity_bar'/>",gridId,0,1,1,1 )
+        self.page_cursor[1] += 1
         return
 
     def flush(self):
         pyrvapi.rvapi_flush()
+        return
+
+    # ----------------------------------------------------------------------
+
+    def putStructureWidget ( self,title_str,fpath_list,openState ):
+
+        wId = self.page_cursor[0] + "_" + "structure" + str(self.page_cursor[1])
+        pyrvapi.rvapi_add_data ( wId,title_str,fpath_list[0],
+                "xyz",self.page_cursor[0],self.page_cursor[1],0,1,1,openState )
+        pyrvapi.rvapi_append_to_data ( wId,fpath_list[1],"hkl:map" )
+        pyrvapi.rvapi_append_to_data ( wId,fpath_list[2],"hkl:ccp4_map" )
+        pyrvapi.rvapi_append_to_data ( wId,fpath_list[3],"hkl:ccp4_dmap" )
+
+        self.page_cursor[1] +=1
         return
 
 
@@ -547,10 +564,12 @@ class Base(object):
 
     # ----------------------------------------------------------------------
 
-    def saveResults ( self, name,nResults,rfree,
-                            fpath_xyz,fpath_mtz,fpath_map,fpath_dmap ):
+    def saveResults ( self, name,dirname,nResults,rfree,resfname,
+                            fpath_xyz,fpath_mtz,fpath_map,fpath_dmap,
+                            columns ):
 
         meta = {}
+        meta["name"]     = name
         meta["rfree"]    = rfree
         meta["nResults"] = nResults
         quit_message     = ""
@@ -558,15 +577,15 @@ class Base(object):
         if nResults>0:
 
             # store results in dedicated subdirectory of "output" directory
-            resdir = os.path.join ( self.outputdir,name )
+            resdir = os.path.join ( self.outputdir,dirname )
             if not os.path.isdir(resdir):
                 os.mkdir ( resdir )
 
             # make new file names in dedicated result directory
-            f_xyz  = os.path.join ( resdir, self.outputname + ".pdb" )
-            f_mtz  = os.path.join ( resdir, self.outputname + ".mtz" )
-            f_map  = os.path.join ( resdir, self.outputname + ".map" )
-            f_dmap = os.path.join ( resdir, self.outputname + "_dmap.map" )
+            f_xyz  = os.path.join ( resdir, resfname + ".pdb" )
+            f_mtz  = os.path.join ( resdir, resfname + ".mtz" )
+            f_map  = os.path.join ( resdir, resfname + ".map" )
+            f_dmap = os.path.join ( resdir, resfname + "_dmap.map" )
 
             # copy result files with new names
             if fpath_xyz!=f_xyz:
@@ -582,15 +601,16 @@ class Base(object):
             meta["dmap"] = f_dmap
 
             # calculate return code and quit message
+            metrics = " (<i>R<sub>free</sub>=" + str(rfree) + "</i>)"
             if rfree < 0.4:
                 self.output_meta["retcode"] = "solved"     # solution
-                quit_message = "solution found"
+                quit_message = "solution found" + metrics
             elif rfree < 0.45:
                 self.output_meta["retcode"] = "candidate"  # possible solution
-                quit_message = "possible solution found"
+                quit_message = "possible solution found" + metrics
             else:
                 self.output_meta["retcode"] = "not solved" # no solution
-                quit_message = "no solution found"
+                quit_message = "no solution found" + metrics
 
         elif nResults==0:
             self.output_meta["retcode"] = "not solved" # no solution
@@ -602,6 +622,7 @@ class Base(object):
 
 
         # put meta structure in output meta data
-        self.output_meta[name] = meta
+        meta["columns"] = columns
+        self.output_meta["results"][dirname] = meta
 
         return quit_message

@@ -202,15 +202,23 @@ JobTree.prototype.makeNodeName = function ( task )  {
   else  node_name += task.name;
 
   switch (task.state)  {
+
     case job_code.exiting  : node_name += ' <b><i>-- exiting.</i></b>';
                              break;
-    case job_code.finished : node_name += ' <b><i>-- done.</i></b>';
+
+    case job_code.finished : var S = task.score_string();
+                             if (S=='')  S = '-- done.';
+                             node_name += ' <b><i>' + S + '</i></b>';
                              break;
+
     case job_code.failed   : node_name += ' <b><i>-- failed.</i></b>';
                              break;
+
     case job_code.stopped  : node_name += ' <b><i>-- terminated.</i></b>';
                              break;
+
     default: ;
+
   }
 
   return node_name;

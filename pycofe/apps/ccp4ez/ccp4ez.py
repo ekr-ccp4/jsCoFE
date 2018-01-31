@@ -49,11 +49,11 @@
 #  }
 #
 
-import ccp4ez_crank2
+import ccp4ez_buccaneer
 
 # ============================================================================
 
-class CCP4ez(ccp4ez_crank2.Crank2):
+class CCP4ez(ccp4ez_buccaneer.Buccaneer):
 
     #def summary_page_id  (self):  return "ccp4ez_summary_tab"
 
@@ -67,17 +67,29 @@ class CCP4ez(ccp4ez_crank2.Crank2):
 
         branch_id = self.prepare_mtz ( "" )
 
-        if self.output_meta["retcode"] != "solved":
-            self.morda ( branch_id )
-
-        """
         if not self.output_meta["retcode"]:
+            self.dimple ( "" )
+
+        if self.output_meta["retcode"] != "solved":
             self.simbad12 ( "" )
-            #self.simbad12 ( branch_id )
+
+        if self.output_meta["retcode"] != "solved":
+            self.morda ( "" )
 
         if self.output_meta["retcode"] != "solved":
             self.crank2 ( "" )
-        """
+
+        dirname = ""
+        rfree   = 2.0
+        results = self.output_meta["results"]
+        for d in results:
+            if results[d]["nResults"]>0:
+                if results[d]["rfree"]<rfree:
+                    rfree   = results[d]["rfree"]
+                    dirname = d
+
+        if d:
+            self.buccaneer ( d,"" )
 
         #self.page_cursor[1] -= 1
         #self.putMessage ( "<h3><i>Structure solution workflow completed.</i></h3>" )

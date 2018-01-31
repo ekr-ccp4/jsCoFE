@@ -88,7 +88,7 @@ var upload_meta = {};
 
         var login = user.getLoginFromHash ( upload_meta.login_token );
 
-        if (('project' in upload_meta)     &&
+        if (('project' in upload_meta) &&
             ('job_id' in upload_meta))  {  // upload from import job
 
           var jobDir = prj.getJobDirPath ( login,upload_meta.project,

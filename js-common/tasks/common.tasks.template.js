@@ -1633,6 +1633,39 @@ if (!dbx)  {
   }
 
 
+  TaskTemplate.prototype.score_string = function() {
+  var S = '';
+    if ('scores' in this)  {
+      S = '';
+      for (var key in this.scores)  {
+        d = this.scores[key];
+        switch (key)  {
+          case 'aimless' : S += 'Compl='                 + d.Completeness + '%' +
+                                ' CC<sub>1/2</sub>='     + d.Half_set_CC  +
+                                ' R<sub>meas_all</sub>=' + d.R_meas_all   +
+                                ' R<sub>meas_ano</sub>=' + d.R_meas_ano   +
+                                ' SpG=' + d.Space_group  + ' ';
+                      break;
+          case 'phaser' : S += 'N<sub>sol</sub>=' + d.count +
+                               ' LLG=' + d.llg + ' TFZ=' + d.tfz + ' ';
+                      break;
+          case 'cbuccaneer' : S += 'Compl=' + d.percentage + '% ';
+                      break;
+          case 'refmac' : S += 'R=' + d.R_factor + ' R<sub>free</sub>=' +
+                                      d.R_free   + ' ';
+                      break;
+          case 'z01'    : S += '<u>SpG=' + d.SpaceGroup  + '</u> ';
+                      break;
+          default : ;
+        }
+      }
+      if (S!='')
+        S = '-- <font style="font-size:80%">' + S + '</font>';
+    }
+    return S;
+  }
+
+
 } else  {
   //  for server side
 

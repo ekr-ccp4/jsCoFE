@@ -17,11 +17,7 @@
 import os
 
 #  ccp4-python imports
-import pyrvapi
-import pyrvapi_ext.parsers
-
-import mtz
-import datred_utils
+#import pyrvapi
 
 import ccp4ez_morda
 
@@ -39,15 +35,16 @@ class Crank2(ccp4ez_morda.MoRDa):
 
     # ----------------------------------------------------------------------
 
-    def crank2 ( self,mtz_branch_id ):
+    def crank2 ( self,parent_branch_id ):
 
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                             ". Automated Experimental Phasing (Crank-2)</b>" )
+        self.page_cursor[1] -= 1
 
         branch_data = self.start_branch ( "Auto-EP (Crank-2)",
                         "CCP4ez Automated Structure Solver: Auto-EP " +
                         "with Crank-2",
-                        self.crank2_dir(),mtz_branch_id,
+                        self.crank2_dir(),parent_branch_id,
                         self.crank2_results_tab_id(),self.crank2_logtab_id(),
                         self.crank2_errtab_id() )
 
@@ -116,16 +113,10 @@ class Crank2(ccp4ez_morda.MoRDa):
 
         # make command-line parameters
 
-        #crank2_xyz  = os.path.join ( self.crank2_dir(),self.output_xyz )
-        #crank2_mtz  = os.path.join ( self.crank2_dir(),self.output_mtz )
-
-        #crank2_xyz = "crank2.xyz"
-        #crank2_mtz = "crank2.mtz"
-
         crank2_xyz  = os.path.join ( self.crank2_dir(),self.outputname + ".pdb" )
         crank2_mtz  = os.path.join ( self.crank2_dir(),self.outputname + ".mtz" )
-        crank2_map  = os.path.join ( self.crank2_dir(),self.outputname + ".map" )
-        crank2_dmap = os.path.join ( self.crank2_dir(),self.outputname + "_dmap.pdb" )
+        crank2_map  = os.path.join ( self.crank2_dir(),self.outputname + ".mtz.map" )
+        crank2_dmap = os.path.join ( self.crank2_dir(),self.outputname + ".mtz_diff.map" )
 
         cmd = [
             os.path.join(os.environ["CCP4"],"share","ccp4i","crank2","crank2.py"),
@@ -143,21 +134,31 @@ class Crank2(ccp4ez_morda.MoRDa):
         self.runApp ( "ccp4-python",cmd )
         self.restoreReportDocument()
 
-        self.end_branch ( branch_data,"no solution found" )
-
         # check for solution
         nResults = 0
         rfree    = 1.0
         if os.path.isfile(crank2_xyz):
             nResults = 1
-            #f = open ( os.path.join(self.outputdir,"morda.res") )
-            #flines = f.readlines()
-            #f.close()
-            #rfree = float(flines[1])
-            rfree = 0.33
+            self.mk_std_streams ( None )
+            rfree_pattern = "R-free factor after refinement is "
+            with open(os.path.join(self.crank2_dir(),self.file_stdout_path()),'r') as logf:
+                for line in logf:
+                    if line.startswith(rfree_pattern):
+                        rfree = float(line.replace(rfree_pattern,""))
+        else:
+            crank2_xyz = ""
 
-        quit_message = self.saveResults ( self.crank2_dir(),nResults,rfree,
-                                crank2_xyz,crank2_mtz,crank2_map,crank2_dmap )
+        columns = {
+          "F"    : "REFM_" + self.hkl.Fmean.value,
+          "SIGF" : "REFM_" + self.hkl.Fmean.sigma,
+          "FREE" : "FREER",
+          "PHI"  : "REFM_PHCOMB",
+          "FOM"  : "REFM_FOMCOMB"
+        }
+
+        quit_message = self.saveResults ( "Crank-2",self.crank2_dir(),nResults,
+                rfree,"crank2", crank2_xyz,crank2_mtz,crank2_map,crank2_dmap,
+                columns )
 
         self.quit_branch ( branch_data,"Automated Experimental Phasing (Crank-2): " +
                                        quit_message )

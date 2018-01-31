@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    18.01.18   <--  Date of Last Modification.
+#    30.01.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -221,13 +221,14 @@ class CCP4ez(import_task.Import):
                   ]
 
             self.runApp ( "ccp4-python",cmd )
-            rvapi_meta = self.restoreReportDocument()
+            rvapi_meta = str(self.restoreReportDocument())
 
             if rvapi_meta:
                 try:
                     rvapi_meta = json.loads ( rvapi_meta )
                     self.rvrow = rvapi_meta["report_row"]
                 except:
+                    self.rvrow += 100
                     self.putMessage (
                         "<b>Program error:</b> <i>unparseable metadata " +
                         "from CCP4ez</i>" + "<p>'" + str(rvapi_meta) + "'" )

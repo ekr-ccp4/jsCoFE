@@ -50,7 +50,7 @@ class PrepareMTZ(ccp4ez_base.Base):
 
     # ----------------------------------------------------------------------
 
-    def prepare_mtz ( self,tree_branch_id ):
+    def prepare_mtz ( self,parent_branch_id ):
 
         branch_data = None
 
@@ -93,10 +93,11 @@ class PrepareMTZ(ccp4ez_base.Base):
 
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                                 ". Scaling and Merging</b>" )
+        self.page_cursor[1] -= 1
 
         branch_data = self.start_branch ( "Scaling and Merging",
                                 "CCP4ez Automated Structure Solver: Scaling and Merging",
-                                self.datared_dir  (),tree_branch_id,
+                                self.datared_dir  (),parent_branch_id,
                                 self.mtz_page_id  (),self.mtz_logtab_id(),
                                 self.mtz_errtab_id() )
 

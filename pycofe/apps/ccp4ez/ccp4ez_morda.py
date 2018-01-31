@@ -17,11 +17,7 @@
 import os
 
 #  ccp4-python imports
-import pyrvapi
-import pyrvapi_ext.parsers
-
-import mtz
-import datred_utils
+#import pyrvapi
 
 import ccp4ez_simbad12
 
@@ -38,17 +34,18 @@ class MoRDa(ccp4ez_simbad12.Simbad12):
 
     # ----------------------------------------------------------------------
 
-    def morda ( self,mtz_branch_id ):
+    def morda ( self,parent_branch_id ):
 
         if not self.seqpath:
             return ""
 
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                                 ". Automated Molecular Replacement (MoRDa)</b>" )
+        self.page_cursor[1] -= 1
 
         branch_data = self.start_branch ( "Auto-MR",
                         "CCP4ez Automated Structure Solver: Auto-MR with MoRDa",
-                        self.morda_dir      (),mtz_branch_id,
+                        self.morda_dir      (),parent_branch_id,
                         self.morda_header_id(),self.morda_logtab_id(),
                         self.morda_errtab_id() )
 
@@ -104,9 +101,20 @@ class MoRDa(ccp4ez_simbad12.Simbad12):
             flines = f.readlines()
             f.close()
             rfree = float(flines[1])
+        else:
+            morda_xyz = ""
 
-        quit_message = self.saveResults ( self.morda_dir(),nResults,rfree,
-                                    morda_xyz,morda_mtz,morda_map,morda_dmap )
+        columns = {
+          "F"    : "FP",
+          "SIGF" : "SIGFP",
+          "FREE" : "FREE",
+          "PHI"  : "PHIC_ALL_LS",
+          "FOM"  : "FOM"
+        }
+
+        quit_message = self.saveResults ( "MoRDa",self.morda_dir(),nResults,
+                rfree,"morda", morda_xyz,morda_mtz,morda_map,morda_dmap,
+                columns )
 
         self.quit_branch ( branch_data,"Automated Molecular Replacement (MoRDa): " +
                                        quit_message )

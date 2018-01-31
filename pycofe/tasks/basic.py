@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    23.01.18   <--  Date of Last Modification.
+#    30.01.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -125,6 +125,7 @@ class TaskDriver(object):
 
     # report parsers
     log_parser    = None
+    generic_parser_summary = {}
 
     # data register counter
     dataSerialNo  = 0
@@ -564,10 +565,13 @@ class TaskDriver(object):
         #self.file_stdout = open ( self.file_stdout_path(),'a' )
         return
 
-    def setGenericLogParser ( self,panel_id,split_sections_bool ):
+    def setGenericLogParser ( self,panel_id,split_sections_bool,graphTables=False ):
         self.putPanel ( panel_id )
+        self.generic_parser_summary = {}
         self.log_parser = pyrvapi_ext.parsers.generic_parser (
-                                                 panel_id,split_sections_bool )
+                                         panel_id,split_sections_bool,
+                                         summary=self.generic_parser_summary,
+                                         graph_tables=graphTables )
         pyrvapi.rvapi_flush()
         return
 
@@ -1097,6 +1101,9 @@ class TaskDriver(object):
                               sol_spg + "</b></font>" )
             rvrow0      = self.rvrow
             self.rvrow += 1
+            if not self.generic_parser_summary:
+                self.generic_parser_summary = {}
+            self.generic_parser_summary["z01"] = {'SpaceGroup':sol_spg}
             newHKLFPath = self.getOFName ( "_" + solSpg + "_" + hkl.files[0],-1 )
             os.rename ( mtzfilepath,newHKLFPath )
             self.files_all = [ newHKLFPath ]
@@ -1181,6 +1188,10 @@ class TaskDriver(object):
 
 
     def success(self):
+        if self.task and self.generic_parser_summary:
+            self.task.scores = self.generic_parser_summary
+            with open('job.meta','w') as file_:
+                file_.write ( self.task.to_JSON() )
         self.rvrow += 1
         self.putMessage ( "<p>&nbsp;" )  # just to make extra space after report
         self.outputDataBox.save ( self.outputDir() )
@@ -1191,6 +1202,10 @@ class TaskDriver(object):
         return
 
     def fail ( self,pageMessage,signalMessage ):
+        if self.task and self.generic_parser_summary:
+            self.task.scores = self.generic_parser_summary
+            with open('job.meta','w') as file_:
+                file_.write ( self.task.to_JSON() )
         self.putMessage ( "<p>&nbsp;" )  # just to make extra space after report
         pyrvapi.rvapi_set_text ( pageMessage,self.report_page_id(),self.rvrow,0,1,1 )
         pyrvapi.rvapi_flush    ()

@@ -7,7 +7,7 @@
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
-#  CCP4EZ Combined Auto-Solver Simbad stages 1 and 2 class
+#  CCP4EZ Combined Auto-Solver Simbad stages 1 (L) and 2 (C) class
 #
 #  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017-2018
 #
@@ -19,17 +19,13 @@ import json
 #import shutil
 
 #  ccp4-python imports
-import pyrvapi
-import pyrvapi_ext.parsers
+#import pyrvapi
 
-import mtz
-import datred_utils
-
-import ccp4ez_mtz
+import ccp4ez_dimple
 
 # ============================================================================
 
-class Simbad12(ccp4ez_mtz.PrepareMTZ):
+class Simbad12(ccp4ez_dimple.Dimple):
 
     #def simbad12_header_id(self):  return "ccp4ez_simbad12_header_tab"
     def simbad12_summary_id(self):  return "summary_tab"
@@ -37,7 +33,7 @@ class Simbad12(ccp4ez_mtz.PrepareMTZ):
     def simbad12_logtab_id (self):  return "ccp4ez_simbad12_log_tab"
     def simbad12_errtab_id (self):  return "ccp4ez_simbad12_err_tab"
 
-    def simbad12_dir      (self):  return "simbad12_results"
+    def simbad12_dir       (self):  return "simbad12_results"
 
     # ----------------------------------------------------------------------
 
@@ -54,15 +50,16 @@ class Simbad12(ccp4ez_mtz.PrepareMTZ):
 
     # ----------------------------------------------------------------------
 
-    def simbad12 ( self,mtz_branch_id ):
+    def simbad12 ( self,parent_branch_id ):
 
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                                 ". Lattice and Contaminant Searches</b>" )
+        self.page_cursor[1] -= 1
 
         branch_data = self.start_branch ( "DB Searches",
                         "CCP4ez Automated Structure Solver: Lattice and " +
                         "Contaminant Searches",
-                        self.simbad12_dir       (),mtz_branch_id,
+                        self.simbad12_dir       (),parent_branch_id,
                         self.simbad12_summary_id(),self.simbad12_logtab_id(),
                         self.simbad12_errtab_id() )
 
@@ -135,9 +132,17 @@ class Simbad12(ccp4ez_mtz.PrepareMTZ):
         else:
             nResults = -1  # indication of an error
 
+        columns = {
+          "F"    : self.hkl.Fmean.value,
+          "SIGF" : self.hkl.Fmean.sigma,
+          "FREE" : self.hkl.FREE,
+          "PHI"  : "PHIC_ALL_LS",
+          "FOM"  : "FOM"
+        }
 
-        quit_message = self.saveResults ( "simbad12",nResults,rfree,
-                            fpath_xyz,fpath_mtz,fpath_map,fpath_dmap )
+        quit_message = self.saveResults ( "Simbad-LC",self.simbad12_dir(),
+                nResults,rfree,"simbad",fpath_xyz,fpath_mtz,fpath_map,fpath_dmap,
+                columns )
 
         self.quit_branch ( branch_data,"Lattice and Contaminant " +
                                 "Searches (Simbad): " + quit_message )
