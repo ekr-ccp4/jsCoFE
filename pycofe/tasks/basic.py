@@ -679,7 +679,11 @@ class TaskDriver(object):
 
             panel_id = self.refmac_report() + "_" + str(self.widget_no)
             pyrvapi.rvapi_add_panel ( panel_id,sec_id,0,0,1,1 )
-            self.log_parser = pyrvapi_ext.parsers.generic_parser ( panel_id,False )
+            #self.log_parser = pyrvapi_ext.parsers.generic_parser ( panel_id,False )
+            self.log_parser = pyrvapi_ext.parsers.generic_parser (
+                                         panel_id,False,
+                                         summary=self.generic_parser_summary,
+                                         graph_tables=False )
 
             fnames = self.calcEDMap ( xyzPath,hkl,libPath,name_pattern )
 
@@ -748,7 +752,11 @@ class TaskDriver(object):
 
         panel_id = self.refmac_report() + "_" + str(self.widget_no)
         pyrvapi.rvapi_add_panel ( panel_id,sec_id,0,0,1,1 )
-        self.log_parser = pyrvapi_ext.parsers.generic_parser ( panel_id,False )
+        #self.log_parser = pyrvapi_ext.parsers.generic_parser ( panel_id,False )
+        self.log_parser = pyrvapi_ext.parsers.generic_parser (
+                                         panel_id,False,
+                                         summary=self.generic_parser_summary,
+                                         graph_tables=False )
 
         fnames = self.calcAnomEDMap ( xyzPath,hkl,anom_form,name_pattern )
 
