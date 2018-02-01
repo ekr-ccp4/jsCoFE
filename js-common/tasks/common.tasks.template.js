@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    17.01.18   <--  Date of Last Modification.
+ *    01.02.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -344,7 +344,14 @@ if (!dbx)  {
   TaskTemplate.prototype.sendInputStateEvent = function ( inputPanel )  {
   // collects data from input widgets, created in makeInputPanel() and
   // stores it in internal fields
-    inputPanel.emitSignal ( 'task_ready',this.collectInput(inputPanel) );
+    inputPanel.emitSignal ( cofe_signals.taskReady,this.collectInput(inputPanel) );
+  }
+
+
+  TaskTemplate.prototype.enableRunButton = function ( inputPanel,enable_bool )  {
+    if (enable_bool)
+          inputPanel.emitSignal ( cofe_signals.taskReady,'' );
+    else  inputPanel.emitSignal ( cofe_signals.taskReady,'disable_run_button' );
   }
 
 

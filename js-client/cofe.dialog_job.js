@@ -336,7 +336,7 @@ JobDialog.prototype.makeLayout = function ( onRun_func )  {
 
     // Listen for input event, emitted when input data changes
     if (dlg.run_btn)
-      dlg.inputPanel.element.addEventListener('task_ready',function(e){
+      dlg.inputPanel.element.addEventListener(cofe_signals.taskReady,function(e){
         dlg.run_btn.setEnabled ( (e.detail.length<=0) );
       },false );
 

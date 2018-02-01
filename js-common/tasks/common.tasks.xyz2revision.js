@@ -117,7 +117,7 @@ if (!__template)  {
       // when inputPanel with possibly unsuitable input is created
       // first, and signal slot is activated later. Zero delay means simply
       // that the signal will be emitted in first available thread.
-      inpParamRef.grid.inputPanel.postSignal ( 'task_ready',message,0 );
+      inpParamRef.grid.inputPanel.postSignal ( cofe_signals.taskReady,message,0 );
 
     }
 

@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    17.01.18   <--  Date of Last Modification.
+ *    01.02.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -192,6 +192,8 @@ function Upload ( customData,upl_data,onSelect_func,onReady_func )  {
 
         } else  {
 
+          upl.emitSignal ( cofe_signals.uploadEvent,'started' );
+
           $.ajax({
             url         : fe_command.upload,
             type        : 'POST',
@@ -217,6 +219,7 @@ function Upload ( customData,upl_data,onSelect_func,onReady_func )  {
                 if (upl.link_button)
                   upl.link_button.setEnabled ( true );
               }
+              upl.emitSignal ( cofe_signals.uploadEvent,'finished' );
             },
             xhr: function() {
 

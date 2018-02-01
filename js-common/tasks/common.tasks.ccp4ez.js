@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    18.01.18   <--  Date of Last Modification.
+ *    31.01.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -40,6 +40,9 @@ function TaskCCP4ez()  {
   this.helpURL = './html/jscofe_task_ccp4ez.html';
 
   this.ha_type = '';
+  this.ligands = [];
+  for (var i=0;i<10;i++)
+    this.ligands.push ( { 'source':'none', 'smiles':'', 'code':'' } );
 
 }
 
@@ -96,7 +99,8 @@ if (!__template)  {
       var lbl   = setLabel ( rowNo,label,tooltip );
       var fsel  = div.grid.setSelectFile ( false,accept_str,rowNo,2,1,1 );
       fsel.hide();
-      var btn   = div.grid.addButton ( 'Browse','./images/open_file.svg',rowNo,2,1,1 );
+      var btn   = div.grid.addButton ( 'Browse','./images/open_file.svg',rowNo,2,1,1 )
+                          .setWidth_px ( 86 );
       var itext = div.grid.setInputText ( fname,rowNo,3,1,1 )
                           .setWidth_px(300).setReadOnly(true).setNoWrap(true);
       div.grid.setVerticalAlignment ( rowNo,2,'middle' );
@@ -287,6 +291,70 @@ if (!__template)  {
                    'and leave blank otherwise.' );
     div.ha_type = div.grid.setInputText ( this.ha_type, row++,2,1,1 )
                           .setMaxInputLength ( 2 ).setWidth_px ( 40 );
+
+    div.grid.setLabel ( '&nbsp;',row++,0,1,1 ).setHeight_px(8);
+
+    // list of ligands (self-expanding)
+    div.ligands = [];
+
+    function showLigands()  {
+      var n = -1;
+      for (var i=0;i<div.ligands.length;i++)
+        if (div.ligands[i].selection.getValue()!='none')
+          n = i;
+      for (var i=0;i<div.ligands.length;i++)  {
+        var visible = (i<=n+1);
+        var source  = div.ligands[i].selection.getValue();
+        div.ligands[i].label    .setVisible ( visible );
+        div.ligands[i].selection.setVisible ( visible );
+        div.ligands[i].smiles   .setVisible ( visible && (source=='smiles') );
+        div.ligands[i].code     .setVisible ( visible && (source=='code')   );
+      }
+    }
+
+    for (var i=0;i<this.ligands.length;i++)  {
+      var lbl = setLabel ( row,'Ligand #' + (i+1),
+                    '[Optional] Provide description of ' +
+                    'ligand to fit in electron density, using either a SMILES ' +
+                    'string or 3-letter code. Up to ' +
+                    this.ligands.length + ' ligands may be specified.' );
+      var sel = new Dropdown();
+      sel.setWidth ( '120px' );
+      div.grid.setWidget ( sel,row,2,1,1 );
+      sel.addItem ( 'None'  ,'','none'  ,this.ligands[i].source=='none'   );
+      sel.addItem ( 'SMILES','','smiles',this.ligands[i].source=='smiles' );
+      sel.addItem ( 'Code'  ,'','code'  ,this.ligands[i].source=='code'   );
+      sel.make();
+      var smiles = div.grid.setInputText ( this.ligands[i].smiles,row,3,1,1 )
+                           .setWidth_px(600).setNoWrap(true)
+                           .setVisible(this.ligands[i].source=='smiles');
+      var code   = div.grid.addInputText ( this.ligands[i].smiles,row,3,1,1 )
+                           .setWidth_px(50).setNoWrap(true).setMaxInputLength(3)
+                           .setVisible(this.ligands[i].source=='code');
+      div.grid.setVerticalAlignment ( row,2,'middle' );
+      div.grid.setVerticalAlignment ( row,3,'middle' );
+      div.ligands.push ( {'label':lbl, 'selection':sel, 'smiles':smiles, 'code':code} );
+      sel.sno = i;
+      sel.addOnChangeListener ( function(text,value){
+        div.ligands[this.sno].smiles.setVisible ( value=='smiles' );
+        div.ligands[this.sno].code  .setVisible ( value=='code'   );
+        showLigands();
+        /*
+        if (this.sno<div.ligands.length-1)  {
+          var visible = (div.ligands[this.sno].source != 'none');
+          div.ligands[this.sno+1].label    .setVisible ( visible );
+          div.ligands[this.sno+1].selection.setVisible ( visible );
+          div.ligands[this.sno+1].smiles   .setVisible ( visible &&
+                      div.ligands[this.sno+1].selection.getValue()=='smiles' );
+          div.ligands[this.sno+1].code     .setVisible ( visible &&
+                      div.ligands[this.sno+1].selection.getValue()=='code'   );
+        }
+        */
+      });
+      row++;
+    }
+
+    showLigands();
 
     return div;
 

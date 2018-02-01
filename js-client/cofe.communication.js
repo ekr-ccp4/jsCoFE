@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    10.11.17   <--  Date of Last Modification.
+ *    01.02.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -15,7 +15,7 @@
  *                  serverCommand()
  *                  serverRequest()
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -23,9 +23,11 @@
 
 
 var cofe_signals = {
-  jobStarted   : 'job_started',    // fired by JobTree
-  treeUpdated  : 'tree_updated',   // fired by JobTree
-  jobDlgSignal : 'job_dlg_signal'
+  taskReady    : 'task_ready',      // fired by Job Dialog's input panels
+  jobStarted   : 'job_started',     // fired by JobTree
+  treeUpdated  : 'tree_updated',    // fired by JobTree
+  jobDlgSignal : 'job_dlg_signal',
+  uploadEvent  : 'uploadEvent'      // fired by Upload module
 }
 
 

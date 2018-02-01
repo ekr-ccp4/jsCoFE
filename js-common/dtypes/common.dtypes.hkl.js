@@ -268,7 +268,7 @@ if (!__template)  {
       } else  {
         customGrid.setLabel ( '<b><i>Space group ' + this.getSpaceGroup() +
                               ' cannot be changed</i></b>',r,1,1,1 );
-        dropdown.grid.parent.parent.emitSignal ( 'task_ready','do not run' );
+        dropdown.grid.parent.parent.emitSignal ( cofe_signals.taskReady,'do not run' );
       }
       customGrid.setLabel ( ' ',++r,0,1,1 ).setHeight_px ( 8 );
     }

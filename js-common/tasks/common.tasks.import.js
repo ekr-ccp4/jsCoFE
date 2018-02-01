@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    15.01.18   <--  Date of Last Modification.
+ *    01.02.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -78,9 +78,9 @@ if (!__template)  {
     else  msg = 'Use the file selection button ';
     div.grid.setLabel ( msg + 'below to select and upload data files ' +
                         'to the Project (use multiple file selections and ' +
-                        'repeat uploads if necessary). When done, hit the ' +
-                        '<b><i>Import</i></b> button to process the ' +
-                        'uploaded files.<br>&nbsp;',
+                        'repeat uploads if necessary). When done, hit ' +
+                        '<b><i>Import</i></b> button to process ' +
+                        'files uploaded.<br>&nbsp;',
                         0,0, 1,1 ).setFontSize('80%');
 
     div.customData = {};
@@ -99,8 +99,14 @@ if (!__template)  {
           if (!returnCode)
             task.sendInputStateEvent ( panel );
         });
+
+      panel.upload.addSignalHandler ( cofe_signals.uploadEvent, function(detail){
+        task.enableRunButton ( panel,detail=='finished' );
+      });
+
     }(div,this));
     div.upload.setUploadedFiles ( this.upload_files );
+    this.enableRunButton ( div,(this.upload_files.length>0) );
 
     div.grid.setWidget ( div.upload,1,0,1,1 );
     div.panel.setScrollable ( 'hidden','hidden' );
@@ -109,145 +115,17 @@ if (!__template)  {
 
   }
 
+
   TaskImport.prototype.disableInputWidgets = function ( widget,disable_bool ) {
     TaskTemplate.prototype.disableInputWidgets.call ( this,widget,disable_bool );
     if (widget.hasOwnProperty('upload'))  {
       widget.upload.button.setDisabled ( disable_bool );
       if (widget.upload.link_button)
         widget.upload.link_button.setDisabled ( disable_bool );
+      this.enableRunButton ( widget,(!disable_bool) && (this.upload_files.length>0) );
     }
   }
 
-
-  /*
-  TaskImport.prototype.renameFile = function ( fname,uploaded_files )  {
-    var new_fname    = fname;
-    var name_counter = 0;
-
-    while (uploaded_files.indexOf(new_fname)>=0)  {
-      name_counter++;
-      var lst = fname.split('.');
-      if (lst.length>1)  {
-        lst.push ( lst[lst.length-1] );
-        lst[lst.length-2] = 'n' + padDigits ( name_counter,3 );
-        new_fname = lst.join('.');
-      } else
-        new_fname = fname + '.n' + padDigits ( name_counter,3 );
-    }
-
-    return new_fname;
-
-  }
-
-  TaskImport.prototype.renameFile1 = function ( fname,uploaded_files )  {
-    var new_fname    = fname;
-    var name_counter = -1;
-    var lst = fname.split('.');
-    var ext = '';
-    if (lst.length>1)
-      ext = '.' + lst.pop();
-
-    do {
-      name_counter++;
-      new_fname = lst.join('.');
-      if (name_counter>0)
-        new_fname += '.n' + padDigits ( name_counter,3 );
-      var m = false;
-      for (var i=0;(i<uploaded_files.length) && (!m);i++)
-        m = uploaded_files[i].startsWith ( new_fname );
-    } while (m);
-
-    if (ext)
-      new_fname += ext;
-
-    return new_fname;
-
-  }
-
-  TaskImport.prototype.scanFiles = function ( files,pos,file_mod,uploaded_files,
-                                              onDone_func )  {
-
-    if (pos>=files.length)  {
-
-      onDone_func ( file_mod );
-
-    } else  {
-
-      var p         = pos;
-      var isSeqFile = false;
-      var new_name  = '';
-
-      while ((!isSeqFile) && (p<files.length))  {
-        var ns    = files[p].name.split('.');
-        isSeqFile = (ns.length>1) &&
-                    (['seq','fasta','pir'].indexOf(ns.pop().toLowerCase())>=0);
-        if (!isSeqFile)  {
-          new_name = this.renameFile ( files[p].name,uploaded_files );
-          if (new_name!=files[p].name)
-            file_mod.rename[files[p].name] = new_name;
-          p++;
-        }
-      }
-
-      if (isSeqFile)  {
-
-        (function(self,p0){
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            var fname         = files[p0].name;
-            var new_name      = self.renameFile1 ( fname,uploaded_files );
-            var contents_list = e.target.result.split('>');
-            var seq_counter   = 1;
-            var annotation    = {
-              'file'   : fname,
-              'rename' : new_name,
-              'items'  : []
-            }
-            for (var i=0;i<contents_list.length;i++)
-              if (contents_list[i].replace(/\s/g,''))  {
-                var fname1 = new_name;
-                if (contents_list.length>2)  {
-                  var lst = fname1.split('.');
-                  lst.push ( lst[lst.length-1] );
-                  lst[lst.length-2] = 's' + padDigits ( seq_counter++,3 );
-                  fname1 = lst.join('.');
-                }
-                annotation.items.push ({
-                  'rename'   : fname1,
-                  'contents' : '>' + contents_list[i].trim(),
-                  'type'     : 'none'
-                });
-              }
-            file_mod.annotation.push ( annotation );
-            self.scanFiles ( files,p0+1,file_mod,uploaded_files,onDone_func );
-          };
-          reader.readAsText ( files[p0] );
-        }(this,p))
-
-      } else  {
-        onDone_func ( file_mod );
-      }
-
-    }
-
-  }
-
-
-  TaskImport.prototype.checkFiles = function ( files,file_mod,uploaded_files,
-                                               onReady_func )  {
-    file_mod.rename = {};  // clean up every upload
-    this.scanFiles ( files,0,file_mod,uploaded_files,function(file_mod){
-      //alert ( ' annot=' + JSON.stringify(file_mod) );
-      var nannot = file_mod.annotation.length;
-      if ((nannot>0) && (file_mod.annotation[nannot-1].items[0].type=='none'))
-        new ImportAnnotationDialog ( file_mod.annotation,onReady_func );
-      else
-        onReady_func();
-    });
-  }
-
-
-*/
 
   function _import_renameFile ( fname,uploaded_files )  {
     var new_fname    = fname;
@@ -267,6 +145,7 @@ if (!__template)  {
     return new_fname;
 
   }
+
 
   function _import_renameFile1 ( fname,uploaded_files )  {
     var new_fname    = fname;
@@ -319,38 +198,36 @@ if (!__template)  {
 
       if (isSeqFile)  {
 
-//        (function(self,p0){
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            var fname         = files[p].name;
-            var new_name      = _import_renameFile1 ( fname,uploaded_files );
-            var contents_list = e.target.result.split('>');
-            var seq_counter   = 1;
-            var annotation    = {
-              'file'   : fname,
-              'rename' : new_name,
-              'items'  : []
-            }
-            for (var i=0;i<contents_list.length;i++)
-              if (contents_list[i].replace(/\s/g,''))  {
-                var fname1 = new_name;
-                if (contents_list.length>2)  {
-                  var lst = fname1.split('.');
-                  lst.push ( lst[lst.length-1] );
-                  lst[lst.length-2] = 's' + padDigits ( seq_counter++,3 );
-                  fname1 = lst.join('.');
-                }
-                annotation.items.push ({
-                  'rename'   : fname1,
-                  'contents' : '>' + contents_list[i].trim(),
-                  'type'     : 'none'
-                });
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var fname         = files[p].name;
+          var new_name      = _import_renameFile1 ( fname,uploaded_files );
+          var contents_list = e.target.result.split('>');
+          var seq_counter   = 1;
+          var annotation    = {
+            'file'   : fname,
+            'rename' : new_name,
+            'items'  : []
+          }
+          for (var i=0;i<contents_list.length;i++)
+            if (contents_list[i].replace(/\s/g,''))  {
+              var fname1 = new_name;
+              if (contents_list.length>2)  {
+                var lst = fname1.split('.');
+                lst.push ( lst[lst.length-1] );
+                lst[lst.length-2] = 's' + padDigits ( seq_counter++,3 );
+                fname1 = lst.join('.');
               }
-            file_mod.annotation.push ( annotation );
-            _import_scanFiles ( files,p+1,file_mod,uploaded_files,onDone_func );
-          };
-          reader.readAsText ( files[p] );
-//        }(this,p))
+              annotation.items.push ({
+                'rename'   : fname1,
+                'contents' : '>' + contents_list[i].trim(),
+                'type'     : 'none'
+              });
+            }
+          file_mod.annotation.push ( annotation );
+          _import_scanFiles ( files,p+1,file_mod,uploaded_files,onDone_func );
+        };
+        reader.readAsText ( files[p] );
 
       } else  {
         onDone_func ( file_mod );
