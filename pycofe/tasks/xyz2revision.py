@@ -52,8 +52,8 @@ class Xyz2Revision(asudef.ASUDef):
         if not structure:
             self.putMessage ( "<h3>Conversion failed, no output</h3>" )
         else:
-            self.revisionFromStructure ( hkl,structure,
-                                         os.path.splitext(xyz.files[0])[0] )
+            asudef.revisionFromStructure ( self,hkl,structure,
+                                           os.path.splitext(xyz.files[0])[0] )
 
         # close execution logs and quit
         self.success()

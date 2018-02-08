@@ -115,7 +115,7 @@ function start ( callback_func )  {
             cmd.sendResponse ( server_response,cmd.fe_retcode.ok,'','' );
             stopServer ( 0 );
           } else {
-            log.detailed ( 5,'stop command issued -- ignored according configuration' )
+            log.detailed ( 5,'stop command issued -- ignored according configuration' );
           }
         break;
 

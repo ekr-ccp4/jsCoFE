@@ -395,7 +395,7 @@ def point_symm_datasets(xml_path, format='unknown'):
 
   return dset_list
 
-def combine_runs(dset_runs, runs):
+def combine_runs(dset_runs, runs, stdo):
     initial = set()
     for run in dset_runs:
       initial.update(range(int(run[1]), int(run[2]) + 1))
@@ -420,10 +420,12 @@ def combine_runs(dset_runs, runs):
         else:
           print >> stdo, 'ERROR in selection: "%s"' %run
 
-      batch_list = sorted(set.intersection(initial, selected))
+      no_selected = len(initial & selected)
+      batch_list = sorted(initial - selected)
 
     else:
-      batch_list = sorted(initial)
+      no_selected = len(initial)
+      batch_list = list()
 
     run_list = list()
     if batch_list:
@@ -439,13 +441,13 @@ def combine_runs(dset_runs, runs):
 
       run_list.append((first, last))
 
-    return run_list
+    return run_list, no_selected
 
 def get_point_script(symm_select, mtzref, plist, mtzout, xmlout, stdo, separate_merge=False):
   dset_run_list = list()
   for dset, mtz_file, runs in plist:
-    run_list = combine_runs(dset.runs, runs)
-    if run_list:
+    run_list, no_selected = combine_runs(dset.runs, runs, stdo)
+    if no_selected:
       item = dset.name, mtz_file, run_list
       if mtz_file == mtzref:
         mtzref = None
@@ -472,7 +474,7 @@ def get_point_script(symm_select, mtzref, plist, mtzout, xmlout, stdo, separate_
 
     stdi.append('HKLIN %s' %mtz_file)
     for first, last in run_list:
-      stdi.append('RUN %d FILE %d BATCH %d to %d' %(run_ind, cou, first, last))
+      stdi.append('EXCLUDE FILE %d BATCH %d to %d' %(cou, first, last))
 
   if mtzref:
     stdi.append('HKLREF %s' %mtzref)

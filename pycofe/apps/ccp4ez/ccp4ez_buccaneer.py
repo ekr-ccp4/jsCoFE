@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    28.01.18   <--  Date of Last Modification.
+#    06.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -27,15 +27,9 @@ import ccp4ez_crank2
 
 class Buccaneer(ccp4ez_crank2.Crank2):
 
-    def buccaneer_page_id  (self):  return "ccp4ez_buccaneer_tab"
-    def buccaneer_logtab_id(self):  return "ccp4ez_buccaneer_log_tab"
-    def buccaneer_errtab_id(self):  return "ccp4ez_buccaneer_err_tab"
-
-    def buccaneer_dir      (self):  return "buccaneer_results"
-
     # ----------------------------------------------------------------------
 
-    def buccaneer ( self,datadir,parent_branch_id ):
+    def buccaneer ( self,datadir,resultdir,parent_branch_id ):
 
         if datadir.endswith(self.crank2_dir()) or not self.seqpath:
             return ""
@@ -47,10 +41,7 @@ class Buccaneer(ccp4ez_crank2.Crank2):
 
         branch_data = self.start_branch ( "Auto-Build",
                         "CCP4ez Automated Structure Solver: Automated Model " +
-                        "Building with Buccaneer",
-                        self.buccaneer_dir      (),parent_branch_id,
-                        self.buccaneer_page_id  (),self.buccaneer_logtab_id(),
-                        self.buccaneer_errtab_id() )
+                        "Building with Buccaneer", resultdir,parent_branch_id )
 
         self.flush()
 
@@ -72,7 +63,7 @@ class Buccaneer(ccp4ez_crank2.Crank2):
             "colin-fo "     + columns["F"]    + ","  + columns["SIGF"] + "\n" +
             "colin-free "   + columns["FREE"] + "\n" +
             "colin-phifom " + columns["PHI"]  + ","  + columns["FOM"]  + "\n" +
-            "pdbout " + os.path.join(self.buccaneer_dir(),"buccaneer.pdb") + "\n" +
+            "pdbout " + os.path.join(resultdir,"buccaneer.pdb") + "\n" +
             "cycles 5\n" +
             "buccaneer-anisotropy-correction\n" +
             "buccaneer-build-semet\n" +
@@ -87,7 +78,7 @@ class Buccaneer(ccp4ez_crank2.Crank2):
             "buccaneer-keyword mr-model-filter-sigma 3\n" +
             "jobs 2\n"  +
             "pdbin-mr " + meta["pdb"] + "\n" +
-            "prefix ./" + self.buccaneer_dir() + "/\n"
+            "prefix ./" + resultdir + "/\n"
         )
         self.close_script()
 
@@ -102,28 +93,33 @@ class Buccaneer(ccp4ez_crank2.Crank2):
         # check for solution
         nResults       = 0
         rfree          = 1.0
+        rfactor        = 1.0
         quit_message   = ""
-        buccaneer_xyz  = os.path.join ( self.buccaneer_dir(),"refine.pdb" )
-        buccaneer_mtz  = os.path.join ( self.buccaneer_dir(),"refine.mtz" )
-        buccaneer_map  = os.path.join ( self.buccaneer_dir(),"refine.map" )
-        buccaneer_dmap = os.path.join ( self.buccaneer_dir(),"refine.diff.map" )
+        buccaneer_xyz  = os.path.join ( resultdir,"refine.pdb" )
+        buccaneer_mtz  = os.path.join ( resultdir,"refine.mtz" )
+        buccaneer_map  = os.path.join ( resultdir,"refine.map" )
+        buccaneer_dmap = os.path.join ( resultdir,"refine.diff.map" )
         if os.path.isfile(buccaneer_xyz):
 
-            edmap.calcCCP4Maps ( buccaneer_mtz,os.path.join(self.buccaneer_dir(),"refine"),
+            edmap.calcCCP4Maps ( buccaneer_mtz,os.path.join(resultdir,"refine"),
                         "./",self.file_stdout,self.file_stderr,"refmac",None )
 
             nResults = 1
             self.mk_std_streams ( None )
-            rfree_pattern = "             R free"
-            with open(os.path.join(self.buccaneer_dir(),self.file_stdout_path()),'r') as logf:
+            rfree_pattern   = "             R free"
+            rfactor_pattern = "           R factor"
+            with open(os.path.join(resultdir,self.file_stdout_path()),'r') as logf:
                 for line in logf:
                     if line.find(rfree_pattern)>=0:
-                        list = filter ( None,line.split() )
-                        rfree = float(list[len(list)-1])
+                        list    = filter ( None,line.split() )
+                        rfree   = float(list[len(list)-1])
+                    elif line.find(rfactor_pattern)>=0:
+                        list    = filter ( None,line.split() )
+                        rfactor = float(list[len(list)-1])
 
             self.putMessage ( "<h2><i>Structure built with <i>R<sub>free</sub>=" +
                               str(rfree) +"</i></h2>" )
-            dfpath = os.path.join ( "..",self.outputdir,self.buccaneer_dir(),"buccaneer" )
+            dfpath = os.path.join ( "..",self.outputdir,resultdir,"buccaneer" )
             self.putStructureWidget ( "Structure and density map",
                                     [ dfpath+".pdb",dfpath+".mtz",dfpath+".map",
                                       dfpath+"_dmap.map" ],-1 )
@@ -135,18 +131,20 @@ class Buccaneer(ccp4ez_crank2.Crank2):
             quit_message  = "FAILED."
 
         buccaneer_columns = {
-          "F"    : columns["F"],
-          "SIGF" : columns["SIGF"],
-          "FREE" : columns["FREE"],
-          "PHI"  : "PHIC_ALL_LS",
-          "FOM"  : "FOM"
+          "F"       : columns["F"],
+          "SIGF"    : columns["SIGF"],
+          "FREE"    : columns["FREE"],
+          "PHI"     : "PHIC_ALL_LS",
+          "FOM"     : "FOM",
+          "DELFWT"  : "DELFWT",
+          "PHDELWT" : "PHDELWT"
         }
 
-        self.saveResults ( "Buccanneer",self.buccaneer_dir(),
-            nResults,rfree,"buccaneer", buccaneer_xyz,buccaneer_mtz,
-            buccaneer_map,buccaneer_dmap,buccaneer_columns )
+        self.saveResults ( "Buccanneer",resultdir,
+            nResults,rfree,rfactor,"buccaneer", buccaneer_xyz,buccaneer_mtz,
+            buccaneer_map,buccaneer_dmap,None,None,buccaneer_columns )
 
-        self.quit_branch ( branch_data,"Automated Model Building (Buccaneer): " +
-                                       quit_message )
+        self.quit_branch ( branch_data,resultdir,
+                           "Automated Model Building (Buccaneer): " + quit_message )
 
-        return self.buccaneer_page_id()
+        return  branch_data["pageId"]

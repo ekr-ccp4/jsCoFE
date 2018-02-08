@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    30.01.18   <--  Date of Last Modification.
+#    06.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -34,11 +34,13 @@ import pyrvapi
 import pyrvapi_ext.parsers
 
 #  application imports
-import import_task
+from   pycofe.tasks  import asudef, import_task
 
 
 # ============================================================================
 # Make CCP4ez driver
+
+#class CCP4ez(asudef.ASUDef):
 
 class CCP4ez(import_task.Import):
 
@@ -49,7 +51,12 @@ class CCP4ez(import_task.Import):
     def import_stderr_path(self):  return "_import_stderr.log"
 
     # redefine name of input script file
-    def file_stdin_path(self):  return "ccp4ez.script"
+    def file_stdin_path   (self):  return "ccp4ez.script"
+
+    # the following will provide for import of generated sequences
+    import_dir = "uploads"
+    def importDir        (self):  return self.import_dir  # import directory
+    def import_summary_id(self):  return None   # don't make import summary table
 
     # ------------------------------------------------------------------------
 
@@ -155,8 +162,98 @@ class CCP4ez(import_task.Import):
                 nrow[0] )
             nrow[0] += 1
 
+        for i in range(len(self.task.ligands)):
+            ligand = self.task.ligands[i]
+            if ligand.source!="none":
+                dline = "[" + ligand.code + "] "
+                if ligand.source=="smiles":
+                    m = 0
+                    for j in range(len(ligand.smiles)):
+                        if m>40:
+                            dline += "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                            m = 0
+                        dline += ligand.smiles[j]
+                        m += 1
+                self.putTableLine ( tableId,"Ligand #" + str(i+1),
+                                    "Ligand description",dline,nrow[0] )
+                nrow[0] += 1
+
         return
 
+
+    def makeOutputData ( self,meta ):
+
+        self.file_stdout.write ( "mod 1\n" )
+
+        if not "row" in meta or not "nResults" in meta:
+            return
+
+        self.file_stdout.write ( "mod 2\n" )
+
+        if meta["nResults"]<1:
+            return
+
+        row = meta["row"]
+        panel_id = "output_panel_" + str(row)
+        self.file_stdout.write ( "mod 3 row=" + str(row) )
+        pyrvapi.rvapi_add_grid ( panel_id,False,self.report_page_id(),row,0,1,1 )
+        #pyrvapi.rvapi_add_grid ( panel_id,self.report_page_id(),row,0,1,1 )
+        self.setReportWidget   ( panel_id )
+
+        self.file_stdout.write ( "\nmod 4\n" )
+
+        # register structure data
+        structure = self.registerStructure ( meta["pdb"],meta["mtz"],meta["map"],
+                                             meta["dmap"], None,True )
+        if structure:
+
+            structure.addDataAssociation ( self.hkl.dataId )
+            structure.setRefmacLabels ( self.hkl )
+            structure.addMRSubtype ()
+            structure.addXYZSubtype()
+
+            self.putStructureWidget ( "structure_btn_",
+                      meta["name"] + " structure and electron density",
+                      structure )
+
+            self.import_dir = "./"
+            try:
+                asudef.revisionFromStructure ( self,self.hkl,structure,meta["name"] )
+            except:
+                self.putMessage ( "revision making failure" )
+
+        else:
+            self.putMessage ( "Structure Data cannot be formed (probably a bug)" )
+
+        self.putMessage ( "<p>&nbsp;" )
+
+
+        """
+        {"results":
+           { "simbad12_results":
+              {"mtz": "output/simbad12_results/simbad.mtz",
+               "map": "output/simbad12_results/simbad.map",
+               "name": "Simbad-LC",
+               "nResults": 1,
+               "rfree": 0.347,
+               "dmap": "output/simbad12_results/simbad_dmap.map",
+               "rfactor": 0.3792,
+               "pdb": "output/simbad12_results/simbad.pdb",
+               "columns": {"PHI": "PHIC_ALL_LS", "SIGF": "SIGF", "DELFWT": "DELFWT", "F": "F", "FREE": "FreeR_flag", "FOM": "FOM", "PHDELWT": "PHDELWT"}, "row": 5}, "buccaneer": {"mtz": "output/buccaneer/buccaneer.mtz", "map": "output/buccaneer/buccaneer.map", "name": "Buccanneer", "nResults": 1, "rfree": 0.3671, "dmap": "output/buccaneer/buccaneer_dmap.map", "rfactor": 0.3151, "pdb": "output/buccaneer/buccaneer.pdb", "columns": {"PHI": "PHIC_ALL_LS", "SIGF": "SIGF", "DELFWT": "DELFWT", "F": "F", "FREE": "FreeR_flag", "FOM": "FOM", "PHDELWT": "PHDELWT"},
+               "row": 8
+              }
+            },
+          "retcode": "solved",
+          "report_row": 9
+        }
+        """
+
+
+        """
+        """
+
+        self.resetReportPage()
+        return
 
     # ------------------------------------------------------------------------
 
@@ -180,7 +277,12 @@ class CCP4ez(import_task.Import):
             if self.xyz:
                 self.write_stdin ( "\nXYZIN " + self.xyz.getFilePath(self.outputDir()) )
             if self.task.ha_type:
-                self.write_stdin ( "\nHATOMS " + self.ha_type )
+                self.write_stdin ( "\nHATOMS " + self.task.ha_type )
+            for i in range(len(self.task.ligands)):
+                if self.task.ligands[i].source!='none':
+                    self.write_stdin ( "\nLIGAND " + self.task.ligands[i].code )
+                    if self.task.ligands[i].source=='smiles':
+                        self.write_stdin ( " " + self.task.ligands[i].smiles )
             self.write_stdin ( "\n" )
             self.close_stdin()
 
@@ -220,7 +322,37 @@ class CCP4ez(import_task.Import):
                     "--rvapi-document",self.reportDocumentName()
                   ]
 
+            sec1 = self.task.parameters.sec1.contains
+            if self.getParameter(sec1.SIMBAD12_CBX)=="False":
+                cmd += "--no-simbad12"
+            if self.getParameter(sec1.MORDA_CBX)=="False":
+                cmd += "--no-morda"
+            if self.getParameter(sec1.CRANK2_CBX)=="False":
+                cmd += "--no-crank2"
+
+
             self.runApp ( "ccp4-python",cmd )
+            self.restoreReportDocument()
+            self.rvrow += 100
+
+            # check on resulting metadata file
+            ccp4ez_meta_file = "ccp4ez.meta.json"
+            ccp4ez_meta = None
+            try:
+                with open(ccp4ez_meta_file) as json_data:
+                    ccp4ez_meta = json.load(json_data)
+            except:
+                pass
+
+            if ccp4ez_meta:
+                results = ccp4ez_meta["results"]
+                for d in results:
+                    self.makeOutputData ( results[d] )
+            else:
+                self.putTitle ( "Results not found (structure not solved)" )
+
+
+            """
             rvapi_meta = str(self.restoreReportDocument())
 
             if rvapi_meta:
@@ -232,6 +364,7 @@ class CCP4ez(import_task.Import):
                     self.putMessage (
                         "<b>Program error:</b> <i>unparseable metadata " +
                         "from CCP4ez</i>" + "<p>'" + str(rvapi_meta) + "'" )
+            """
 
 
         # close execution logs and quit

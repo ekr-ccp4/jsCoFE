@@ -16,6 +16,8 @@
 
 #  python native imports
 import os
+import sys
+import traceback
 import subprocess
 
 #  ccp4-python imports
@@ -114,6 +116,7 @@ def run ( body ):  # body is reference to the main Import class
     unmergedSecId = "unmerged_mtz_sec"
     k = 0
     for f_orig, f_fmt in files_mtz:
+      try:
         body.files_all.remove ( f_orig )
         p_orig = os.path.join(body.importDir(), f_orig)
         p_mtzin = p_orig
@@ -250,7 +253,6 @@ def run ( body ):  # body is reference to the main Import class
 
                         mtzTableId = "unmerged_mtz_" + str(k) + "_table"
 
-                        os.rename(p_mtzin, os.path.join(body.outputDir(), os.path.basename(p_mtzin)))
                         unmerged.makeUniqueFNames ( body.outputDir() )
 
                         body.outputDataBox.add_data ( unmerged )
@@ -276,9 +278,20 @@ def run ( body ):  # body is reference to the main Import class
             pyrvapi.rvapi_flush()
 
             # move imported file into output directory
-            #os.rename(p_mtzin, os.path.join(body.outputDir(), os.path.basename(p_mtzin)))
+            os.rename(p_mtzin, os.path.join(body.outputDir(), os.path.basename(p_mtzin)))
 
             body.file_stdout.write ( "... processed: " + f_orig + "\n    " )
+
+        
+        trace = ''
+
+      except:
+        trace = ''.join(traceback.format_exception(*sys.exc_info()))
+        body.file_stdout.write ( trace )
+
+      if trace:
+        body.fail(trace, 'import failed')
+
 
     body.rvrow += 1
     pyrvapi.rvapi_flush()

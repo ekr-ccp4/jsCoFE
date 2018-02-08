@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    30.11.17   <--  Date of Last Modification.
+#    06.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -24,7 +24,7 @@ import pyrvapi
 #  application imports
 from   pycofe.dtypes import dtype_xyz
 from   pycofe.varut  import command
-from   pycofe.proc   import xyzmeta
+from   pycofe.proc   import xyzmeta, coor
 
 
 # ============================================================================
@@ -72,6 +72,7 @@ def run ( body ):  # body is reference to the main Import class
         body.files_all.remove ( f )
 
         fpath = os.path.join ( body.importDir(),f );
+        coor.stripLigWat ( fpath,fpath )  #  strip ligands and waters
 
         # split input file to chains
         scr_file = open ( "pdbcur.script","w" )

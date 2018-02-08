@@ -25,21 +25,25 @@
 #
 
 #  python native imports
-import os
+import os, sys
 import uuid
 import glob
+import traceback
 
 #  ccp4-python imports
 import pyrvapi
 
 #  application imports
 import basic
-from   pycofe.proc      import datred_utils, import_merged
-from   pycofe.i2reports import aimless_pipe as i2report
+from  pycofe.proc      import datred_utils, import_merged
+from  pycofe.i2reports import aimless_pipe as i2report
 
 
 # ============================================================================
 # Make Aimless driver
+
+class ParamStorage(object):
+    pass
 
 class Aimless(basic.TaskDriver):
 
@@ -61,63 +65,73 @@ class Aimless(basic.TaskDriver):
 
     # ------------------------------------------------------------------------
 
+    def log(self, *args):
+        self.file_stdout.write(repr(args))
+        self.file_stdout.write('\n')
+
     def run(self):
+        try:
+            reso_high = str(self.input_data.data.ds0[0].dataset.reso)
+            par = ParamStorage()
+            for k1, v1 in sorted(vars(self.task.parameters).items()):
+                for k2, v2 in sorted(vars(v1.contains).items()):
+                    if v2.type != 'label':
+                        assert k2 not in vars(par)
+                        p2 = self.getParameter(v2).strip()
+#                       self.log(k1, k2, p2)
+                        setattr(par, k2, p2)
+
+            aimless_lines = list()
+            scalingProtocol(par, aimless_lines)
+            scalingDetails(par, aimless_lines)
+            rejectOutliers(par, aimless_lines)
+            SDcorrection(par, aimless_lines)
+            intensitiesAndPartials(par, aimless_lines)
+            self.log('# Aimless parameters')
+            for line in aimless_lines:
+                self.log(' '.join(line.split()))
+
+            pointless_lines = list()
+            pointlessParams(par, pointless_lines, reso_high)
+            self.log('# Pointless parameters')
+            for line in pointless_lines:
+                self.log(' '.join(line.split()))
+
+#           rewrite - depends on No of datasets as well
+            scaCbx = par.MERGE_DATASETS == 'SEPARATELY'
+            trace = ''
+
+        except:
+            trace = ''.join(traceback.format_exception(*sys.exc_info()))
+            for item in trace.split('\n'):
+                self.log(item)
+        
+        if trace:
+            self.fail(trace, 'failed processing input parameters')
+            return
+
+# for quick tests of parameters:
+#       else:
+#           self.success()
+#           return
+#   def tmp(self):
 
         # fetch input data
         ds0      = self.input_data.data.ds0[0]
         unmerged = self.makeClass ( self.input_data.data.unmerged )
-
-        resMin   = self.getParameter ( self.task.parameters.sec1.contains.RESMIN  )
-        resMax   = self.getParameter ( self.task.parameters.sec1.contains.RESMAX  )
-        resCbx   = self.getParameter ( self.task.parameters.sec1.contains.RES_CBX )
-        scaCbx   = self.getParameter ( self.task.parameters.sec1.contains.SCA_CBX )
-
-        #self.file_stdout.write ( "$CCP4=" + str(os.environ["CCP4"]) )
-
-        resMin = str(resMin).strip()
-        resMax = str(resMax).strip()
-
-        if resMin and resMax and float(resMin) <= float(resMax):
-            resMin, resMax = resMax, resMin
-
-        resLine = None
-        if resMin or resMax:
-            resLine = "RESOLUTION"
-            if resMin:
-                resLine += " LOW " + resMin
-
-            if resMax:
-                resLine += " HIGH " + resMax
 
         mtzRef      = os.path.join(self.inputDir(),ds0.files[0])
         symm_select = ds0.symm_select if ds0._type=="DataUnmerged" else None
 
         plist = [[ds.dataset,os.path.join(self.inputDir(),ds.files[0]),ds.runs] for ds in unmerged]
         format_list = [getattr(ds.dataset,'original_format','unknown') for ds in unmerged]
-        #print >>self.file_stdout, 'input hkl formats:', format_list
-        onlymerge = not sum([f != 'xds_scaled' for f in format_list])
-        #print >>self.file_stdout, 'onlymerge:', onlymerge
-
-        """
-        self.file_stdout.write ( " ==============================================================================\n" )
-        self.file_stdout.write ( str(symm_select) + "\n" )
-        self.file_stdout.write ( " ==============================================================================\n" )
-        self.file_stdout.write ( str(mtzRef) + "\n" )
-        self.file_stdout.write ( " ==============================================================================\n" )
-        self.file_stdout.write ( plist[0][0].to_JSON() + "\n" )
-        self.file_stdout.write ( str(plist) + "\n" )
-        self.file_stdout.write ( " ==============================================================================\n" )
-        self.file_stdout.write ( str(scaCbx) + "\n" )
-        self.file_stdout.write ( " ==============================================================================\n" )
-        """
+        # see (A) below
+        # onlymerge = not sum([f != 'xds_scaled' for f in format_list])
 
         script_list = datred_utils.get_point_script (
                             symm_select,mtzRef,plist,
                             self.pointless_mtz(),self.pointless_xml(),
                             self.file_stdout,scaCbx )
-
-        if resLine and resCbx:
-            script_list[0] += resLine + "\n"
 
         if len(script_list)==3:
             title = [ "<h3>1. Extracting selected images</h3>",
@@ -135,6 +149,9 @@ class Aimless(basic.TaskDriver):
         n = 0
         for script in script_list:
             self.open_stdin()
+            for line in pointless_lines:
+                self.write_stdin ( line + '\n' )
+
             self.write_stdin ( script )
             self.close_stdin()
 
@@ -163,11 +180,14 @@ class Aimless(basic.TaskDriver):
         # print json.dumps(datred_utils.tabs_as_dict(tab_list), **dump_keyargs)
 
         self.open_stdin()
-        if resLine and not resCbx:
-            self.write_stdin ( resLine + "\n" )
 
-        if onlymerge:
-            self.write_stdin ( "ONLYMERGE\n" )
+        # (A) currently this is an option
+        # it needs to be set before upload or after import, as a subtype
+        # if onlymerge:
+        #     self.write_stdin ( "ONLYMERGE\n" )
+
+        for line in aimless_lines:
+            self.write_stdin ( line + '\n' )
 
         self.write_stdin ( "XMLOUT " + self.aimless_xml() + "\n" )
         self.write_stdin ( "END\n" )
@@ -258,7 +278,227 @@ class Aimless(basic.TaskDriver):
 
 # ============================================================================
 
+def scalingProtocol(par, lines):
+
+    if par.PERFORM_SCALING == 'NO':
+        lines.append('ONLYMERGE')
+        return
+
+    s = 'SCALES'
+    if par.SCALING_PROTOCOL == 'CONSTANT':
+        s += ' CONSTANT'
+
+    elif par.SCALING_PROTOCOL == 'BATCH':
+        s += ' BATCH'
+        if par.BFACTOR_SCALE == 'False':
+            s += ' BFACTOR OFF'
+
+    else:
+        if par.SCALES_ROTATION_TYPE == 'SPACING':
+            p1 = par.SCALES_ROTATION_SPACING
+            if p1 != '':
+                s += ' ROTATION SPACING ' + p1
+
+        else:
+            p1 = par.SCALES_ROTATION_NBINS
+            s += ' ROTATION ' + (p1 if p1 != '' else '1')
+
+        if par.SCALES_SECONDARY_CORRECTION == 'True':
+            p1 = par.SCALES_SECONDARY_NSPHHARMONICS
+            if p1 != '':
+                s += ' SECONDARY ' + p1
+
+        else:
+            s += ' SECONDARY 0'
+
+        if par.SCALES_TILETYPE == 'NONE':
+            s += ' NOTILE'
+
+        elif par.SCALES_TILETYPE == 'CCD':
+            s += ' TILE'
+            s += ' ' + par.SCALES_NTILEX if par.SCALES_NTILEX != '' else '3'
+            s += ' ' + par.SCALES_NTILEY if par.SCALES_NTILEY != '' else '3'
+            s += ' CCD'
+
+        if par.BFACTOR_SCALE == 'True':
+            if par.SCALES_BROTATION_TYPE == 'SPACING':
+                p1 = par.SCALES_BROTATION_SPACING
+                if p1 != '':
+                    s += ' BROTATION SPACING ' + p1
+
+            else:
+                p1 = par.SCALES_BROTATION_NBINS
+                s += ' BROTATION ' + (p1 if p1 != '' else '1')
+
+        else:
+            s += ' BFACTOR OFF'
+
+    if s != 'SCALES':
+        lines.append(s)
+
+def rejectOutliers(par, lines):
+
+    sdrej = '6.0'
+
+    p1 = par.OUTLIER_EMAX
+    if p1 != '':
+        lines.append('REJECT EMAX ' + p1)
+
+    s = 'REJECT'
+    if par.OUTLIER_COMBINE == 'False':
+        s += ' SEPARATE'
+
+    p1 = par.OUTLIER_SDMAX
+    p2 = par.OUTLIER_SDMAX2
+    if p1 != '' or p2 != '':
+        s += ' ' + (p1 if p1 != '' else sdrej) + ' ' + p2
+
+    p1 = par.OUTLIER_SDMAXALL
+    if p1 != '':
+        p2 = '-' if par.OUTLIER_SDMAXALL_ADJUST == 'True' else ''
+        s += ' ALL ' + p2 + p1
+
+    if s != 'REJECT':
+        lines.append(s)
+
+def SDcorrection(par, lines):
+
+    if par.SDCORRECTION_REFINE == 'True':
+        p0 = par.SDCORRECTION_OPTIONS
+        assert p0 in ('INDIVIDUAL', 'SAME', 'SIMILAR')
+        s = 'SDCORRECTION REFINE ' + p0
+        if p0 == 'SIMILAR':
+            p1 = par.SDCORRECTION_SIMILARITY_SDFAC
+            p2 = par.SDCORRECTION_SIMILARITY_SDB
+            p3 = par.SDCORRECTION_SIMILARITY_SDADD
+            pp = (p1, p2, p3)
+            if ''.join(pp):
+                pp = [p if p else d for p, d in zip(pp, ('0.2', '3.0', '0.04'))]
+                s += ' %s %s %s' %tuple(pp)
+
+        if par.SDCORRECTION_FIXSDB == 'True':
+            s += ' FIXSDB'
+
+        if s != 'SDCORRECTION REFINE INDIVIDUAL':
+            lines.append(s)
+
+        if par.SDCORRECTION_FIXSDB == 'Tie':
+            s = 'SDCORRECTION TIE'
+            p1 = par.SDCORRECTION_TIESDB_SD
+            if p1 != '':
+                s += ' SdB 0.0 ' + p1
+
+            lines.append(s)
+
+    else:
+        p1 = par.SDCORRECTION_SDFAC
+        p2 = par.SDCORRECTION_SDB
+        p3 = par.SDCORRECTION_SDADD
+        pp = (p1, p2, p3)
+        if ''.join(pp):
+            pp = [p if p else d for p, d in zip(pp, ('1.0', '0.0', '0.03'))]
+            s = 'SDCORRECTION %s %s %s' %tuple(pp)
+            lines.append(s)
+
+        else:
+            lines.append('SDCORRECTION NOREFINE')
+
+def intensitiesAndPartials(par, lines):
+
+    if par.INTENSITIES_OPTIONS != 'COMBINE':
+        s = 'INTENSITIES ' + par.INTENSITIES_OPTIONS
+        lines.append(s)
+
+    fracl = par.PARTIALS_FRACLOW
+    frach = par.PARTIALS_FRACHIGH
+    if fracl != '' or frach != '':
+        fracl_prn = fracl if fracl != '' else '0.95'
+        frach_prn = frach if frach != '' else '1.05'
+        s = 'PARTIALS TEST %7.3f %7.3f ' %(float(fracl), float(frach))
+        lines.append(s)
+
+    if par.ACCEPT_OVERLOADS == 'True':
+        lines.append('KEEP OVERLOADS')
+
+    if par.ACCEPT_EDGES == 'True':
+        lines.append('KEEP EDGE')
+
+    if par.ACCEPT_XDS_MISFITS == 'True':
+        # XDS MISFIT (outlier) flag
+        lines.append('KEEP MISFIT')
+
+    if par.RESOLUTION_SYMM != 'EXPLICIT':
+        p1 = par.RESO_LOW
+        p2 = par.RESO_HIGH
+        if p1 != '' or p2 != '':
+            low = ' LOW ' + p1 if p1 != '' else ''
+            high = ' HIGH ' + p2 if p2 != '' else ''
+            lines.append('RESOLUTION' + low + high)
+
+def scalingDetails(par, lines):
+
+    if par.PERFORM_SCALING == 'NO':
+        lines.append('ONLYMERGE')
+        return
+
+    p1 =  par.CYCLES_N
+    if p1 != '':
+        lines.append('REFINE CYCLES ' + p1)
+
+    emin = par.SELECT_EMIN
+    iovsdmin = par.SELECT_IOVSDMIN
+    if iovsdmin != '' or emin != '':
+        s = 'REFINE SELECT'
+        s += ' ' + '-1' if iovsdmin == '' else iovsdmin
+        if emin != '':
+            s += ' ' + emin
+
+        lines.append(s)
+
+    if par.TIE_DETAILS == 'ADJUST':
+        bf_sd = '-1' if par.TIE_BFACTOR == 'False' else par.TIE_BFACTOR_SD
+        bz_sd = '-1' if par.TIE_BZERO == 'False' else par.TIE_BZERO_SD
+        ro_sd = '-1' if par.TIE_ROTATION == 'False' else par.TIE_ROTATION_SD
+        su_sd = '-1' if par.TIE_SURFACE == 'False' else par.TIE_SURFACE_SD
+        bf_sd_prn = bf_sd if bf_sd != '' else '0.05'
+        bz_sd_prn = bz_sd if bz_sd != '' else '10.0'
+        ro_sd_prn = ro_sd if ro_sd != '' else '0.05'
+        su_sd_prn = su_sd if su_sd != '' else '0.005'
+        s = "TIE "
+        s += 'ROTATION %7.4f ' %float(ro_sd_prn)
+        s += 'BFACTOR %7.4f ' %float(bf_sd_prn)
+        s += 'SURFACE %7.4f ' %float(su_sd_prn)
+        s += 'ZEROB %7.4f ' %float(bz_sd_prn)
+        lines.append(s)
+
+def pointlessParams(par, lines, high_data):
+
+    if par.TOLERANCE != '':
+        lines.append('TOLERANCE ' + par.TOLERANCE)
+
+    if par.RESOLUTION_SYMM == 'EXPLICIT':
+        p1 = par.RESO_LOW
+        p2 = par.RESO_HIGH
+        if p1 != '' or p2 != '':
+            low = ' LOW ' + p1 if p1 != '' else ''
+            high = ' HIGH ' + p2 if p2 != '' else ''
+            lines.append('RESOLUTION' + low + high)
+
+        else:
+            lines.append('RESOLUTION HIGH ' + high_data)
+
+
+    else:
+        p1 = par.ISIGLIMIT
+        if p1 != '':
+            lines.append('ISIGLIMIT ' + p1)
+
+        p1 = par.CCHALFLIMIT
+        if p1 != '':
+            lines.append('ISIGLIMIT CCHALF ' + p1)
+
 if __name__ == "__main__":
 
     drv = Aimless ( "Data Reduction with Aimless",os.path.basename(__file__) )
     drv.run()
+

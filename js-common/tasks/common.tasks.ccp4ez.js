@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    31.01.18   <--  Date of Last Modification.
+ *    06.02.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -44,6 +44,84 @@ function TaskCCP4ez()  {
   for (var i=0;i<10;i++)
     this.ligands.push ( { 'source':'none', 'smiles':'', 'code':'' } );
 
+  this.parameters = { // input parameters
+    sec1  : { type     : 'section',
+              title    : 'Advanced Parameters',
+              open     : false,  // true for the section to be initially open
+              position : [0,0,1,8],
+              contains : {
+                /*
+                DATASET_SEL : {
+                        type     : 'combobox',
+                        keyword  : 'dataset',
+                        label    : 'Reflection dataset to use',
+                        //lwidth   : 60,        // label width in px
+                        //reportas : 'Down-weighting model',
+                        tooltip  : 'If input reflection file contains several ' +
+                                   'dataset, you may specify the desired ' +
+                                   'dataset number, or allow for automatic ' +
+                                   'choice.',
+                        range    : ['A|choose automatically',
+                                    'G|take dataset number'],
+                        value    : 'A',
+                        position : [0,0,1,1]
+                      },
+                DATASET_NO : {
+                        type      : 'integer',
+                        keyword   : 'dataset-no',
+                        label     : '',
+                        iwidth    : 40,
+                        tooltip   : 'Give dataset number (dataset with base ' +
+                                    'H,K,L columns has number 0).',
+                        range     : [1,100],
+                        value     : '1',
+                        default   : '1',
+                        position  : [0,3,1,1],
+                        showon    : {'DATASET_SEL':['G']}
+                      },
+                */
+                TITLE1 : {
+                        type      : 'label',  // just a separator
+                        label     : '<h3>Components controls</h3><i>Uncheck ' +
+                                    'components which <u>should not</u> ' +
+                                    'be used:</i><sub>&nbsp;</sub>',
+                        position : [1,0,1,5],
+                      },
+                SIMBAD12_CBX : {
+                        type      : 'checkbox',
+                        keyword   : 'simbad12',
+                        label     : 'Compatible lattice and contaminant search',
+                        tooltip   : 'Uncheck to skip database searches on ' +
+                                    'compatible lattice parameters and possible ' +
+                                    'contaminants.',
+                        iwidth    : 350,
+                        value     : true,
+                        position  : [2,0,1,3]
+                      },
+                MORDA_CBX : {
+                        type      : 'checkbox',
+                        keyword   : 'morda',
+                        label     : 'Automated Molecular Replacement',
+                        tooltip   : 'Uncheck to skip phasing with automated ' +
+                                    'molecular replacement.',
+                        iwidth    : 350,
+                        value     : true,
+                        position  : [3,0,1,3]
+                      },
+                CRANK2_CBX : {
+                        type      : 'checkbox',
+                        keyword   : 'crank2',
+                        label     : 'Automated Experimental Phasing',
+                        tooltip   : 'Uncheck to skip automated experimental ' +
+                                    'phasing.',
+                        iwidth    : 350,
+                        value     : true,
+                        position  : [4,0,1,3]
+                      }
+              }
+            }
+  };
+
 }
 
 if (__template)
@@ -70,6 +148,8 @@ if (!__template)  {
   var nSeqInputs = 1;
 
     var div = this.makeInputLayout();
+
+    this.setInputDataFields ( div.grid,0,dataBox,this );
 
     if ((this.state==job_code.new) || (this.state==job_code.running)) {
       div.header.setLabel ( ' ',2,0,1,1 );
@@ -101,7 +181,7 @@ if (!__template)  {
       fsel.hide();
       var btn   = div.grid.addButton ( 'Browse','./images/open_file.svg',rowNo,2,1,1 )
                           .setWidth_px ( 86 );
-      var itext = div.grid.setInputText ( fname,rowNo,3,1,1 )
+      var itext = div.grid.setInputText ( fname,rowNo,3,1,2 )
                           .setWidth_px(300).setReadOnly(true).setNoWrap(true);
       div.grid.setVerticalAlignment ( rowNo,2,'middle' );
       div.grid.setVerticalAlignment ( rowNo,3,'middle' );
@@ -245,7 +325,7 @@ if (!__template)  {
     function setCoorFileSelect ( rowNo,fname )  {
       var wset = setFileSelect ( rowNo,'Structure',
              '[Optional] Provide a path to a PDB or mmCIF file with ' +
-             'structural homologue, or an apo structure (optional)',
+             'known (and close) structural homologue, or an apo structure.',
              '.pdb, .ent, .mmcif, .pdbx, .cif',fname );
       wset['fsel'].addOnChangeListener ( function(){
         var files = wset['fsel'].getFiles();
@@ -268,6 +348,7 @@ if (!__template)  {
     }
 
     div.coor_select = setCoorFileSelect ( row++,'' );
+    var row0 = row;
     div.grid.setLabel ( '',row++,0,1,1 ).setHeight_px(8);
 
 
@@ -294,6 +375,16 @@ if (!__template)  {
 
     div.grid.setLabel ( '&nbsp;',row++,0,1,1 ).setHeight_px(8);
 
+    div.code_lbl   = div.grid.setLabel ( '<b><i>Code</i></b>',row,3,1,1 )
+                        .setTooltip ( '3-letter code to identify the ligand. ' +
+                          'If no SMILES string is given, the code must match ' +
+                          'one from RCSB Compound dictionary. However, if ' +
+                          'SMILES string is provided, the code must not match ' +
+                          'any of known ligands, e.g., "DRG".' );
+    div.smiles_lbl = div.grid.setLabel ( '<b><i>SMILES String</i></b>',row++,4,1,1 )
+                        .setTooltip ( 'SMILES string describing ligands ' +
+                          'structure.' );
+
     // list of ligands (self-expanding)
     div.ligands = [];
 
@@ -302,14 +393,20 @@ if (!__template)  {
       for (var i=0;i<div.ligands.length;i++)
         if (div.ligands[i].selection.getValue()!='none')
           n = i;
+      var code   = false;
+      var smiles = false;
       for (var i=0;i<div.ligands.length;i++)  {
         var visible = (i<=n+1);
         var source  = div.ligands[i].selection.getValue();
         div.ligands[i].label    .setVisible ( visible );
         div.ligands[i].selection.setVisible ( visible );
         div.ligands[i].smiles   .setVisible ( visible && (source=='smiles') );
-        div.ligands[i].code     .setVisible ( visible && (source=='code')   );
+        div.ligands[i].code     .setVisible ( visible && (source!='none')   );
+        if (source=='smiles')  smiles = true;
+        if (source!='none')    code   = true;
       }
+      div.code_lbl  .setVisible ( code   );
+      div.smiles_lbl.setVisible ( smiles );
     }
 
     for (var i=0;i<this.ligands.length;i++)  {
@@ -325,36 +422,36 @@ if (!__template)  {
       sel.addItem ( 'SMILES','','smiles',this.ligands[i].source=='smiles' );
       sel.addItem ( 'Code'  ,'','code'  ,this.ligands[i].source=='code'   );
       sel.make();
-      var smiles = div.grid.setInputText ( this.ligands[i].smiles,row,3,1,1 )
-                           .setWidth_px(600).setNoWrap(true)
-                           .setVisible(this.ligands[i].source=='smiles');
-      var code   = div.grid.addInputText ( this.ligands[i].smiles,row,3,1,1 )
+      var code   = div.grid.setInputText ( this.ligands[i].code,row,3,1,1 )
                            .setWidth_px(50).setNoWrap(true).setMaxInputLength(3)
                            .setVisible(this.ligands[i].source=='code');
+      var smiles = div.grid.setInputText ( this.ligands[i].smiles,row,4,1,1 )
+                           .setWidth_px(600).setNoWrap(true)
+                           .setVisible(this.ligands[i].source=='smiles');
       div.grid.setVerticalAlignment ( row,2,'middle' );
       div.grid.setVerticalAlignment ( row,3,'middle' );
+      div.grid.setVerticalAlignment ( row,4,'middle' );
       div.ligands.push ( {'label':lbl, 'selection':sel, 'smiles':smiles, 'code':code} );
       sel.sno = i;
       sel.addOnChangeListener ( function(text,value){
+        div.ligands[this.sno].code  .setVisible ( value!='none'   );
         div.ligands[this.sno].smiles.setVisible ( value=='smiles' );
-        div.ligands[this.sno].code  .setVisible ( value=='code'   );
         showLigands();
-        /*
-        if (this.sno<div.ligands.length-1)  {
-          var visible = (div.ligands[this.sno].source != 'none');
-          div.ligands[this.sno+1].label    .setVisible ( visible );
-          div.ligands[this.sno+1].selection.setVisible ( visible );
-          div.ligands[this.sno+1].smiles   .setVisible ( visible &&
-                      div.ligands[this.sno+1].selection.getValue()=='smiles' );
-          div.ligands[this.sno+1].code     .setVisible ( visible &&
-                      div.ligands[this.sno+1].selection.getValue()=='code'   );
-        }
-        */
       });
       row++;
     }
 
     showLigands();
+
+    this.layParameters ( div.grid,div.grid.getNRows()+1,0 );
+
+    var ncols = div.grid.getNCols();
+    for (var i=1;i<ncols;i++)  {
+      div.grid.setLabel    ( ' ',row0,i,1,1   ).setHeight_px(8);
+      div.grid.setCellSize ( 'auto','',row0,i );
+    }
+    div.grid.setLabel    ( ' ',row0,ncols,1,1  ).setHeight_px(8);
+    div.grid.setCellSize ( '95%','',row0,ncols );
 
     return div;
 
@@ -376,20 +473,46 @@ if (!__template)  {
   TaskCCP4ez.prototype.collectInput = function ( inputPanel )  {
     // collects data from input widgets, created in makeInputPanel() and
     // stores it in internal fields
+    var msg   = '';  // Ok if stays empty
     var files = inputPanel.mtz_select['fsel'].getFiles();
     this.ha_type = inputPanel.ha_type.getValue();
+    for (var i=0;i<this.ligands.length;i++)  {
+      this.ligands[i].source = inputPanel.ligands[i].selection.getValue();
+      this.ligands[i].smiles = inputPanel.ligands[i].smiles.getValue();
+      this.ligands[i].code   = inputPanel.ligands[i].code.getValue();
+      if (this.ligands[i].source!='none')  {
+        if (!this.ligands[i].code)
+          msg += '<b><i>Code for ligand #' + (i+1) + ' is not given</i></b>';
+        if ((this.ligands[i].source=='smiles') && (!this.ligands[i].smiles))
+          msg += '<b><i>SMILES string for ligand #' + (i+1) + ' is not given</i></b>';
+      }
+    }
+    var unique = true;
+    for (var i=0;(i<this.ligands.length) && unique;i++)
+      if ((this.ligands[i].source!='none') && (this.ligands[i].code))  {
+        for (var j=i+1;(j<this.ligands.length) && unique;j++)
+          if ((this.ligands[j].source!='none') &&
+              (this.ligands[i].code==this.ligands[j].code))  {
+            unique = false;
+            msg += '<b><i>Repeat use of ligand code ' + this.ligands[i].code +
+                   '</i></b>';
+          }
+      }
     if (files.length<1)
-      return '<b><i>Reflection data is not specified.</i></b>';
-    return '';
+      msg += '<b><i>Reflection data is not specified</i></b>';
+
+    TaskTemplate.prototype.collectInput.call ( this,inputPanel );
+
+    return  msg;
   }
 
   //  This function is called when task is finally sent to FE to run. Should
   // execute function given as argument, or issue an error message if run
   // should not be done.
   TaskCCP4ez.prototype.doRun = function ( inputPanel,run_func )  {
-  var files  = [inputPanel.mtz_select ['fsel'].getFiles()];
+  var files  = [inputPanel.mtz_select  ['fsel'].getFiles()];
   var sfiles = inputPanel.seq_select[0]['fsel'].getFiles();
-  var cfiles = inputPanel.coor_select['fsel'].getFiles();
+  var cfiles = inputPanel.coor_select  ['fsel'].getFiles();
 
     if (sfiles.length>0)  files.push ( sfiles );
     if (cfiles.length>0)  files.push ( cfiles );
@@ -408,6 +531,18 @@ if (!__template)  {
       });
     }
 
+  }
+
+
+  // This function is called at cloning jobs and should do copying of all
+  // custom class fields not found in the Template class
+  TaskCCP4ez.prototype.customDataClone = function ( task )  {
+    this.ha_type = task.ha_type;
+    this.ligands = [];
+    for (var i=0;i<task.ligands.length;i++)
+      this.ligands.push ( { 'source' : task.ligands[i].source,
+                            'smiles' : task.ligands[i].smiles,
+                            'code'   : task.ligands[i].code } );
   }
 
 

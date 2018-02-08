@@ -1,7 +1,7 @@
 //
 //  =================================================================
 //
-//    13.01.18   <--  Date of Last Modification.
+//    02.02.18   <--  Date of Last Modification.
 //                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //  -----------------------------------------------------------------
 //
@@ -146,7 +146,9 @@ function updateWatchedContent ( updateHidden_bool )  {
             var div   = document.getElementById ( divId );
             if (!div)  {
               div = element ( 'div','id',divId,'' );
-              document.getElementById ( hId ).appendChild ( div );
+              var holder = document.getElementById ( hId );
+              if (holder)
+                holder.appendChild ( div );
               $( '<div class="cap-div"><b><i>File is too large and shown ' +
                  'without middle part.</i></b><br>Click <a href="' +
                  uri.substring(0,uri.indexOf('?capsize')) +
@@ -161,7 +163,9 @@ function updateWatchedContent ( updateHidden_bool )  {
           if (!pre)  {
             pre = element ( "pre","id",preId,"" );
             pre.setAttribute ( "class","display-text" );
-            document.getElementById ( hId ).appendChild ( pre );
+            var holder = document.getElementById ( hId );
+            if (holder)
+              holder.appendChild ( pre );
           } else {
             while (pre.hasChildNodes())
               pre.removeChild ( pre.lastChild );

@@ -1,7 +1,7 @@
 //
 //  =================================================================
 //
-//    23.08.17   <--  Date of Last Modification.
+//    03.02.18   <--  Date of Last Modification.
 //                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //  -----------------------------------------------------------------
 //
@@ -12,15 +12,15 @@
 //  **** Content :  RVAPI javascript layer's window module
 //       ~~~~~~~~~
 //
-//  (C) E. Krissinel 2013-2017
+//  (C) E. Krissinel 2013-2018
 //
 //  =================================================================
 //
 
 var _jsrview_uri       = "";
 
-var _viewer_def_width  = 800;
-var _viewer_def_height = 600;
+//var _viewer_def_width  = 800;
+//var _viewer_def_height = 600;
 
 
 // ===========================================================================
@@ -115,8 +115,25 @@ function startUglyMol ( title,xyz_uri,map_uri,diffmap_uri )  {
   jq(iframe).css ( {'border'   : 'none',
                     'overflow' : 'hidden'
   });
-  jq(iframe).width  ( _viewer_def_width  );
-  jq(iframe).height ( _viewer_def_height );
+
+  /*
+  var w = window.parent.innerWidth
+          || doc.documentElement.clientWidth
+          || doc.body.clientWidth;
+
+  var h = window.parent.innerHeight
+          || doc.documentElement.clientHeight
+          || doc.body.clientHeight;
+  */
+
+  var w = jq(window.parent).width () - 50;
+  var h = jq(window.parent).height() - 70;
+
+  jq(iframe).width  ( 3*w/4 );
+  jq(iframe).height ( 7*h/8 );
+
+//  jq(iframe).width  ( _viewer_def_width  );
+//  jq(iframe).height ( _viewer_def_height );
 
   dialog.appendChild ( iframe );
 
@@ -271,8 +288,16 @@ function startViewHKL ( title,mtz_uri )  {
   jq(iframe).css ( {'border'   : 'none',
                     'overflow' : 'hidden'
   });
-  jq(iframe).width  ( _viewer_def_width  );
-  jq(iframe).height ( _viewer_def_height );
+
+
+  var w = jq(window.parent).width () - 50;
+  var h = jq(window.parent).height() - 70;
+
+  jq(iframe).width  ( 3*w/4 );
+  jq(iframe).height ( 7*h/8 );
+
+  //jq(iframe).width  ( _viewer_def_width  );
+  //jq(iframe).height ( _viewer_def_height );
 
   dialog.appendChild ( iframe );
 

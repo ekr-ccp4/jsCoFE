@@ -101,12 +101,13 @@ if (!__template)  {
         });
 
       panel.upload.addSignalHandler ( cofe_signals.uploadEvent, function(detail){
-        task.enableRunButton ( panel,detail=='finished' );
+        task.sendTaskStateSignal ( panel,detail );
       });
 
     }(div,this));
     div.upload.setUploadedFiles ( this.upload_files );
-    this.enableRunButton ( div,(this.upload_files.length>0) );
+    if (this.upload_files.length<=0)
+      this.sendTaskStateSignal ( div,'hide_run_button' );
 
     div.grid.setWidget ( div.upload,1,0,1,1 );
     div.panel.setScrollable ( 'hidden','hidden' );
@@ -122,7 +123,8 @@ if (!__template)  {
       widget.upload.button.setDisabled ( disable_bool );
       if (widget.upload.link_button)
         widget.upload.link_button.setDisabled ( disable_bool );
-      this.enableRunButton ( widget,(!disable_bool) && (this.upload_files.length>0) );
+      //if (this.upload_files.length<=0)
+        //this.sendTaskStateSignal ( widget,'hide_run_button' );
     }
   }
 

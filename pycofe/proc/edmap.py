@@ -26,7 +26,6 @@ except:
     print " import failed in 'proc/edmap'"
     sys.exit ( 200 )
 
-
 # ============================================================================
 
 def file_pdb       ():  return ".pdb"

@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    12.16.17   <--  Date of Last Modification.
+ *    02.02.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  Send Directory Module
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -43,6 +43,8 @@ var tarballName = '__dir.tar.gz';
 
 function packDir ( dirPath, fileSelection, onReady_func )  {
 // Pack files, assume tar
+
+  utils.removeFile ( tarballName );
 
   var tar = child_process.spawn ( '/bin/sh',['-c','tar -czf ' +
                                   tarballName + ' ' + fileSelection],{

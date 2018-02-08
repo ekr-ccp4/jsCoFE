@@ -3,13 +3,13 @@
 #
 # ============================================================================
 #
-#    28.12.17   <--  Date of Last Modification.
+#    06.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
 #  CCP4EZ Combined Auto-Solver Prepare MTZ class
 #
-#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017
+#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017-2018
 #
 # ============================================================================
 #
@@ -30,9 +30,9 @@ import ccp4ez_base
 class PrepareMTZ(ccp4ez_base.Base):
 
     #def mtz_header_id(self):  return "ccp4ez_mtz_header_tab"
-    def mtz_page_id  (self):  return "ccp4ez_mtz_tab"
-    def mtz_logtab_id(self):  return "ccp4ez_mtz_log_tab"
-    def mtz_errtab_id(self):  return "ccp4ez_mtz_err_tab"
+    #def mtz_page_id  (self):  return "ccp4ez_mtz_tab"
+    #def mtz_logtab_id(self):  return "ccp4ez_mtz_log_tab"
+    #def mtz_errtab_id(self):  return "ccp4ez_mtz_err_tab"
 
     def datared_dir  (self):  return "datared"
     def joined_mtz   (self):  return os.path.join(self.datared_dir(),"joined_tmp.mtz")
@@ -92,14 +92,15 @@ class PrepareMTZ(ccp4ez_base.Base):
         # reflections should be merged, use pointless - aimless pipeline
 
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
-                                ". Scaling and Merging</b>" )
+                                ". Scaling and Merging (Pointless, Aimless)</b>" )
         self.page_cursor[1] -= 1
 
         branch_data = self.start_branch ( "Scaling and Merging",
                                 "CCP4ez Automated Structure Solver: Scaling and Merging",
-                                self.datared_dir  (),parent_branch_id,
-                                self.mtz_page_id  (),self.mtz_logtab_id(),
-                                self.mtz_errtab_id() )
+                                self.datared_dir(),parent_branch_id )
+
+        #                        self.mtz_page_id  (),self.mtz_logtab_id(),
+        #                        self.mtz_errtab_id() )
 
         #self.putMessage ( "<h2>Data Reduction with Aimless</h2>" )
         self.putMessage ( "<h3>1. Extracting images</h3>" )
@@ -155,8 +156,9 @@ class PrepareMTZ(ccp4ez_base.Base):
                 "failed parsing pointless xmlout" )
             self.output_meta["retcode"] = "[02-004] pointless failure"
             self.write_meta()
-            self.end_branch ( branch_data,"Data Scaling and Merging failed",
-                                          "pointless failure" )
+            self.end_branch ( branch_data,self.datared_dir(),
+                              "Data Scaling and Merging failed",
+                              "pointless failure" )
             return ""
         datred_utils.report ( table_list,self.symm_det() )
         self.setOutputPage ( cursor )
@@ -178,8 +180,9 @@ class PrepareMTZ(ccp4ez_base.Base):
             self.stderr ( " *** reflection file does not exist -- stop.\n" )
             self.output_meta["retcode"] = "[02-005] aimless failure"
             self.write_meta()
-            self.end_branch ( branch_data,"Data Scaling and Merging failed",
-                                          "aimless failure" )
+            self.end_branch ( branch_data,self.datared_dir(),
+                              "Data Scaling and Merging failed",
+                              "aimless failure" )
             return ""
 
         # add free R-flag
@@ -195,8 +198,9 @@ class PrepareMTZ(ccp4ez_base.Base):
             self.stderr ( " *** reflection file does not exist -- stop.\n" )
             self.output_meta["retcode"] = "[02-006] failed to add free R-flag to merged hkl"
             self.write_meta()
-            self.end_branch ( branch_data,"Data Scaling and Merging failed",
-                                          "freerflag failure" )
+            self.end_branch ( branch_data,self.datared_dir(),
+                              "Data Scaling and Merging failed",
+                              "freerflag failure" )
             return ""
 
         # truncate merged file
@@ -229,8 +233,9 @@ class PrepareMTZ(ccp4ez_base.Base):
             self.stderr ( " *** reflection file does not exist -- stop.\n" )
             self.output_meta["retcode"] = "[02-007] failed to truncate hkl"
             self.write_meta()
-            self.end_branch ( branch_data,"Data Scaling and Merging failed",
-                                          "ctruncate failure" )
+            self.end_branch ( branch_data,self.datared_dir(),
+                              "Data Scaling and Merging failed",
+                              "ctruncate failure" )
             return ""
 
         # get merged file metadata
@@ -241,8 +246,9 @@ class PrepareMTZ(ccp4ez_base.Base):
             self.stderr ( " *** reflection file is empty -- stop.\n" )
             self.output_meta["retcode"] = "[02-008] truncated hkl file empty"
             self.write_meta()
-            self.end_branch ( branch_data,"Data Scaling and Merging failed",
-                                          "empty merged file" )
+            self.end_branch ( branch_data,self.datared_dir(),
+                              "Data Scaling and Merging failed",
+                              "empty merged file" )
             return ""
 
         self.hkl = mf[0]
@@ -257,6 +263,7 @@ class PrepareMTZ(ccp4ez_base.Base):
                                  self.page_cursor[0],self.page_cursor[1],
                                  0,1,1,-1 )
 
-        self.quit_branch ( branch_data,"Refection data scaled and merged" )
+        self.quit_branch ( branch_data,self.datared_dir(),
+                           "Refection data scaled and merged (Pointless, Aimless)" )
 
-        return self.mtz_page_id()
+        return  branch_data["pageId"]

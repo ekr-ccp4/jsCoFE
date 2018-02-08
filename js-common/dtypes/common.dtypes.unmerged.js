@@ -175,30 +175,69 @@ if (!__template)  {
 
   }
 
-
   DataUnmerged.prototype.collectCustomDropdownInput = function ( dropdown ) {
 
     var msg = '';   // Ok by default
     var customGrid = dropdown.customGrid;
+    var regex_runs = /^\s*(\d+\s*(-\s*\d+\s*)?(,\s*\d+\s*(-\s*\d+\s*)?)*)?$/;
+    var regex_runs2 = /^\d+(-\d+)?(,\d+(-\d+)?)*$/;
 
-    if (dropdown.layCustom.startsWith('unmerged'))  {
-
-      if (dropdown.layCustom=='unmerged-ref')  {
+    if (dropdown.layCustom.startsWith('unmerged'))
+    {
+      if (dropdown.layCustom=='unmerged-ref')
+      {
         this.dataset.symm = customGrid.combosel.content;
         this.symm_select  = customGrid.combosel.getValues();
-      } else
+      }
+      else
+      {
         this.runs = customGrid.runs.getValue().trim();
-
+        var ok = this.runs.length == 0
+        if (!ok)
+        {
+          ok = regex_runs.test(this.runs);
+          if (ok)
+          {
+            var orig_list = this.runs.replace(/[, \-]+/g, ',').split(',');
+            var sorted_list = orig_list.slice(0);
+            sorted_list.sort(function(a, b){return a - b});
+            ok = orig_list.toString() == sorted_list.toString();
+            if (ok)
+            {
+              var x0 = '';
+              var x1 = orig_list[0];
+              for (var i = 1; i < orig_list.length; i++)
+              {
+                x0 = x1;
+                x1 = orig_list[i];
+                ok = ok && x0 != x1;
+              }
+            }
+          }
+        }
+        if (!ok)
+        {
+          msg = '<b><i>Incorrect batch selection:</i>&nbsp;' + this.runs + '</b><br>'
+              + '<br>Rules:<br>'
+              + '- Selection must contain comma-separated batch ranges;<br>'
+              + '- A range can be a single batch number or two dash-separated batch numbers;<br>'
+              + '- All batch numbers in the selection must be increasing numbers.<br>'
+              + '- Batch numbers outside available ranges are allowed.<br>'
+              + '- Spaces are alloed but not between didgits.<br>'
+//            + '- The numbers of the first and the last available batches canbe skipped.<br>'
+              + 'Examples:<br>'
+              + '1-11,33-99,111,112,114-222<br>'
+//            + ' - 11, 33 - 99, 111, 112, 114 - 99999<br>'
+          ;
+        }
+      }
     }
-
     return msg;
-
   }
-
-
-} else  {
-  //  for server side
-
-  module.exports.DataUnmerged = DataUnmerged;
-
 }
+else
+{
+  //  for server side
+  module.exports.DataUnmerged = DataUnmerged;
+}
+

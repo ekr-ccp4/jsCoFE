@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    30.01.18   <--  Date of Last Modification.
+#    06.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -960,8 +960,9 @@ class TaskDriver(object):
 
 
     def putStructureWidget1 ( self,pageId,widgetId,title_str,structure,openState,row,colSpan ):
-        self.putMessage1 ( pageId,"<b>Assigned name:</b>&nbsp;" +\
-                                  structure.dname + "<br>&nbsp;", row,1 )
+        self.putMessage1 ( pageId,"<b>Assigned name:</b>&nbsp;" +
+                                  structure.dname +
+                                  "<font size='-1'><br>&nbsp;</font>", row,1 )
         wId     = widgetId + str(self.widget_no)
         self.widget_no += 1
         type    = ["xyz","hkl:map","hkl:ccp4_map","hkl:ccp4_dmap","LIB"]

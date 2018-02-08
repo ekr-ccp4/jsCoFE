@@ -192,7 +192,7 @@ function Upload ( customData,upl_data,onSelect_func,onReady_func )  {
 
         } else  {
 
-          upl.emitSignal ( cofe_signals.uploadEvent,'started' );
+          upl.emitSignal ( cofe_signals.uploadEvent,'upload_started' );
 
           $.ajax({
             url         : fe_command.upload,
@@ -219,7 +219,7 @@ function Upload ( customData,upl_data,onSelect_func,onReady_func )  {
                 if (upl.link_button)
                   upl.link_button.setEnabled ( true );
               }
-              upl.emitSignal ( cofe_signals.uploadEvent,'finished' );
+              upl.emitSignal ( cofe_signals.uploadEvent,'upload_finished' );
             },
             xhr: function() {
 

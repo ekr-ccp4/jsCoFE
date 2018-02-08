@@ -91,7 +91,7 @@ class Lorestr(basic.TaskDriver):
         if self.getParameter(self.task.parameters.sec1.contains.MR_CBX)=="True":
             cmd += [ "-mr" ]
 
-        #cmd += ["-xml","lorestr.xml"]
+        cmd += ["-xml","lorestr.xml"]
 
         # Start lorestr
         self.runApp ( "lorestr",cmd )

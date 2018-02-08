@@ -95,12 +95,29 @@ ImportAnnotationDialog.prototype.makePage = function()  {
       this.grid.setCellSize ( 'auto','',row,1 );
       this.grid.setCellSize ( 'auto','',row,2 );
       this.grid.setCellSize ( 'auto','',row,3 );
-      this.grid.setCellSize ( '99%','',row,4 );
+      this.grid.setCellSize ( '99%' ,'',row,4 );
 
       for (var j=0;j<this.annotation[i].items.length;j++)  {
-        var contents_lbl = this.grid.setLabel ( '<pre>' +
-                                     this.annotation[i].items[j].contents + '</pre>',
-                                     row,1, 1,1 );
+        //var clist   = this.annotation[i].items[j].contents.match(/^.*([\n\r]+|$)/gm);
+        var clist   = this.annotation[i].items[j].contents.replace('\r','').split('\n');
+        var seqline = '<pre>';
+        for (var k=0;k<clist.length;k++)  {
+          var n = 0;
+          for (var m=0;m<clist[k].length;m++)  {
+            if (n>=75)  {
+              seqline += '\n';
+              n = 0;
+            }
+            seqline += clist[k][m];
+            n++;
+          }
+          while (n<75)  {
+            seqline += ' ';
+            n++;
+          }
+          seqline += '\n';
+        }
+        var contents_lbl = this.grid.setLabel ( seqline+'</pre>',row,1, 1,1 );
         if (this.annotation[i].items[j].type=='none')  {
           var clist = this.annotation[i].items[j].contents.split('\n');
           clist[0]  = '';

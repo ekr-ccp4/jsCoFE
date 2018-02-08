@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    26.01.18   <--  Date of Last Modification.
+#    06.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -27,17 +27,11 @@ import ccp4ez_dimple
 
 class Simbad12(ccp4ez_dimple.Dimple):
 
-    #def simbad12_header_id(self):  return "ccp4ez_simbad12_header_tab"
-    def simbad12_summary_id(self):  return "summary_tab"
-    def simbad12_page_id   (self):  return "ccp4ez_simbad12_tab"
-    def simbad12_logtab_id (self):  return "ccp4ez_simbad12_log_tab"
-    def simbad12_errtab_id (self):  return "ccp4ez_simbad12_err_tab"
-
     def simbad12_dir       (self):  return "simbad12_results"
 
     # ----------------------------------------------------------------------
 
-    def get_best_rfree ( self,dirpath,filename ):
+    def get_rfactors ( self,dirpath,filename ):
         if os.path.isdir(dirpath):
             filepath = os.path.join ( dirpath,filename )
             if os.path.isfile(filepath):
@@ -45,12 +39,16 @@ class Simbad12(ccp4ez_dimple.Dimple):
                 lines = f.readlines()
                 f.close()
                 if len(lines)>=2:
-                    return float(lines[1].strip().split(",")[4])
-        return 10.0
+                    return [float(lines[1].strip().split(",")[3]),
+                            float(lines[1].strip().split(",")[4])]
+        return [10.0,10.0]
 
     # ----------------------------------------------------------------------
 
     def simbad12 ( self,parent_branch_id ):
+
+        if not self.trySimbad12:
+            return ""
 
         self.putMessage       ( "&nbsp;" )
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
@@ -60,17 +58,15 @@ class Simbad12(ccp4ez_dimple.Dimple):
         branch_data = self.start_branch ( "DB Searches",
                         "CCP4ez Automated Structure Solver: Lattice and " +
                         "Contaminant Searches",
-                        self.simbad12_dir       (),parent_branch_id,
-                        self.simbad12_summary_id(),self.simbad12_logtab_id(),
-                        self.simbad12_errtab_id() )
+                        self.simbad12_dir(),parent_branch_id,"summary_tab" )
 
         # store document before making command line, because document name
         # can be changed by the framework
-        self.storeReportDocument ( self.simbad12_logtab_id() )
+        self.storeReportDocument ( branch_data["logTabId"] )
         self.flush()
 
         # Prepare simbad input -- script file
-        cmd = [ "-nproc"          ,"1",
+        cmd = [ "-nproc"          ,str(int(self.nSubJobs) + 1),
                 "-F"              ,self.hkl.Fmean.value,
                 "-SIGF"           ,self.hkl.Fmean.sigma,
                 "-FREE"           ,self.hkl.FREE,
@@ -115,8 +111,13 @@ class Simbad12(ccp4ez_dimple.Dimple):
             self.putMessage ( "<b>Program error:</b> <i>no metadata from Simbad</i>" )
             self.page_cursor[1] -= 1
 
-        rfree = min ( self.get_best_rfree ( "latt","lattice_mr.csv" ),
-                      self.get_best_rfree ( "cont","cont_mr.csv" ) )
+        r1 = self.get_rfactors ( "latt","lattice_mr.csv" )
+        r2 = self.get_rfactors ( "cont","cont_mr.csv" )
+        rfree   = r1[1]
+        rfactor = r1[0]
+        if r2[1]<rfree:
+            rfree   = r2[1]
+            rfactor = r2[0]
 
         fpath_xyz  = ""
         fpath_mtz  = ""
@@ -134,19 +135,21 @@ class Simbad12(ccp4ez_dimple.Dimple):
             nResults = -1  # indication of an error
 
         columns = {
-          "F"    : self.hkl.Fmean.value,
-          "SIGF" : self.hkl.Fmean.sigma,
-          "FREE" : self.hkl.FREE,
-          "PHI"  : "PHIC_ALL_LS",
-          "FOM"  : "FOM"
+          "F"       : self.hkl.Fmean.value,
+          "SIGF"    : self.hkl.Fmean.sigma,
+          "FREE"    : self.hkl.FREE,
+          "PHI"     : "PHIC_ALL_LS",
+          "FOM"     : "FOM",
+          "DELFWT"  : "DELFWT",
+          "PHDELWT" : "PHDELWT"
         }
 
         quit_message = self.saveResults ( "Simbad-LC",self.simbad12_dir(),
-                nResults,rfree,"simbad",fpath_xyz,fpath_mtz,fpath_map,fpath_dmap,
-                columns )
+                nResults,rfree,rfactor,"simbad",fpath_xyz,fpath_mtz,
+                fpath_map,fpath_dmap,None,None,columns )
 
-        self.quit_branch ( branch_data,"Lattice and Contaminant " +
-                                "Searches (Simbad): " + quit_message )
+        self.quit_branch ( branch_data,self.simbad12_dir(),
+                           "Lattice and Contaminant Searches (Simbad): " +
+                           quit_message )
 
-
-        return self.simbad12_summary_id()
+        return  branch_data["pageId"]

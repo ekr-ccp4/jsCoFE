@@ -348,10 +348,8 @@ if (!dbx)  {
   }
 
 
-  TaskTemplate.prototype.enableRunButton = function ( inputPanel,enable_bool )  {
-    if (enable_bool)
-          inputPanel.emitSignal ( cofe_signals.taskReady,'' );
-    else  inputPanel.emitSignal ( cofe_signals.taskReady,'disable_run_button' );
+  TaskTemplate.prototype.sendTaskStateSignal = function ( inputPanel,state_str )  {
+    inputPanel.emitSignal ( cofe_signals.taskReady,state_str );
   }
 
 
@@ -1639,6 +1637,12 @@ if (!dbx)  {
     run_func();
   }
 
+
+  // This function is called at cloning jobs and should do copying of all
+  // custom class fields not found in the Template class
+  TaskTemplate.prototype.customDataClone = function ( task )  {
+    return;
+  }
 
   TaskTemplate.prototype.score_string = function() {
   var S = '';

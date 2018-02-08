@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    27.01.18   <--  Date of Last Modification.
+#    06.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -25,17 +25,19 @@ import ccp4ez_morda
 
 class Crank2(ccp4ez_morda.MoRDa):
 
-    #def crank2_header_id(self):  return "ccp4ez_crank2_header_tab"
-    def crank2_results_tab_id(self):  return "results_tab"
-    def crank2_page_id       (self):  return "ccp4ez_crank2_tab"
-    def crank2_logtab_id     (self):  return "ccp4ez_crank2_log_tab"
-    def crank2_errtab_id     (self):  return "ccp4ez_crank2_err_tab"
-
-    def crank2_dir           (self):  return "crank2_results"
+    def crank2_dir(self):  return "crank2_results"
 
     # ----------------------------------------------------------------------
 
     def crank2 ( self,parent_branch_id ):
+
+        if not self.tryCrank2:
+            return ""
+
+        # check data availability
+
+        if not self.hkl.Fpm and not self.hkl.Ipm or not self.seqpath:
+            return
 
         self.putMessage       ( "&nbsp;" )
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
@@ -44,31 +46,13 @@ class Crank2(ccp4ez_morda.MoRDa):
 
         branch_data = self.start_branch ( "Auto-EP (Crank-2)",
                         "CCP4ez Automated Structure Solver: Auto-EP " +
-                        "with Crank-2",
-                        self.crank2_dir(),parent_branch_id,
-                        self.crank2_results_tab_id(),self.crank2_logtab_id(),
-                        self.crank2_errtab_id() )
-
-        # check data availability
-
-        na_message = ""
-        if not self.hkl.Fpm and not self.hkl.Ipm:
-            na_message = "no anomalous data"
-        if not self.seqpath:
-            if na_message:
-                na_message += " and "
-            na_message += "no sequence data"
-        if na_message:
-            self.end_branch ( branch_data,"not attempted",
-                        "Automated EP not attempted because " + na_message +
-                        " are given." )
-            return
-
+                        "with Crank-2", self.crank2_dir(),parent_branch_id,
+                        "results_tab" )
 
         # make report tab
 
         cursor2 = self.insertTab ( "results_tab","Report",
-                                   self.crank2_logtab_id(),True )
+                                   branch_data["logTabId"],True )
         self.putMessage ( "<h2>Automated Experimental Phasing with Crank-2</h2>" )
 
         # write input script
@@ -138,14 +122,18 @@ class Crank2(ccp4ez_morda.MoRDa):
         # check for solution
         nResults = 0
         rfree    = 1.0
+        rfactor  = 1.0
         if os.path.isfile(crank2_xyz):
             nResults = 1
             self.mk_std_streams ( None )
-            rfree_pattern = "R-free factor after refinement is "
+            rfree_pattern   = "R-free factor after refinement is "
+            rfactor_pattern = "R factor after refinement is "
             with open(os.path.join(self.crank2_dir(),self.file_stdout_path()),'r') as logf:
                 for line in logf:
                     if line.startswith(rfree_pattern):
-                        rfree = float(line.replace(rfree_pattern,""))
+                        rfree   = float(line.replace(rfree_pattern,""))
+                    if line.startswith(rfactor_pattern):
+                        rfactor = float(line.replace(rfactor_pattern,""))
         else:
             crank2_xyz = ""
 
@@ -158,10 +146,11 @@ class Crank2(ccp4ez_morda.MoRDa):
         }
 
         quit_message = self.saveResults ( "Crank-2",self.crank2_dir(),nResults,
-                rfree,"crank2", crank2_xyz,crank2_mtz,crank2_map,crank2_dmap,
-                columns )
+                rfree,rfactor,"crank2", crank2_xyz,crank2_mtz,crank2_map,crank2_dmap,
+                None,None,columns )
 
-        self.quit_branch ( branch_data,"Automated Experimental Phasing (Crank-2): " +
-                                       quit_message )
+        self.quit_branch ( branch_data,self.crank2_dir(),
+                           "Automated Experimental Phasing (Crank-2): " +
+                           quit_message )
 
-        return self.crank2_results_tab_id()
+        return  branch_data["pageId"]

@@ -158,7 +158,7 @@ class Simbad(asudef.ASUDef):
                           result0["name"] + " structure and electron density",
                           structure )
 
-                self.revisionFromStructure ( hkl,structure,result0["name"] )
+                asudef.revisionFromStructure ( self,hkl,structure,result0["name"] )
 
             else:
                 self.putMessage ( "Structure Data cannot be formed (probably a bug)" )

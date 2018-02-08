@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    06.01.18   <--  Date of Last Modification.
+#    06.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -73,7 +73,7 @@ class ASUMod(asudef.ASUDef):
             nRes      = revision0.ASU.nRes
             molWeight = revision0.ASU.molWeight
 
-        revision = self.makeRevision ( hkl,seq,
+        revision = asudef.makeRevision ( self,hkl,seq,
                                        self.getParameter(sec1.COMPOSITION_SEL),
                                        altEstimateKey,nRes,molWeight,
                                        self.getParameter(sec1.RESLIMIT),

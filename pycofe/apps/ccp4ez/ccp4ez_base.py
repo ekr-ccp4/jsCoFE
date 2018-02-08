@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    31.01.18   <--  Date of Last Modification.
+#    06.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -24,7 +24,10 @@
 #                 [--jobid          id]                  \
 #                 [--sge]                                \
 #                 [--qname          name]                \
-#                 [--njobs          N]
+#                 [--njobs          N]                   \
+#                 [--no-simbad12]                        \
+#                 [--no-morda]                           \
+#                 [--no-crank2]
 #
 #  Input file:
 #
@@ -32,6 +35,9 @@
 #  SEQIN  seqpath
 #  XYZIN  xyzpath
 #  HATOMS type [number]
+#  LIGAND code [smiles]
+#  LIGAND code [smiles]
+#  .......
 #
 #  Metadata in rvapi document (will be overwritten by equivalent command-line
 #  parameters if they are given):
@@ -78,15 +84,21 @@ class Base(object):
     exeType        = "--mp"     # or "--sge" if the pipeline runs on SGE cluster
     queueName      = ""         # SGE queue
     nSubJobs       = 1          # permissible number of sub-jobs to launch
+    trySimbad12    = True
+    tryMoRDa       = True
+    tryCrank2      = True
+
+
     stage_no       = 0          # stage number for headers
     summaryTabId   = "ccp4ez_summary_page"     # summary tab Id
-    strow          = 0          # summary tab output row number
+    #strow          = 0          # summary tab output row number
     navTreeId      = "ccp4ez_navigation_tree"  # navigation tree Id
 
     hklpath        = None       # path to input reflection file, merged or unmerged
     seqpath        = None       # path to file with all sequences expected
     xyzpath        = None       # path to file with structure model
     ha_type        = "Se"       # heavy atom type
+    ligands        = []         # list of ligands
 
     input_hkl      = None       # input dataset, merged or unmerged
     hkl            = None       # merged reflections dataset
@@ -112,6 +124,7 @@ class Base(object):
 
     log_parser      = None
     log_parser_cnt  = 0  # for generating parser's panel ids
+    generic_parser_summary = {}
 
     rvapi_version   = [1,0,15]   # for tree layout, put [1,0,15]
     layout          = 4          # tabbed layout (for debugging)
@@ -200,6 +213,9 @@ class Base(object):
                 elif key == "--jobid"          : self.jobId          = value
                 elif key == "--qname"          : self.queueName      = value
                 elif key == "--njobs"          : self.nSubJobs       = int(value)
+                elif key == "--no-simbad12"    : self.trySimbad12    = False
+                elif key == "--no-morda"       : self.trySimbad12    = False
+                elif key == "--no-crank2"      : self.trySimbad12    = False
                 else:
                     self.output_meta["retcode"] = "[01-001] unknown command line parameter"
                     self.stderr ( " *** unrecognised command line parameter " + key )
@@ -224,6 +240,12 @@ class Base(object):
             elif s.startswith("HATOMS"):
                 self.ha_type = s.replace("HATOMS","",1).strip()
                 self.stdout ( "\n HATOMS " + self.ha_type )
+            elif s.startswith("LIGAND"):
+                lst = filter ( None,s.replace("LIGAND","",1).split(" ") )
+                self.ligands.append ( lst )
+                self.stdout ( "\n LIGAND " + lst[0] )
+                if len(lst)>1:
+                    self.stdout ( " " + lst[1] )
             elif s:
                 self.output_meta["retcode"] = "[01-002] unrecognised input line"
                 self.stderr ( " *** unrecognised input line " + s + "\n" )
@@ -321,13 +343,20 @@ class Base(object):
             #self.putMessage ( "<h2>YYYYYYYYYYYYYYY</h2>" )
             #self.page_cursor = self.addTab ( "new","New",True )
             #self.putMessage ( "<h2>ZZZZZZZZZZZZZZZZ</h2>" )
+            #self.file_stdout.write ( "nSubJobs=" + str(self.nSubJobs) + "\n" )
 
         return
 
     # ----------------------------------------------------------------------
 
     def start_branch ( self,branch_title,page_title,subdir,branch_id,
-                            tree_header_id,logtab_id,errtab_id ):
+                            headTabId=None ):
+
+        tree_header_id = headTabId
+        if not headTabId:
+            tree_header_id = subdir + "_header_id"
+        logtab_id      = subdir + "_logtab_id"
+        errtab_id      = subdir + "_errtab_id"
 
         # make work directory
         sdir = os.path.join ( self.workdir,subdir )
@@ -370,36 +399,30 @@ class Base(object):
         # back to the beginning of head tab
         self.setOutputPage ( cursor1 )
 
-        return {"title":title, "cursor0":cursor0, "cursor1":cursor1}
+        return { "title"    : title,     "pageId"  : tree_header_id,
+                 "logTabId" : logtab_id, "cursor0" : cursor0,
+                 "cursor1"  : cursor1 }
 
 
-    def end_pipeline ( self,branch_data,message,detail_message=None ):
-        if branch_data:
-            self.setOutputPage ( branch_data["cursor1"] )
-            self.page_cursor[1] -= 1
-            self.putMessage ( "<h2>" + branch_data["title"] + ": <i>" +
-                                       message + "</i></h2>" )
-            if detail_message:
-                self.putMessage ( "<i>" + detail_message + "</>" )
-        return
-
-    def quit_branch ( self,branch_data,message=None ):
+    def quit_branch ( self,branch_data,dirname,message=None ):
         if branch_data:
             self.setOutputPage ( branch_data["cursor0"] )
             if message:
                 self.putMessageLF ( "<b>" + str(self.stage_no) + ". " +
                                     message + "</b>" )
+            self.page_cursor[1] +=1  # leave one row for setting widgets in main thread
+            if dirname in self.output_meta["results"]:
+                self.output_meta["results"][dirname]["row"] = self.page_cursor[1]
+                self.output_meta["results"][dirname]["stage_no"] = self.stage_no
         self.mk_std_streams ( None )
         if self.layout == 0:
             pyrvapi.rvapi_set_tab_proxy ( self.navTreeId,"" )
+        self.write_meta()
         return
 
-    def end_branch ( self,branch_data,message,detail_message=None ):
+    def end_branch ( self,branch_data,dirname,message,detail_message=None ):
         if branch_data:
             self.setOutputPage ( branch_data["cursor1"] )
-            #self.page_cursor[1] -= 1
-            #self.putMessage ( "<h2>" + branch_data["title"] + ": <i>" +
-            #                           message + "</i></h2>" )
             self.putMessage ( "<h3>" + message + "<h3>" )
             if detail_message:
                 self.putMessage ( "<i>" + detail_message + "</>" )
@@ -407,9 +430,14 @@ class Base(object):
             self.putMessageLF ( "<i>" + message + "</>" )
             if detail_message:
                 self.putMessage ( "<i>" + detail_message + "</>" )
+            self.page_cursor[1] +=1  # leave one row for setting widgets in main thread
+            if dirname in self.output_meta["results"]:
+                self.output_meta["results"][dirname]["row"] = self.page_cursor[1]
+                self.output_meta["results"][dirname]["stage_no"] = self.stage_no
         self.mk_std_streams ( None )
         if self.layout == 0:
             pyrvapi.rvapi_set_tab_proxy ( self.navTreeId,"" )
+        self.write_meta()
         return
 
 
@@ -488,9 +516,12 @@ class Base(object):
         wId = self.page_cursor[0] + "_" + "structure" + str(self.page_cursor[1])
         pyrvapi.rvapi_add_data ( wId,title_str,fpath_list[0],
                 "xyz",self.page_cursor[0],self.page_cursor[1],0,1,1,openState )
-        pyrvapi.rvapi_append_to_data ( wId,fpath_list[1],"hkl:map" )
-        pyrvapi.rvapi_append_to_data ( wId,fpath_list[2],"hkl:ccp4_map" )
-        pyrvapi.rvapi_append_to_data ( wId,fpath_list[3],"hkl:ccp4_dmap" )
+        if len(fpath_list)>1:
+            pyrvapi.rvapi_append_to_data ( wId,fpath_list[1],"hkl:map" )
+        if len(fpath_list)>2:
+            pyrvapi.rvapi_append_to_data ( wId,fpath_list[2],"hkl:ccp4_map" )
+        if len(fpath_list)>3:
+            pyrvapi.rvapi_append_to_data ( wId,fpath_list[3],"hkl:ccp4_dmap" )
 
         self.page_cursor[1] +=1
         return
@@ -520,12 +551,15 @@ class Base(object):
         pyrvapi.rvapi_flush()
         return
 
-    def setGenericLogParser ( self,split_sections_bool ):
+    def setGenericLogParser ( self,split_sections_bool,graphTables=False ):
         self.log_parser_cnt += 1
         panel_id = "genlogparser_" + str(self.log_parser_cnt)
         self.putPanel ( panel_id )
+        self.generic_parser_summary = {}
         self.log_parser = pyrvapi_ext.parsers.generic_parser (
-                                                 panel_id,split_sections_bool )
+                                         panel_id,split_sections_bool,
+                                         summary=self.generic_parser_summary,
+                                         graph_tables=graphTables )
         pyrvapi.rvapi_flush()
         return panel_id
 
@@ -549,28 +583,42 @@ class Base(object):
 
     # ----------------------------------------------------------------------
 
-    def runApp ( self,appName,cmd ):
+    def runApp ( self,appName,cmd,fpath_stdout=None,fpath_stderr=None ):
 
         input_script = None
         if self.script_file:
             input_script = self.script_path
 
+        fstdout = self.file_stdout
+        fstderr = self.file_stderr
+
+        if fpath_stdout:
+            fstdout = open ( fpath_stdout,'w' )
+        if fpath_stderr:
+            fstderr = open ( fpath_stderr,'w' )
+
         rc = command.call ( appName,cmd,self.workdir,input_script,
-                            self.file_stdout,self.file_stderr,self.log_parser )
+                            fstdout,fstderr,self.log_parser )
         os.chdir ( self.workdir )
         self.script_file = None
+
+        if fpath_stdout:
+            fstdout.close()
+        if fpath_stderr:
+            fstderr.close()
 
         return rc
 
     # ----------------------------------------------------------------------
 
-    def saveResults ( self, name,dirname,nResults,rfree,resfname,
+    def saveResults ( self, name,dirname,nResults,rfree,rfactor,resfname,
                             fpath_xyz,fpath_mtz,fpath_map,fpath_dmap,
-                            columns ):
+                            fpath_lib,libIndex,columns ):
 
         meta = {}
         meta["name"]     = name
         meta["rfree"]    = rfree
+        meta["rfactor"]  = rfactor
         meta["nResults"] = nResults
         quit_message     = ""
 
@@ -586,6 +634,7 @@ class Base(object):
             f_mtz  = os.path.join ( resdir, resfname + ".mtz" )
             f_map  = os.path.join ( resdir, resfname + ".map" )
             f_dmap = os.path.join ( resdir, resfname + "_dmap.map" )
+            f_lib  = os.path.join ( resdir, resfname + ".lib" )
 
             # copy result files with new names
             if fpath_xyz!=f_xyz:
@@ -593,12 +642,18 @@ class Base(object):
                 shutil.copy2 ( fpath_mtz ,f_mtz  )
                 shutil.copy2 ( fpath_map ,f_map  )
                 shutil.copy2 ( fpath_dmap,f_dmap )
+                if fpath_lib:
+                    shutil.copy2 ( fpath_lib,f_lib )
 
             # store new file names in meta structure
             meta["pdb"]  = f_xyz
             meta["mtz"]  = f_mtz
             meta["map"]  = f_map
             meta["dmap"] = f_dmap
+            if fpath_lib:
+                meta["lib"] = f_lib
+            if libIndex:
+                meta["libindex"] = libIndex
 
             # calculate return code and quit message
             metrics = " (<i>R<sub>free</sub>=" + str(rfree) + "</i>)"

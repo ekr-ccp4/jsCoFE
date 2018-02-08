@@ -91,12 +91,13 @@ function TaskMolrep()  {
                        position : [2,0,1,4],
                        hideon   : {_:'||','revision.xyz':[0,-1],'PRF':['P']} // from this and input data section
                      },
-               TITLE12 : { type : 'label',  // just a separator
+              TITLE12 : {
+                       type     : 'label',  // just a separator
                        label    : '<br><h3>Common search parameters</h3>',
                        position : [3,0,1,4],
                        hideon   : {'revision.xyz':[0,-1]} // from input data section
                      },
-               NMON : { type    : 'integer_', // '_' means blank value is allowed
+              NMON : { type    : 'integer_', // '_' means blank value is allowed
                        keyword  : 'NMON',       // the real keyword for job input stream
                        label    : 'Number of copies to find',
                        tooltip  : 'Choose a value between 1 and 200, or leave ' +
@@ -109,7 +110,7 @@ function TaskMolrep()  {
                        value    : '',       // value to be paired with the keyword
                        position : [4,0,1,1] // [row,col,rowSpan,colSpan]
                      },
-               NP  : { type     : 'integer_', // '_' means blank value is allowed
+              NP  :  { type     : 'integer_', // '_' means blank value is allowed
                        keyword  : 'NP',       // the real keyword for job input stream
                        label    : 'Number of RF peaks to use',
                        tooltip  : 'Choose a value between 1 and 200, or leave ' +
@@ -122,7 +123,7 @@ function TaskMolrep()  {
                        value    : '',       // value to be paired with the keyword
                        position : [5,0,1,1] // [row,col,rowSpan,colSpan]
                      },
-               NPT : { type     : 'integer_',
+              NPT :  { type     : 'integer_',
                        keyword  : 'NPT',
                        label    : 'Number of RF peaks to use in TF',
                        tooltip  : 'Choose a value between 1 and 50, or leave ' +
@@ -163,7 +164,7 @@ function TaskMolrep()  {
                        position : [7,6,1,1],
                        showon   : {'LOCK':['A','Y']}
                      },
-               PST : { type     : 'combobox',
+              PST :  { type     : 'combobox',
                        keyword  : 'PST',
                        label    : 'Pseudo-translation',
                        tooltip  : 'Using pseudo-translation',

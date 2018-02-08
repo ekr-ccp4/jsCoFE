@@ -1,7 +1,7 @@
 //
 //  =================================================================
 //
-//    10.08.17   <--  Date of Last Modification.
+//    03.02.18   <--  Date of Last Modification.
 //                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //  -----------------------------------------------------------------
 //
@@ -12,7 +12,7 @@
 //  **** Content :  RVAPI javascript layer's button module
 //       ~~~~~~~~~
 //
-//  (C) E. Krissinel 2013-2017
+//  (C) E. Krissinel 2013-2018
 //
 //  =================================================================
 //
@@ -41,6 +41,13 @@ function addSubmitButton ( inpId,title,formAction,formId,
 
 function addButtonGrid ( btnId,title,command,data,rvOnly,holderId,
                          row,col,rowSpan,colSpan )  {
+
+  if (command=='{coot}')  {
+    if (typeof window.parent.__rvapi_config_coot_btn !== 'undefined')  {
+      if (!window.parent.__rvapi_config_coot_btn)
+        return;
+    }
+  }
 
   if (document.getElementById(btnId))
     return;
@@ -80,6 +87,13 @@ function addButtonGrid ( btnId,title,command,data,rvOnly,holderId,
 
 function addButton ( btnId,title,command,data,rvOnly,holderId )  {
 
+  if (command=='{coot}')  {
+    if (typeof window.parent.__rvapi_config_coot_btn !== 'undefined')  {
+      if (!window.parent.__rvapi_config_coot_btn)
+        return;
+    }
+  }
+
   if (document.getElementById(btnId))
     return;
 
@@ -104,6 +118,13 @@ function addButton ( btnId,title,command,data,rvOnly,holderId )  {
 
 function addIconButtonGrid ( btnId,button_class,tooltip,command,data,
                              rvOnly,holderId,row,col,rowSpan,colSpan )  {
+
+  if (command=='{coot}')  {
+    if (typeof window.parent.__rvapi_config_coot_btn !== 'undefined')  {
+      if (!window.parent.__rvapi_config_coot_btn)
+        return;
+    }
+  }
 
   if (document.getElementById(btnId))
     return;
@@ -138,6 +159,13 @@ function addIconButtonGrid ( btnId,button_class,tooltip,command,data,
 
 function addIconButton ( btnId,button_class,tooltip,command,data,rvOnly,
                          holderId )  {
+
+  if (command=='{coot}')  {
+    if (typeof window.parent.__rvapi_config_coot_btn !== 'undefined')  {
+      if (!window.parent.__rvapi_config_coot_btn)
+        return;
+    }
+  }
 
   if (document.getElementById(btnId))
     return;

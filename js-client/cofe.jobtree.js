@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    11.01.18   <--  Date of Last Modification.
+ *    02.02.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -480,7 +480,9 @@ JobTree.prototype.deleteJob = function ( onDelete_func ) {
 
       var message;
       if (nDel==1)  {
-        var jobId = tree.makeNodeId ( tree.task_map[tree.selected_node_id].id );
+        var jobId = '';
+        if (tree.selected_node_id in tree.task_map)
+          jobId = tree.makeNodeId ( tree.task_map[tree.selected_node_id].id );
         if (isRunning)
           message = 'Selected job ' + jobId +
                     ' is running and should not be removed from<br>' +
@@ -723,6 +725,7 @@ JobTree.prototype.cloneJob = function ( onAdd_func )  {
           for (var i=0;i<task0.harvestedTaskIds.length;i++)
             task.harvestedTaskIds.push ( task0.harvestedTaskIds[i] );
         }
+        task.customDataClone ( task0 );
         tree.projectData.jobCount++;
         task.project = tree.projectData.desc.name;
         task.id      = tree.projectData.jobCount;

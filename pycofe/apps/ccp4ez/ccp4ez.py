@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    31.01.18   <--  Date of Last Modification.
+#    06.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -24,7 +24,10 @@
 #                 [--jobid          id]                  \
 #                 [--sge]                                \
 #                 [--qname          name]                \
-#                 [--njobs          N]
+#                 [--njobs          N]                   \
+#                 [--no-simbad12]                        \
+#                 [--no-morda]                           \
+#                 [--no-crank2]
 #
 #  Input file:
 #
@@ -49,36 +52,15 @@
 #  }
 #
 
-import ccp4ez_lorestr
+import ccp4ez_fitligands
 
 # ============================================================================
 
-class CCP4ez(ccp4ez_lorestr.Lorestr):
-
-    #def summary_page_id  (self):  return "ccp4ez_summary_tab"
+class CCP4ez(ccp4ez_fitligands.FitLigands):
 
     # ----------------------------------------------------------------------
 
-    def run(self):
-
-        #cursor0 = self.addTab ( self.summary_page_id(),"Summary",True )
-        #self.putMessage ( "<h2>CCP4 Easy (Combined Automated Structure Solution)</h2>" )
-        #self.putMessage ( "<h3><i>Structure solution in progress ...</i></h3>" )
-
-        branch_id = self.prepare_mtz ( "" )
-
-        if not self.output_meta["retcode"]:
-            self.dimple ( "" )
-
-        #if self.output_meta["retcode"] != "solved":
-        #    self.simbad12 ( "" )
-
-        if self.output_meta["retcode"] != "solved":
-            self.morda ( "" )
-
-        if self.output_meta["retcode"] != "solved":
-            self.crank2 ( "" )
-
+    def getBestResults(self):
         dirname = ""
         rfree   = 2.0
         results = self.output_meta["results"]
@@ -87,14 +69,56 @@ class CCP4ez(ccp4ez_lorestr.Lorestr):
                 if results[d]["rfree"]<rfree:
                     rfree   = results[d]["rfree"]
                     dirname = d
+        return [dirname,rfree]
+
+    def checkResult ( self,resdir,defdir,rfree ):
+        results = self.output_meta["results"]
+        d       = defdir
+        r       = rfree
+        if r<0.0:
+            r = results["defdir"]
+        if resdir in results:
+            if results[resdir]["nResults"]>0:
+                if results[resdir]["rfree"]<r:
+                    d = resdir
+        return d
+
+    def run(self):
+
+        branch_id = self.prepare_mtz ( "" )
+
+        if not self.output_meta["retcode"]:
+            self.dimple ( None,"dimple_mr","mr","" )
+
+        if self.output_meta["retcode"] != "solved":
+            self.simbad12 ( "" )
+
+        if self.output_meta["retcode"] != "solved":
+            self.morda ( "" )
+
+        if self.output_meta["retcode"] != "solved":
+            self.crank2 ( "" )
+
+        res = self.getBestResults()
+        d   = res[0]
 
         if d:
-            #self.lorestr   ( d,"" )
-            self.buccaneer ( d,"" )
-            self.lorestr   ( self.buccaneer_dir(),"" )
+            self.buccaneer  ( d,"buccaneer","" )
+            d = self.checkResult ( "buccaneer",d,1.0 )
+            self.acedrg     ( "acedrg","" )
+            if "ligands" in self.output_meta:
+                self.dimple     ( d,"dimple_refine","refine","" )
+                d = self.checkResult ( "dimple_refine",d,1.0 )
+                self.fitLigands ( d,"fitligands","" )
+                #d1 = self.checkResult ( "fitligands",d,1.0 )
+                #if d1!=d:
+                #    self.lorestr ( "fitligands","" )
+            else:
+                self.dimple ( d,"dimple_refine","refine","" )
+                #self.lorestr ( d,"lorestr","" )
 
-        #self.page_cursor[1] -= 1
-        #self.putMessage ( "<h3><i>Structure solution workflow completed.</i></h3>" )
+        self.putMessage ( "<h3><i>---- Structure solution workflow " +
+                          "completed.</i></h3>" )
 
         self.write_meta()
         return

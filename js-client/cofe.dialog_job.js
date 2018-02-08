@@ -322,9 +322,6 @@ JobDialog.prototype.makeLayout = function ( onRun_func )  {
   toolBar.setVerticalAlignment ( 0,5,'middle' );
   toolBar.setCellSize ( '40%','',0,6 );
 
-  //this.inputPanel .setVisible ( true  );
-  //this.outputPanel.setVisible ( false );
-
   if ((this.task.state!='new') && (this.task.job_dialog_data.panel=='output') &&
       (this.outputPanel.element.src.length<=0))
     this.loadReport();
@@ -337,7 +334,23 @@ JobDialog.prototype.makeLayout = function ( onRun_func )  {
     // Listen for input event, emitted when input data changes
     if (dlg.run_btn)
       dlg.inputPanel.element.addEventListener(cofe_signals.taskReady,function(e){
-        dlg.run_btn.setEnabled ( (e.detail.length<=0) );
+        //alert ( ' run_btn=' + e.detail + ' l=' + e.detail.length );
+        if (e.detail.length<=0)  {
+          dlg.run_btn  .setEnabled ( true );
+          dlg.close_btn.setEnabled ( true );
+        } else if (e.detail=='hide_run_button')  {
+          dlg.run_btn  .setEnabled ( false );
+          dlg.close_btn.setEnabled ( true  );
+        } else if (e.detail=='upload_started')  {
+          dlg.run_btn  .setEnabled ( false );
+          dlg.close_btn.setEnabled ( false );
+        } else if (e.detail=='upload_finished')  {
+          dlg.run_btn  .setEnabled ( true );
+          dlg.close_btn.setEnabled ( true );
+        } else  {
+          dlg.run_btn  .setEnabled ( false );
+          dlg.close_btn.setEnabled ( true  );
+        }
       },false );
 
     $(dlg.element).on ( 'dialogresize', function(event,ui){
