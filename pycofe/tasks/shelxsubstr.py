@@ -235,4 +235,4 @@ class ShelxSubstr(crank2.Crank2):
 if __name__ == "__main__":
 
     drv = ShelxSubstr ( "",os.path.basename(__file__) )
-    drv.run()
+    drv.start()

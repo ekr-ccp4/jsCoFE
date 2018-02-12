@@ -31,10 +31,14 @@ class Dimple(ccp4ez_mtz.PrepareMTZ):
 
     def dimple ( self,datadir,resultdir,mode,parent_branch_id ):
 
-        if not self.xyzpath:
+        if mode=="mr" and not self.xyzpath:
             return ""
 
-        self.putMessage       ( "&nbsp;" )
+        if datadir and datadir.startswith("dimple"):
+            self.file_stdout.write ( " *** repeat run of Dimple skipped\n" )
+            return ""
+
+        #self.putMessage       ( "&nbsp;" )
 
         if mode=="mr":
             title = "Homologue MR"
@@ -62,6 +66,7 @@ class Dimple(ccp4ez_mtz.PrepareMTZ):
         else:
             cmd = [ self.mtzpath,self.xyzpath,resultdir ]
         cmd += [ "--slow","--slow","--free-r-flags","-" ]
+        #cmd += [ "--free-r-flags","-" ]
 
         # run dimple
         self.runApp ( "dimple",cmd )
@@ -76,7 +81,10 @@ class Dimple(ccp4ez_mtz.PrepareMTZ):
         dimple_mtz  = os.path.join ( resultdir,"final.mtz" )
         dimple_map  = os.path.join ( resultdir,"final.map" )
         dimple_dmap = os.path.join ( resultdir,"final.diff.map" )
+        spg_info    = None
         if os.path.isfile(dimple_xyz):
+
+            spg_info = self.checkSpaceGroup ( dimple_xyz )
 
             edmap.calcCCP4Maps ( dimple_mtz,os.path.join(resultdir,"final"),
                    "./",self.file_stdout,self.file_stderr,"refmac",None )
@@ -93,6 +101,9 @@ class Dimple(ccp4ez_mtz.PrepareMTZ):
 
             self.putMessage ( "<h2><i>Solution found (<i>R<sub>free</sub>=" +
                               str(rfree) +"</i>)</h2>" )
+            if spg_info:
+                self.putMessage ( "<h3>Space group changed to " +
+                                  spg_info["spg"] + "</h3>" )
             dfpath = os.path.join ( "..",self.outputdir,resultdir,"dimple" )
             self.putStructureWidget ( "Structure and density map",
                                     [ dfpath+".pdb",dfpath+".mtz",dfpath+".map",
@@ -113,7 +124,7 @@ class Dimple(ccp4ez_mtz.PrepareMTZ):
 
         quit_message = self.saveResults ( "Dimple",resultdir,nResults,
                 rfree,rfactor,"dimple", dimple_xyz,dimple_mtz,dimple_map,dimple_dmap,
-                None,None,columns )
+                None,None,columns,spg_info )
 
         if mode!="mr":
             quit_message = "refined to <i>R<sub>free</sub>=" + str(rfree) + "</i>"

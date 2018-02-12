@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    06.02.18   <--  Date of Last Modification.
+#    10.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -27,7 +27,8 @@
 #                 [--njobs          N]                   \
 #                 [--no-simbad12]                        \
 #                 [--no-morda]                           \
-#                 [--no-crank2]
+#                 [--no-crank2]                          \
+#                 [--no-fitligands]
 #
 #  Input file:
 #
@@ -65,11 +66,13 @@ class CCP4ez(ccp4ez_fitligands.FitLigands):
         rfree   = 2.0
         results = self.output_meta["results"]
         for d in results:
-            if results[d]["nResults"]>0:
+            if results[d]["nResults"]>0 and "rfree" in results[d]:
                 if results[d]["rfree"]<rfree:
                     rfree   = results[d]["rfree"]
                     dirname = d
         return [dirname,rfree]
+
+    # ----------------------------------------------------------------------
 
     def checkResult ( self,resdir,defdir,rfree ):
         results = self.output_meta["results"]
@@ -83,6 +86,8 @@ class CCP4ez(ccp4ez_fitligands.FitLigands):
                     d = resdir
         return d
 
+    # ----------------------------------------------------------------------
+
     def run(self):
 
         branch_id = self.prepare_mtz ( "" )
@@ -92,6 +97,16 @@ class CCP4ez(ccp4ez_fitligands.FitLigands):
 
         if self.output_meta["retcode"] != "solved":
             self.simbad12 ( "" )
+            if self.output_meta["retcode"] == "sequence problem":
+                self.putMessage ( "<h3><i>---- Sequence data does not match " +
+                        "solution (too many sequences given). Stop.</i></h3>" )
+                self.write_meta()
+                return
+            elif self.output_meta["retcode"] == "sequence mismatch":
+                self.putMessage ( "<h3><i>---- Sequence data does not match " +
+                        "solution (too low homology). Stop.</i></h3>" )
+                self.write_meta()
+                return
 
         if self.output_meta["retcode"] != "solved":
             self.morda ( "" )
@@ -99,17 +114,24 @@ class CCP4ez(ccp4ez_fitligands.FitLigands):
         if self.output_meta["retcode"] != "solved":
             self.crank2 ( "" )
 
-        res = self.getBestResults()
-        d   = res[0]
+        res   = self.getBestResults()
+        d     = res[0]  # directory with lowest-rfree solution
+        rfree = res[1]  # lowest rfree achieved
 
-        if d:
+        if d and rfree <= 0.45:
             self.buccaneer  ( d,"buccaneer","" )
             d = self.checkResult ( "buccaneer",d,1.0 )
+            self.file_stdout.write ( " xxxx0 d=" + d + " \n" )
             self.acedrg     ( "acedrg","" )
-            if "ligands" in self.output_meta:
-                self.dimple     ( d,"dimple_refine","refine","" )
+            self.file_stdout.write ( " xxxx1 " + str(self.output_meta["results"]["acedrg"]["nResults"]) + "\n" )
+            if self.output_meta["results"]["acedrg"]["nResults"] > 0:
+                self.file_stdout.write ( " xxxx2 d=" + d + " \n" )
+                self.dimple  ( d,"dimple_refine","refine","" )
+                self.file_stdout.write ( " xxxx3 \n" )
                 d = self.checkResult ( "dimple_refine",d,1.0 )
+                self.file_stdout.write ( " xxxx4 d=" + d + " \n" )
                 self.fitLigands ( d,"fitligands","" )
+                self.file_stdout.write ( " xxxx5 \n" )
                 #d1 = self.checkResult ( "fitligands",d,1.0 )
                 #if d1!=d:
                 #    self.lorestr ( "fitligands","" )

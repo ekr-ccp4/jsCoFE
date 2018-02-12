@@ -90,4 +90,4 @@ if __name__ == "__main__":
 
     drv = PISA ( "",os.path.basename(__file__),
                  { "report_page" : { "show" : False } } )
-    drv.run()
+    drv.start()

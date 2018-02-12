@@ -31,6 +31,7 @@ import shutil
 
 #  application imports
 import basic
+from pycofe.varut import signal
 try:
     from pycofe.varut import messagebox
 except:
@@ -124,14 +125,12 @@ class Coot(basic.TaskDriver):
                 messagebox.displayMessage ( "Failed to launch",
                   "<b>Failed to launch Coot: <i>" + rc.msg + "</i></b>"
                   "<p>This may indicate a problem with software setup." )
-                signal.job_failed ( rc.msg )
 
-        return
-
+            raise signal.JobFailure ( rc.msg )
 
 # ============================================================================
 
 if __name__ == "__main__":
 
     drv = Coot ( "",os.path.basename(__file__) )
-    drv.run()
+    drv.start()

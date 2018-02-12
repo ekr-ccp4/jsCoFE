@@ -25,12 +25,7 @@ import ccp4ez_simbad12
 
 class MoRDa(ccp4ez_simbad12.Simbad12):
 
-    #def morda_header_id(self):  return "ccp4ez_morda_header_tab"
-    #def morda_page_id  (self):  return "ccp4ez_morda_tab"
-    #def morda_logtab_id(self):  return "ccp4ez_morda_log_tab"
-    #def morda_errtab_id(self):  return "ccp4ez_morda_err_tab"
-
-    def morda_dir      (self):  return "morda_results"
+    def morda_dir(self):  return "morda_results"
 
     # ----------------------------------------------------------------------
 
@@ -42,7 +37,7 @@ class MoRDa(ccp4ez_simbad12.Simbad12):
         if not self.seqpath:
             return ""
 
-        self.putMessage       ( "&nbsp;" )
+        #self.putMessage       ( "&nbsp;" )
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                                 ". Automated Molecular Replacement (MoRDa)</b>" )
         self.page_cursor[1] -= 1
@@ -51,9 +46,6 @@ class MoRDa(ccp4ez_simbad12.Simbad12):
                         "CCP4ez Automated Structure Solver: Auto-MR with MoRDa",
                         self.morda_dir(),parent_branch_id )
 
-        #                self.morda_header_id(),self.morda_logtab_id(),
-        #                self.morda_errtab_id() )
-
         morda_xyz  = os.path.join ( self.morda_dir(),self.outputname + ".pdb" )
         morda_mtz  = os.path.join ( self.morda_dir(),self.outputname + ".mtz" )
         morda_map  = os.path.join ( self.morda_dir(),self.outputname + ".map" )
@@ -61,15 +53,16 @@ class MoRDa(ccp4ez_simbad12.Simbad12):
 
         self.flush()
         self.storeReportDocument (
-            '{ "jobId"     : "' + self.jobId              + '",' +
-            '  "logTabId"  : "' + branch_data["logTabId"] + '",' +
-            '  "name_xyz"  : "' + morda_xyz               + '",' +
-            '  "name_mtz"  : "' + morda_mtz               + '",' +
-            '  "name_map"  : "' + morda_map               + '",' +
-            '  "name_dmap" : "' + morda_dmap              + '",' +
-            '  "sge_q"     : "' + self.queueName          + '",' +
-            '  "sge_tc"    : "' + str(self.nSubJobs)      + '",' +
-            '  "subjobs"   : "subjobs" ' +
+            '{ "jobId"      : "' + self.jobId              + '",' +
+            '  "reportTabId": "' + branch_data["pageId"]   + '",' +
+            '  "logTabId"   : "' + branch_data["logTabId"] + '",' +
+            '  "name_xyz"   : "' + morda_xyz               + '",' +
+            '  "name_mtz"   : "' + morda_mtz               + '",' +
+            '  "name_map"   : "' + morda_map               + '",' +
+            '  "name_dmap"  : "' + morda_dmap              + '",' +
+            '  "sge_q"      : "' + self.queueName          + '",' +
+            '  "sge_tc"     : "' + str(self.nSubJobs)      + '",' +
+            '  "subjobs"    : "subjobs" ' +
             '}'
         )
 
@@ -101,7 +94,9 @@ class MoRDa(ccp4ez_simbad12.Simbad12):
         nResults = 0
         rfree    = 1.0
         rfactor  = 1.0
+        spg_info = None
         if os.path.isfile(morda_xyz):
+            spg_info = self.checkSpaceGroup ( morda_xyz )
             nResults = 1
             f = open ( os.path.join(self.outputdir,"morda.res") )
             flines = f.readlines()
@@ -126,7 +121,7 @@ class MoRDa(ccp4ez_simbad12.Simbad12):
 
         quit_message = self.saveResults ( "MoRDa",self.morda_dir(),nResults,
                 rfree,rfactor,"morda", morda_xyz,morda_mtz,morda_map,morda_dmap,
-                None,None,columns )
+                None,None,columns,spg_info )
 
         self.quit_branch ( branch_data,self.morda_dir(),
                            "Automated Molecular Replacement (MoRDa): " +

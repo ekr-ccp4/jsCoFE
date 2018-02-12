@@ -395,7 +395,7 @@ def point_symm_datasets(xml_path, format='unknown'):
 
   return dset_list
 
-def combine_runs(dset_runs, runs, stdo):
+def combine_runs(dset_runs, runs):
     initial = set()
     for run in dset_runs:
       initial.update(range(int(run[1]), int(run[2]) + 1))
@@ -418,7 +418,7 @@ def combine_runs(dset_runs, runs, stdo):
             selected.add(int(tfirst))
 
         else:
-          print >> stdo, 'ERROR in selection: "%s"' %run
+          raise Exception('ERROR in selection: "%s"' %run)
 
       no_selected = len(initial & selected)
       batch_list = sorted(initial - selected)
@@ -443,10 +443,10 @@ def combine_runs(dset_runs, runs, stdo):
 
     return run_list, no_selected
 
-def get_point_script(symm_select, mtzref, plist, mtzout, xmlout, stdo, separate_merge=False):
+def get_point_script(symm_select, mtzref, plist, mtzout, xmlout, separate_merge=False):
   dset_run_list = list()
   for dset, mtz_file, runs in plist:
-    run_list, no_selected = combine_runs(dset.runs, runs, stdo)
+    run_list, no_selected = combine_runs(dset.runs, runs)
     if no_selected:
       item = dset.name, mtz_file, run_list
       if mtz_file == mtzref:
@@ -457,7 +457,7 @@ def get_point_script(symm_select, mtzref, plist, mtzout, xmlout, stdo, separate_
         dset_run_list.append(item)
 
     else:
-      print >> stdo, 'ERROR no images selected for dataset ' + dset.name
+      raise Exception('ERROR no images selected for dataset ' + dset.name)
 
   stdi_list = list()
   stdi = list()
@@ -474,7 +474,8 @@ def get_point_script(symm_select, mtzref, plist, mtzout, xmlout, stdo, separate_
 
     stdi.append('HKLIN %s' %mtz_file)
     for first, last in run_list:
-      stdi.append('EXCLUDE FILE %d BATCH %d to %d' %(cou, first, last))
+      file_cou = 'FILE %d' %cou if len(dset_run_list) > 1 else ''
+      stdi.append('EXCLUDE %s BATCH %d to %d' %(file_cou, first, last))
 
   if mtzref:
     stdi.append('HKLREF %s' %mtzref)
@@ -692,7 +693,7 @@ def test():
       tc_dset = tc_dset_dict[dname]
       plist.append((tc_dset, mtzname + '.mtz', test_ranges(tc_dset.runs)))
 
-    args = symm_select, mtzref, plist, 'merged.mtz', 'pointless.xml', sys.stdout, mode == 'separate'
+    args = symm_select, mtzref, plist, 'merged.mtz', 'pointless.xml', mode == 'separate'
     for script in get_point_script(*args):
       print script
       print

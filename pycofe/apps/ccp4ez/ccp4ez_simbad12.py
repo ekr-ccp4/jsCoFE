@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    06.02.18   <--  Date of Last Modification.
+#    10.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -22,12 +22,13 @@ import json
 #import pyrvapi
 
 import ccp4ez_dimple
+import asucomp
 
 # ============================================================================
 
 class Simbad12(ccp4ez_dimple.Dimple):
 
-    def simbad12_dir       (self):  return "simbad12_results"
+    def simbad12_dir(self): return "simbad12_results"
 
     # ----------------------------------------------------------------------
 
@@ -48,9 +49,11 @@ class Simbad12(ccp4ez_dimple.Dimple):
     def simbad12 ( self,parent_branch_id ):
 
         if not self.trySimbad12:
+            self.file_stdout.write ( "\n *** use of Simbad-LC is switched off\n" )
             return ""
 
-        self.putMessage       ( "&nbsp;" )
+        self.file_stdout.write ( "\n ... run Simbad-LC\n" )
+        #self.putMessage       ( "&nbsp;" )
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                                 ". Lattice and Contaminant Searches</b>" )
         self.page_cursor[1] -= 1
@@ -123,6 +126,8 @@ class Simbad12(ccp4ez_dimple.Dimple):
         fpath_mtz  = ""
         fpath_map  = ""
         fpath_dmap = ""
+        asuComp    = {}
+        spg_info   = None
         if simbad_meta:
             nResults   = simbad_meta["nResults"]
             meta       = simbad_meta["results"][0]
@@ -131,6 +136,8 @@ class Simbad12(ccp4ez_dimple.Dimple):
                 fpath_mtz  = os.path.join(self.reportdir,meta["mtz"])
                 fpath_map  = os.path.join(self.reportdir,meta["map"])
                 fpath_dmap = os.path.join(self.reportdir,meta["dmap"])
+                asuComp    = asucomp.getASUComp1 ( fpath_xyz,self.seqpath )
+                spg_info   = self.checkSpaceGroup ( fpath_xyz )
         else:
             nResults = -1  # indication of an error
 
@@ -144,9 +151,18 @@ class Simbad12(ccp4ez_dimple.Dimple):
           "PHDELWT" : "PHDELWT"
         }
 
-        quit_message = self.saveResults ( "Simbad-LC",self.simbad12_dir(),
-                nResults,rfree,rfactor,"simbad",fpath_xyz,fpath_mtz,
-                fpath_map,fpath_dmap,None,None,columns )
+        quit_message = self.saveResults ( "Simbad-LC ["+meta["name"]+"]",
+                self.simbad12_dir(),nResults,rfree,rfactor,
+                "simbad_"+meta["name"],fpath_xyz,fpath_mtz,fpath_map,fpath_dmap,
+                None,None,columns,spg_info )
+
+        self.output_meta["results"][self.simbad12_dir()]["pdbcode"] = meta["name"]
+        self.output_meta["results"][self.simbad12_dir()]["asucomp"] = asuComp
+        if self.output_meta["retcode"] != "not solved" and self.seqpath:
+            if asuComp["retcode"] == 1:
+                self.output_meta["retcode"] = "sequence problem"
+            elif asuComp["minseqid"]<0.7:
+                self.output_meta["retcode"] = "sequence mismatch"
 
         self.quit_branch ( branch_data,self.simbad12_dir(),
                            "Lattice and Contaminant Searches (Simbad): " +

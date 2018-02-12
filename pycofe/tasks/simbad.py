@@ -176,4 +176,4 @@ class Simbad(asudef.ASUDef):
 if __name__ == "__main__":
 
     drv = Simbad ( "",os.path.basename(__file__),{} )
-    drv.run()
+    drv.start()

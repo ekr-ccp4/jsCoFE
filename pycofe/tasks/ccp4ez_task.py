@@ -28,6 +28,7 @@
 import os
 import sys
 import json
+import shutil
 
 #  ccp4-python imports
 import pyrvapi
@@ -35,7 +36,7 @@ import pyrvapi_ext.parsers
 
 #  application imports
 from   pycofe.tasks  import asudef, import_task
-
+from   pycofe.proc   import import_merged
 
 # ============================================================================
 # Make CCP4ez driver
@@ -54,21 +55,28 @@ class CCP4ez(import_task.Import):
     def file_stdin_path   (self):  return "ccp4ez.script"
 
     # the following will provide for import of generated sequences
-    import_dir = "uploads"
+
+    import_dir      = "uploads"
+    import_table_id = "import_summary_id"
+    id_modifier     = 1
+
     def importDir        (self):  return self.import_dir  # import directory
-    def import_summary_id(self):  return None   # don't make import summary table
+    def import_summary_id(self):  return self.import_table_id  # import summary table id
+    def getXMLFName      (self):  return os.path.join(self.importDir(),"matthews.xml")
+    def seq_table_id     (self):  return "seq_table_" + str(self.id_modifier)
+    def res_table_id     (self):  return "res_table_" + str(self.id_modifier)
 
     # ------------------------------------------------------------------------
 
     def importData(self):
 
-        self.putWaitMessageLF ( "<b>1. Data Import</b>" )
-        self.rvrow -= 1
+        self.putWaitMessageLF ( "<b>1. Input Data Import</b>" )
+        #self.rvrow -= 1
 
         # -------------------------------------------------------------------
         # import uploaded data
         # make import tab and redirect output to it
-        pyrvapi.rvapi_add_tab ( self.import_page_id(),"1. Data Import",False )
+        pyrvapi.rvapi_add_tab ( self.import_page_id(),"1. Input Data Import",False )
         self.setReportWidget  ( self.import_page_id() )
 
         fstdout = self.file_stdout
@@ -104,37 +112,43 @@ class CCP4ez(import_task.Import):
         # -------------------------------------------------------------------
         # fetch data for CCP4ez pipeline
 
-        self.unm = None   # unmerged dataset
-        self.hkl = None   # selected merged dataset
-        self.seq = None   # list of sequence objects
-        self.xyz = None   # coordinates (model/apo)
+        self.unm     = None   # unmerged dataset
+        self.hkl     = None   # selected merged dataset
+        self.seq     = None   # list of sequence objects
+        self.xyz     = None   # coordinates (model/apo)
+        self.hkl_alt = {}     # alternative-space group merged datasets
 
-        if 'DataUnmerged' in self.outputDataBox.data:
-            self.unm = self.outputDataBox.data['DataUnmerged'][0]
+        if "DataUnmerged" in self.outputDataBox.data:
+            self.unm = self.outputDataBox.data["DataUnmerged"][0]
 
-        if 'DataHKL' in self.outputDataBox.data:
+        if "DataHKL" in self.outputDataBox.data:
             maxres = 10000.0
-            for i in range(len(self.outputDataBox.data['DataHKL'])):
-                res = self.outputDataBox.data['DataHKL'][i].getHighResolution(True)
+            for i in range(len(self.outputDataBox.data["DataHKL"])):
+                res = self.outputDataBox.data["DataHKL"][i].getHighResolution(True)
                 if res<maxres:
                     maxres   = res
-                    self.hkl = self.outputDataBox.data['DataHKL'][i]
+                    self.hkl = self.outputDataBox.data["DataHKL"][i]
 
-        if 'DataSequence' in self.outputDataBox.data:
-            self.seq = self.outputDataBox.data['DataSequence']
+        if "DataSequence" in self.outputDataBox.data:
+            self.seq = self.outputDataBox.data["DataSequence"]
 
-        if 'DataXYZ' in self.outputDataBox.data:
-            self.xyz = self.outputDataBox.data['DataXYZ'][0]
+        if "DataXYZ" in self.outputDataBox.data:
+            self.xyz = self.outputDataBox.data["DataXYZ"][0]
 
 
         # -------------------------------------------------------------------
         # make data summary table
 
-        tableId = "ccp4ez_summary_table"
+        panelId = "summary_section"
+        pyrvapi.rvapi_set_text ( "",self.report_page_id(),self.rvrow,0,1,1 )
+        self.putSection ( panelId,"<b>1. Input summary</b>" )
 
-        self.putTable ( tableId,"<font style='font-style:normal;font-size:125%;'>1. Input Data</font>",
-                                self.report_page_id(),self.rvrow,0 )
-        self.rvrow += 1
+        tableId = "ccp4ez_summary_table"
+        #self.putTable ( tableId,"<font style='font-style:normal;font-size:125%;'>" +
+        #                        "1. Input Data</font>",self.report_page_id(),
+        #                        self.rvrow,0 )
+        #self.rvrow += 1
+        self.putTable ( tableId,"Input data",panelId,0,0 )
         self.setTableHorzHeaders ( tableId,["Assigned Name","View"],
                 ["Name of the assocuated data object","Data view and export"] )
 
@@ -180,53 +194,148 @@ class CCP4ez(import_task.Import):
 
         return
 
+    #def revisionFromMeta ( self,asuComp,hkl,structure,name ):
+    #    return
 
-    def makeOutputData ( self,meta ):
+    # ------------------------------------------------------------------------
 
-        self.file_stdout.write ( "mod 1\n" )
+    def makeOutputData ( self,resdir,meta ):
 
         if not "row" in meta or not "nResults" in meta:
             return
 
-        self.file_stdout.write ( "mod 2\n" )
+        #if meta["nResults"]<1:
+        #    return
 
-        if meta["nResults"]<1:
-            return
-
-        row = meta["row"]
+        row      = meta["row"]
         panel_id = "output_panel_" + str(row)
-        self.file_stdout.write ( "mod 3 row=" + str(row) )
-        pyrvapi.rvapi_add_grid ( panel_id,False,self.report_page_id(),row,0,1,1 )
-        #pyrvapi.rvapi_add_grid ( panel_id,self.report_page_id(),row,0,1,1 )
-        self.setReportWidget   ( panel_id )
+        title    = "Details"
+        if "title" in meta:
+            row -= 1
+            pyrvapi.rvapi_set_text ( "",self.report_page_id(),row,0,1,1 )
+            title = meta["title"]
 
-        self.file_stdout.write ( "\nmod 4\n" )
+        if "merged" in meta:  # output from data reduction part
+            # import reflection data and place HKL widgets
+            pyrvapi.rvapi_add_section ( panel_id,"<b>" + str(meta["stage_no"]) +
+                                        ". Data processing results (<i>Spg=" +
+                                        meta["spg"] + "</i>)</b>",
+                                        self.report_page_id(),row,0,1,1,False )
+            self.setReportWidget ( panel_id )
+            self.import_dir      = "./"
+            self.import_table_id = None
+            # clean upload directory
+            #shutil.rmtree(dirpath)
+            #os.mkdir(dirpath)
+            self.files_all = [meta["mtz"]]
+            import_merged.run ( self,"Import merged HKL" )
+            # get reference to imported structure
+            self.hkl = self.outputDataBox.data["DataHKL"][0]
 
-        # register structure data
-        structure = self.registerStructure ( meta["pdb"],meta["mtz"],meta["map"],
-                                             meta["dmap"], None,True )
-        if structure:
+        elif "ligands" in meta:
+            # check in generated ligands
+            pyrvapi.rvapi_add_section ( panel_id,title,self.report_page_id(),
+                                        row,0,1,1,False )
+            self.setReportWidget ( panel_id )
 
-            structure.addDataAssociation ( self.hkl.dataId )
-            structure.setRefmacLabels ( self.hkl )
-            structure.addMRSubtype ()
-            structure.addXYZSubtype()
+            if meta["nResults"]>0:
+                #self.putMessage ( "<h3>Generated ligand structure(s)</h3>" )
+                for code in meta["ligands"]:
+                    self.putMessage   ( "&nbsp;" )
+                    self.putMessageLF ( "<b>Code: " + code + "</b>")
+                    self.finaliseLigand ( code,meta["ligands"][code]["xyz"],
+                                               meta["ligands"][code]["cif"],
+                                               False,"" )
+            else:
+                self.putMessage ( "<h3>No ligand structure(s) generated</h3>" )
+                self.putMessage ( "<i>This is likely to be a program error, " +
+                                  "please report</i>" )
 
-            self.putStructureWidget ( "structure_btn_",
-                      meta["name"] + " structure and electron density",
-                      structure )
+        else:  # look for structure
 
-            self.import_dir = "./"
-            try:
-                asudef.revisionFromStructure ( self,self.hkl,structure,meta["name"] )
-            except:
-                self.putMessage ( "revision making failure" )
+            pyrvapi.rvapi_add_section ( panel_id,title,self.report_page_id(),
+                                        row,0,1,1,False )
+            self.setReportWidget ( panel_id )
 
-        else:
-            self.putMessage ( "Structure Data cannot be formed (probably a bug)" )
+            if meta["nResults"]>0:
 
-        self.putMessage ( "<p>&nbsp;" )
+                hkl_sol = self.hkl
 
+                # check if space group changed
+                if "spg" in meta and "hkl" in meta:
+                    self.putMessage ( "<h3>Space group changed to " +
+                                      meta["spg"] + "</h3>" )
+                    spgkey = meta["spg"].replace(" ","")
+                    if not spgkey in self.hkl_alt:
+                        self.import_dir      = "./"
+                        self.import_table_id = None
+                        hkl0 = self.outputDataBox.data["DataHKL"]
+                        id0  = []
+                        for i in range(len(hkl0)):
+                            id0 += [hkl0[i].dataId]
+                        self.files_all = [meta["hkl"]]
+                        import_merged.run ( self,"Import merged HKL reindexed in " +
+                                                 meta["spg"] )
+                        self.rvrow += 10
+                        # get reference to imported structure
+                        hkl0 = self.outputDataBox.data["DataHKL"]
+                        hkl_sol = None
+                        for i in range(len(hkl0)):
+                            if not hkl0[i].dataId in id0:
+                                hkl_sol = hkl0[i]
+                        self.hkl_alt[spgkey] = hkl_sol
+                    else:
+                        hkl_sol = self.hkl_alt[spgkey]
+
+                # register structure data
+                libPath = None
+                if "lib" in meta:
+                    libPath = meta["lib"]
+                structure = self.registerStructure ( meta["pdb"],meta["mtz"],
+                                                     meta["map"],meta["dmap"],
+                                                     libPath,True )
+                if structure:
+
+                    structure.addDataAssociation ( hkl_sol.dataId )
+                    structure.setRefmacLabels ( hkl_sol )
+                    structure.addMRSubtype ()
+                    structure.addXYZSubtype()
+
+                    if "libindex" in meta:
+                        structure.addLigands ( meta["libindex"] )
+
+                    self.putMessage ( "&nbsp;" ) # just vertical spacer
+                    self.putStructureWidget ( "structure_btn_" + str(row),
+                              meta["name"] + " structure and electron density",
+                              structure )
+
+                    if resdir.lower().startswith("simbad"):
+                        self.import_dir      = resdir
+                        self.import_table_id = None
+                        asudef.revisionFromStructure ( self,hkl_sol,structure,
+                                    "simbad_"+meta["pdbcode"],useSequences=self.seq,
+                                    make_revision=(self.seq==None) )
+                        self.id_modifier += 1
+                        if not self.seq:  # sequence was imported in asudef
+                            self.seq = self.outputDataBox.data["DataSequence"]
+
+                    elif resdir == "dimple_mr":
+                        self.import_dir      = resdir
+                        self.import_table_id = None
+                        asudef.revisionFromStructure ( self,hkl_sol,structure,
+                                    "dimple",useSequences=self.seq,
+                                    make_revision=(self.seq==None) )
+                        self.id_modifier += 1
+                        if not self.seq:  # sequence was imported in asudef
+                            self.seq = self.outputDataBox.data["DataSequence"]
+
+                else:
+                    self.putMessage ( "Structure Data cannot be formed " +
+                                      "(probably a bug)" )
+            else:
+                self.putMessageLF ( "No solution found." )
+
+        self.putMessage ( "&nbsp;" ) # just vertical spacer
 
         """
         {"results":
@@ -248,19 +357,16 @@ class CCP4ez(import_task.Import):
         }
         """
 
-
-        """
-        """
-
         self.resetReportPage()
         return
+
 
     # ------------------------------------------------------------------------
 
     def run(self):
 
         self.importData()
-        self.putMessage ( "&nbsp;" )
+        #self.putMessage ( "&nbsp;" )
         self.flush()
 
         # run ccp4ez pipeline
@@ -309,8 +415,6 @@ class CCP4ez(import_task.Import):
             meta["outputDir"]     = self.outputDir()
             meta["outputName"]    = "ccp4ez"
 
-            self.file_stdout.write ( json.dumps(meta) )
-
             self.storeReportDocument ( json.dumps(meta) )
 
             ccp4ez_path = os.path.normpath ( os.path.join (
@@ -324,12 +428,13 @@ class CCP4ez(import_task.Import):
 
             sec1 = self.task.parameters.sec1.contains
             if self.getParameter(sec1.SIMBAD12_CBX)=="False":
-                cmd += "--no-simbad12"
+                cmd += ["--no-simbad12"]
             if self.getParameter(sec1.MORDA_CBX)=="False":
-                cmd += "--no-morda"
+                cmd += ["--no-morda"]
             if self.getParameter(sec1.CRANK2_CBX)=="False":
-                cmd += "--no-crank2"
-
+                cmd += ["--no-crank2"]
+            if self.getParameter(sec1.FITLIGANDS_CBX)=="False":
+                cmd += ["--no-fitligands"]
 
             self.runApp ( "ccp4-python",cmd )
             self.restoreReportDocument()
@@ -345,26 +450,23 @@ class CCP4ez(import_task.Import):
                 pass
 
             if ccp4ez_meta:
-                results = ccp4ez_meta["results"]
-                for d in results:
-                    self.makeOutputData ( results[d] )
+
+                self.rvrow = ccp4ez_meta["report_row"]
+
+                resorder   = ccp4ez_meta["resorder"]
+                results    = ccp4ez_meta["results"]
+                for i in range(len(resorder)):
+                    d = resorder[i]  # stage's result directory
+                    if d in results:
+                        self.makeOutputData ( d,results[d] )
+                        self.flush()
+
+                self.putMessage ( "<hr/><i><b>Note:</b> In order to further " +
+                            "process the results, define ASU Content using " +
+                            "structures generated by CCP4 Easy." )
+
             else:
                 self.putTitle ( "Results not found (structure not solved)" )
-
-
-            """
-            rvapi_meta = str(self.restoreReportDocument())
-
-            if rvapi_meta:
-                try:
-                    rvapi_meta = json.loads ( rvapi_meta )
-                    self.rvrow = rvapi_meta["report_row"]
-                except:
-                    self.rvrow += 100
-                    self.putMessage (
-                        "<b>Program error:</b> <i>unparseable metadata " +
-                        "from CCP4ez</i>" + "<p>'" + str(rvapi_meta) + "'" )
-            """
 
 
         # close execution logs and quit
@@ -377,8 +479,8 @@ class CCP4ez(import_task.Import):
 if __name__ == "__main__":
 
     drv = CCP4ez ( "CCP4ez Automated Structure Solver",os.path.basename(__file__),
-                  { "report_page" : { "show" : True, "name" : "Summary" },
+                  { "report_page" : { "show" : True, "name" : "Report" },
                     "nav_tree"    : { "id"   : "nav_tree_id", "name" : "Workflow" }
                   })
 
-    drv.run()
+    drv.start()

@@ -104,7 +104,8 @@ var _taskIndex = {
   'c' : { type: 'TaskChangeSpG'      , after: ['H'] },
 
   // do not suggest ASUMod
-  'd' : { type: 'TaskASUMod'         , after: [] }
+  'd' : { type: 'TaskASUMod'         , after: [] },
+  'e' : { type: 'TaskASUDefStruct'   , after: ['A'] }
 
 };
 
@@ -204,6 +205,7 @@ if ((typeof module === 'undefined') || (typeof module.exports === 'undefined')) 
   // returns structure:
   //  { tasks: [name1,name2,...],  counts: [c1,c2,...] }
 
+
     var k1  =  getTaskKeyFromType ( task_type1 );
     var k2  =  getTaskKeyFromType ( task_type2 );
     var k3  =  getTaskKeyFromType ( task_type3 );
@@ -218,12 +220,14 @@ if ((typeof module === 'undefined') || (typeof module.exports === 'undefined')) 
       var w = _wfKnowledge[wfkey];
       for (var taskkey in w) {
         var t = _taskIndex[taskkey].type;
-        var k = knowledge.tasks.indexOf ( t );
-        if (k>=0)
-          knowledge.counts[k] += w[taskkey];
-        else  {
-          knowledge.tasks .push ( t );
-          knowledge.counts.push ( w[taskkey] );
+        if (t!='Root')  {
+          var k = knowledge.tasks.indexOf ( t );
+          if (k>=0)
+            knowledge.counts[k] += w[taskkey];
+          else  {
+            knowledge.tasks .push ( t );
+            knowledge.counts.push ( w[taskkey] );
+          }
         }
       }
     }

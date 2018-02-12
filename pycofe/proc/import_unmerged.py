@@ -113,7 +113,9 @@ def run ( body ):  # body is reference to the main Import class
     if not files_mtz:
         return
 
-    unmergedSecId = "unmerged_mtz_sec"
+    unmergedSecId = "unmerged_mtz_sec_" + str(body.widget_no)
+    body.widget_no += 1
+
     k = 0
     for f_orig, f_fmt in files_mtz:
       try:
@@ -282,7 +284,7 @@ def run ( body ):  # body is reference to the main Import class
 
             body.file_stdout.write ( "... processed: " + f_orig + "\n    " )
 
-        
+
         trace = ''
 
       except:

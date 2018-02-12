@@ -10,7 +10,7 @@
 #  EXECUTABLE MODULE FOR RVAPI HELPER APPLICATIONS
 #
 #  Command-line:
-#     ccp4-python python.tasks.rvapiapp.py exeType jobDir jobId
+#     ccp4-python pycofe.tasks.rvapiapp.py exeType jobDir jobId
 #
 #  where:
 #    exeType  is either SHELL or SGE
@@ -33,7 +33,7 @@ import os
 import sys
 
 #  application imports
-from   pycofe.varut import jsonut, command, signal
+from pycofe.varut import jsonut, command, signal
 try:
     from pycofe.varut import messagebox
 except:
@@ -77,9 +77,9 @@ file_stderr = open ( file_stderr_path,'w' )
 
 task = jsonut.readjObject ( 'job.meta' )
 if task is None:
-    print " task read failed in 'python.tasks.rvapiapp'"
-    file_stdout.write ( " task read failed in 'python.tasks.rvapiapp'" )
-    signal.task_read_failed()  # terminates inside signal
+    print " task read failed in 'pycofe.tasks.rvapiapp'"
+    file_stdout.write ( " task read failed in 'pycofe.tasks.rvapiapp'" )
+    signal.TaskReadFailure().quitApp()
 
 app  = None;
 args = None;
@@ -94,9 +94,9 @@ elif task.rvapi_command == "{viewhkl}":
     args = task.rvapi_args
 
 if app is None:
-    print " wrong command specification 'python.tasks.rvapiapp' (" + task.command + ")"
-    file_stdout.write ( " wrong command specification 'python.tasks.rvapiapp' (" + task.command + ")" )
-    signal.task_read_failed()  # terminates inside signal
+    print " wrong command specification 'pycofe.tasks.rvapiapp' (" + task.rvapi_command + ")"
+    file_stdout.write ( " wrong command specification 'pycofe.tasks.rvapiapp' (" + task.rvapi_command + ")" )
+    signal.TaskReadFailure().quitApp()
 
 
 # ============================================================================
@@ -115,9 +115,10 @@ file_stdout.close()
 file_stderr.close()
 
 if rc.msg == "":
-    signal.success()  # the thread terminates inside the signal()
+    signal.Success().quitApp()
 elif messagebox:
     messagebox.displayMessage ( "Failed to launch",
       "<b>Failed to launch " + task.rvapi_command +
       ".</b><p>This may indicate a problem with software setup." )
-    signal.job_failed ( rc.msg )
+    signal.JobFailure( rc.msg ).quitApp()
+

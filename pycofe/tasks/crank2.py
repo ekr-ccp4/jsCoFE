@@ -429,6 +429,25 @@ class Crank2(basic.TaskDriver):
                 else:
                     self.putTitle ( "Structure Revisions" )
 
+                # fetch r-factors for display in job tree
+                fileref = os.path.join ( self.reportDir(),"7-ref","ref.log" )
+                rfree_pattern   = "R-free factor after refinement is "
+                rfactor_pattern = "R factor after refinement is "
+                rfree   = 0.0
+                rfactor = 0.0
+                if os.path.isfile(fileref):
+                    with open(fileref,'r') as f:
+                        for line in f:
+                            if line.startswith(rfree_pattern):
+                                rfree   = float(line.replace(rfree_pattern,""))
+                            if line.startswith(rfactor_pattern):
+                                rfactor = float(line.replace(rfactor_pattern,""))
+                if rfree>0.0 and rfactor>0.0:
+                    self.generic_parser_summary["refmac"] = {
+                        'R_factor' : rfactor,
+                        'R_free'   : rfree
+                    }
+
                 # check if space group has changed
                 hkl_sol = None
                 if "cryst" in meta:
@@ -576,4 +595,4 @@ class Crank2(basic.TaskDriver):
 if __name__ == "__main__":
 
     drv = Crank2 ( "",os.path.basename(__file__),{} )
-    drv.run()
+    drv.start()

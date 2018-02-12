@@ -108,7 +108,8 @@ def run ( body,sectionTitle="Macromolecular sequences" ):  # body is reference t
             "\n ******** Sequence annotation file NOT FOUND OR CORRUPT (error)\n" )
         return
 
-    seqSecId = "seq_sec"
+    seqSecId = "seq_sec_" + str(body.widget_no)
+    body.widget_no += 1
 
     pyrvapi.rvapi_add_section ( seqSecId,sectionTitle,
                                 body.report_page_id(),body.rvrow,0,1,1,False )
@@ -167,7 +168,7 @@ def run ( body,sectionTitle="Macromolecular sequences" ):  # body is reference t
         for i in range(0,len(lines)):
             if i > 0:
                 body.file_stdout.write ( "    " )
-            body.file_stdout.write ( lines[i] + "\n" )
+            #body.file_stdout.write ( lines[i] + "\n" )
             if i > 0:
                 htmlLine += "<br>"
                 seq.size += len ( lines[i].strip() )

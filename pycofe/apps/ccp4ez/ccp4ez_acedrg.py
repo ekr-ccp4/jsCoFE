@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    06.02.18   <--  Date of Last Modification.
+#    10.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -35,7 +35,7 @@ class AceDrg(ccp4ez_lorestr.Lorestr):
         if len(self.ligands)<=0:
             return ""  # no ligands to make
 
-        self.putMessage       ( "&nbsp;" )
+        #self.putMessage       ( "&nbsp;" )
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                                 ". Making ligand structures (AceDrg)</b>" )
         self.page_cursor[1] -= 1
@@ -90,8 +90,10 @@ class AceDrg(ccp4ez_lorestr.Lorestr):
                 self.putStructureWidget ( code + " structure",
                                           [ os.path.join("..",xyzPath2) ],-1 )
 
+        self.output_meta["results"][resultdir] = {}
+        self.output_meta["results"][resultdir]["ligands"]  = meta
+        self.output_meta["results"][resultdir]["nResults"] = nResults
         if nResults>0:
-            self.output_meta["ligands"] = meta
             if nResults==1:
                 quit_message = "built ligand " + quit_message
             else:

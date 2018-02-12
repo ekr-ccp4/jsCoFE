@@ -117,4 +117,4 @@ class ASUMod(asudef.ASUDef):
 if __name__ == "__main__":
 
     drv = ASUMod ( "",os.path.basename(__file__) )
-    drv.run()
+    drv.start()

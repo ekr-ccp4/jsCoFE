@@ -33,10 +33,15 @@ class FitLigands(ccp4ez_acedrg.AceDrg):
 
     def fitLigands ( self,datadir,resultdir,parent_branch_id ):
 
-        if not "ligands" in self.output_meta:
+        if not self.tryFitLigands:
+            self.file_stdout.write ( "\n *** use of FitLigands is switched off\n" )
+            return ""
+
+        if self.output_meta["results"]["acedrg"]["nResults"] <= 0:
             return ""  # no ligands to fit
 
-        self.putMessage       ( "&nbsp;" )
+        self.file_stdout.write ( "\n ... run FitLigands\n" )
+        #self.putMessage       ( "&nbsp;" )
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                                 ". Fitting ligands (Coot)</b>" )
         self.page_cursor[1] -= 1
@@ -78,7 +83,7 @@ class FitLigands(ccp4ez_acedrg.AceDrg):
 
         # loop over ligands
 
-        ligmeta      = self.output_meta["ligands"]
+        ligmeta      = self.output_meta["results"]["acedrg"]["ligands"]
         nResults     = 0
         quit_message = ""
         rfree        = 1.0
@@ -189,7 +194,7 @@ class FitLigands(ccp4ez_acedrg.AceDrg):
 
         self.saveResults ( "FitLigands",resultdir,nResults,
             rfree,rfactor,"fitligands", xyzPath,mtzPath,mapPath,dmapPath,libPath,
-            libIndex,columns )
+            libIndex,columns,None )  # no space group change at fitting ligands
 
         self.quit_branch ( branch_data,resultdir,
                            "Fitting ligands (Coot): " + quit_message )

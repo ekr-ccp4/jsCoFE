@@ -35,7 +35,7 @@ class Lorestr(ccp4ez_buccaneer.Buccaneer):
         if datadir.endswith(self.crank2_dir()):
             return ""
 
-        self.putMessage       ( "&nbsp;" )
+        #self.putMessage       ( "&nbsp;" )
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                                 ". Refinement (Lorestr)</b>" )
         self.page_cursor[1] -= 1
@@ -143,7 +143,7 @@ class Lorestr(ccp4ez_buccaneer.Buccaneer):
 
         self.saveResults ( "Lorestr",resultdir,nResults,
             rfree,rfactor,"lorestr", lorestr_xyz,lorestr_mtz,lorestr_map,lorestr_dmap,
-            lorestr_lib,libIndex,lorestr_columns )
+            lorestr_lib,libIndex,lorestr_columns,None ) # no space group change
 
         self.quit_branch ( branch_data,resultdir,
                            "Refinement (Lorestr): " + quit_message )

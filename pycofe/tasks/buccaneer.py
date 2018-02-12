@@ -237,4 +237,4 @@ class BuccaneerMR(basic.TaskDriver):
 if __name__ == "__main__":
 
     drv = BuccaneerMR ( "",os.path.basename(__file__) )
-    drv.run()
+    drv.start()

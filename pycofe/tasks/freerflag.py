@@ -258,4 +258,4 @@ class FreeRFlag(basic.TaskDriver):
 if __name__ == "__main__":
 
     drv = FreeRFlag ( "",os.path.basename(__file__) )
-    drv.run()
+    drv.start()

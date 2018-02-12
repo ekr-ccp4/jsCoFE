@@ -21,12 +21,22 @@ import subprocess
 import traceback
 
 class comrc():
-   def __init__(self):
-       self.msg   = ""
-       self.utime = 0
-       self.stime = 0
-       self.umem  = 0
-       return
+    def __init__(self,retcode=None):
+        if retcode:
+            returncode = retcode[1]
+            self.utime = retcode[2].ru_utime
+            self.stime = retcode[2].ru_stime
+            self.umem  = retcode[2].ru_maxrss/104448.0
+            self.msg = ""
+            if returncode:
+                self.msg = "Error in command.call\n"
+                self.msg += "Return code: " + str(returncode) + "\n"
+        else:
+           self.msg   = ""
+           self.utime = 0
+           self.stime = 0
+           self.umem  = 0
+        return
 
 
 def call ( executable,command_line,job_dir,stdin_fname,file_stdout,
@@ -67,33 +77,26 @@ def call ( executable,command_line,job_dir,stdin_fname,file_stdout,
     file_stdout.write ( "\n" + "="*80 + "\n\n" )
     file_stdout.flush()
 
-    rc = comrc()
-    try:
-        p = subprocess.Popen ( [executable] + command_line,
-                              shell=False,
-                              stdin=file_stdin,
-                              stdout=subprocess.PIPE if log_parser else file_stdout,
-                              stderr=file_stderr )
-        if log_parser:
-            log_parser.parse_stream ( p.stdout,file_stdout )
-        #p.wait()
-        retcode  = os.wait4 ( p.pid,0 )
-        rc.utime = retcode[2].ru_utime
-        rc.stime = retcode[2].ru_stime
-        rc.umem  = retcode[2].ru_maxrss/104448.0
-        file_stdout.write ( "\n" + "-"*80 + "\n" )
-        file_stdout.write ( "   user time  : " + str(rc.utime) + " (sec)\n" )
-        file_stdout.write ( "   sys time   : " + str(rc.stime) + " (sec)\n" )
-        file_stdout.write ( "   memory used: " + str(rc.umem ) + " (MB)\n" )
-        file_stdout.write ( "-"*80 + "\n" )
+    p = subprocess.Popen ( [executable] + command_line,
+                          shell=False,
+                          stdin=file_stdin,
+                          stdout=subprocess.PIPE if log_parser else file_stdout,
+                          stderr=file_stderr )
 
-    except Exception:
-        rc.msg = "Error in command.call\n"+ traceback.format_exc()
+    if log_parser:
+        log_parser.parse_stream ( p.stdout,file_stdout )
 
+    rc = comrc ( os.wait4(p.pid,0) )
     if file_stdin:
         file_stdin.close()
 
-    if len(rc.msg)>0:
+    file_stdout.write ( "\n" + "-"*80 + "\n" )
+    file_stdout.write ( "   user time  : " + str(rc.utime) + " (sec)\n" )
+    file_stdout.write ( "   sys time   : " + str(rc.stime) + " (sec)\n" )
+    file_stdout.write ( "   memory used: " + str(rc.umem ) + " (MB)\n" )
+    file_stdout.write ( "-"*80 + "\n" )
+
+    if rc.msg:
         msg = ' *** error running {0}: {1}'.format(executable, rc.msg)
         file_stdout.write(msg)
         file_stderr.write(msg)

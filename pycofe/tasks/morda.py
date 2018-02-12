@@ -202,4 +202,4 @@ if __name__ == "__main__":
 
     drv = Morda ( "",os.path.basename(__file__),
                   { "report_page" : { "show" : True, "name" : "Summary" } }  )
-    drv.run()
+    drv.start()

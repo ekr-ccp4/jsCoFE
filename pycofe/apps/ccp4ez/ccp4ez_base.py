@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    06.02.18   <--  Date of Last Modification.
+#    11.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -27,7 +27,8 @@
 #                 [--njobs          N]                   \
 #                 [--no-simbad12]                        \
 #                 [--no-morda]                           \
-#                 [--no-crank2]
+#                 [--no-crank2]                          \
+#                 [--no-fitligands]
 #
 #  Input file:
 #
@@ -87,7 +88,7 @@ class Base(object):
     trySimbad12    = True
     tryMoRDa       = True
     tryCrank2      = True
-
+    tryFitLigands  = True
 
     stage_no       = 0          # stage number for headers
     summaryTabId   = "ccp4ez_summary_page"     # summary tab Id
@@ -103,6 +104,11 @@ class Base(object):
     input_hkl      = None       # input dataset, merged or unmerged
     hkl            = None       # merged reflections dataset
     mtzpath        = None       # path to merged mtz file
+    mtz_alt        = {}         # reflections reindexed in compatible space groups
+    #
+    #  mtz_alt = {
+    #    'P45222' : mtzpath
+    #  }
 
     output_meta    = {}  # output meta json file written in current directory on
                           # termination
@@ -110,7 +116,8 @@ class Base(object):
     #  output_meta = {
     #    "retcode"    : "",
     #    "report_row" : 0,
-    #    "results"    : {}
+    #    "results"    : {}  # map of directory names
+    #    "resorder"   : []  # list of directory names
     #  }
     #
 
@@ -188,6 +195,7 @@ class Base(object):
         self.output_meta["retcode"]    = ""
         self.output_meta["report_row"] = 0
         self.output_meta["results"]    = {}
+        self.output_meta["resorder"]   = []
 
         self.file_stdout = sys.stdout
         self.file_stderr = sys.stderr
@@ -201,8 +209,11 @@ class Base(object):
         while narg<len(args):
             key   = args[narg]
             narg += 1
-            if key=="--sge" or key=="--mp":
-                self.exeType = key
+            if key=="--sge" or key=="--mp" : self.exeType       = key
+            elif key == "--no-simbad12"    : self.trySimbad12   = False
+            elif key == "--no-morda"       : self.tryMoRDa      = False
+            elif key == "--no-crank2"      : self.tryCrank2     = False
+            elif key == "--no-fitligands"  : self.tryFitLigands = False
             elif narg<len(args):
                 value = args[narg]
                 if   key == "--wkdir"          : self.workdir        = value
@@ -213,9 +224,6 @@ class Base(object):
                 elif key == "--jobid"          : self.jobId          = value
                 elif key == "--qname"          : self.queueName      = value
                 elif key == "--njobs"          : self.nSubJobs       = int(value)
-                elif key == "--no-simbad12"    : self.trySimbad12    = False
-                elif key == "--no-morda"       : self.trySimbad12    = False
-                elif key == "--no-crank2"      : self.trySimbad12    = False
                 else:
                     self.output_meta["retcode"] = "[01-001] unknown command line parameter"
                     self.stderr ( " *** unrecognised command line parameter " + key )
@@ -408,15 +416,17 @@ class Base(object):
         if branch_data:
             self.setOutputPage ( branch_data["cursor0"] )
             if message:
-                self.putMessageLF ( "<b>" + str(self.stage_no) + ". " +
-                                    message + "</b>" )
-            self.page_cursor[1] +=1  # leave one row for setting widgets in main thread
+                title = "<b>" + str(self.stage_no) + ". " + message + "</b>"
+                self.putMessageLF ( "<br>" + title )
+                self.output_meta["results"][dirname]["title"] = title
             if dirname in self.output_meta["results"]:
                 self.output_meta["results"][dirname]["row"] = self.page_cursor[1]
                 self.output_meta["results"][dirname]["stage_no"] = self.stage_no
+            self.page_cursor[1] += 1  # leave one row for setting widgets in main thread
         self.mk_std_streams ( None )
         if self.layout == 0:
             pyrvapi.rvapi_set_tab_proxy ( self.navTreeId,"" )
+        self.output_meta["resorder"] += [dirname]
         self.write_meta()
         return
 
@@ -424,19 +434,21 @@ class Base(object):
         if branch_data:
             self.setOutputPage ( branch_data["cursor1"] )
             self.putMessage ( "<h3>" + message + "<h3>" )
+            self.output_meta["results"][dirname]["title"] = "<b>" + message + "</b>"
             if detail_message:
-                self.putMessage ( "<i>" + detail_message + "</>" )
+                self.putMessage ( "<i>" + detail_message + "</i>" )
             self.setOutputPage ( branch_data["cursor0"] )
-            self.putMessageLF ( "<i>" + message + "</>" )
+            self.putMessageLF ( "<i>" + message + "</i>" )
             if detail_message:
-                self.putMessage ( "<i>" + detail_message + "</>" )
-            self.page_cursor[1] +=1  # leave one row for setting widgets in main thread
+                self.putMessage ( "<i>" + detail_message + "</i>" )
+            page_cursor[1] +=1  # leave one row for setting widgets in main thread
             if dirname in self.output_meta["results"]:
                 self.output_meta["results"][dirname]["row"] = self.page_cursor[1]
                 self.output_meta["results"][dirname]["stage_no"] = self.stage_no
         self.mk_std_streams ( None )
         if self.layout == 0:
             pyrvapi.rvapi_set_tab_proxy ( self.navTreeId,"" )
+        self.output_meta["resorder"] += [dirname]
         self.write_meta()
         return
 
@@ -445,7 +457,7 @@ class Base(object):
 
     def write_meta ( self ):
         self.output_meta["report_row"] = self.page_cursor[1]
-        meta = json.dumps ( self.output_meta )
+        meta = json.dumps ( self.output_meta,indent=2 )
         with open(os.path.join(self.workdir,"ccp4ez.meta.json"),"w") as f:
             f.write ( meta )
         if self.rvapi_doc_path:
@@ -495,13 +507,15 @@ class Base(object):
         self.page_cursor[1] += 1
         return
 
-    def putWaitMessageLF ( self,message_str ):
+    def putWaitMessageLF ( self,message_str,foregap=1 ):
         gridId = self.page_cursor[0] + str(self.page_cursor[1])
         pyrvapi.rvapi_add_grid ( gridId,False,self.page_cursor[0],
                                               self.page_cursor[1],0,1,1 )
+        for i in range(foregap):
+            pyrvapi.rvapi_set_text ( "&nbsp;",gridId,i,0,1,1 )
         pyrvapi.rvapi_set_text ( "<font style='font-size:120%;'>" + message_str +
-                                 "</font>",gridId,0,0,1,1 )
-        pyrvapi.rvapi_set_text ( "<div class='activity_bar'/>",gridId,0,1,1,1 )
+                                 "</font>",gridId,foregap,0,1,1 )
+        pyrvapi.rvapi_set_text ( "<div class='activity_bar'/>",gridId,foregap,1,1,1 )
         self.page_cursor[1] += 1
         return
 
@@ -613,7 +627,7 @@ class Base(object):
 
     def saveResults ( self, name,dirname,nResults,rfree,rfactor,resfname,
                             fpath_xyz,fpath_mtz,fpath_map,fpath_dmap,
-                            fpath_lib,libIndex,columns ):
+                            fpath_lib,libIndex,columns,spg_info ):
 
         meta = {}
         meta["name"]     = name
@@ -656,7 +670,10 @@ class Base(object):
                 meta["libindex"] = libIndex
 
             # calculate return code and quit message
-            metrics = " (<i>R<sub>free</sub>=" + str(rfree) + "</i>)"
+            metrics = " (<i>R<sub>free</sub>=" + str(rfree)
+            if spg_info:
+                metrics += ", SpG=" + spg_info["spg"]
+            metrics += "</i>)"
             if rfree < 0.4:
                 self.output_meta["retcode"] = "solved"     # solution
                 quit_message = "solution found" + metrics
@@ -675,9 +692,14 @@ class Base(object):
             self.output_meta["retcode"] = "errors"
             quit_message = "errors encountered"
 
-
-        # put meta structure in output meta data
+        # put columns in meta
         meta["columns"] = columns
+
+        # put space grou info in meta
+        if spg_info:
+            meta["spg"] = spg_info["spg"]  # resulting space group
+            meta["hkl"] = spg_info["hkl"]  # reindexed hkl if space group changed
+
         self.output_meta["results"][dirname] = meta
 
         return quit_message

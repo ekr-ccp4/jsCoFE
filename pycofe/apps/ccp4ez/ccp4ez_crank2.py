@@ -27,7 +27,7 @@ class Crank2(ccp4ez_morda.MoRDa):
 
     def crank2_dir(self):  return "crank2_results"
 
-    # ----------------------------------------------------------------------
+    # ------------------------------------------------------------------------
 
     def crank2 ( self,parent_branch_id ):
 
@@ -39,7 +39,7 @@ class Crank2(ccp4ez_morda.MoRDa):
         if not self.hkl.Fpm and not self.hkl.Ipm or not self.seqpath:
             return
 
-        self.putMessage       ( "&nbsp;" )
+        #self.putMessage       ( "&nbsp;" )
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                             ". Automated Experimental Phasing (Crank-2)</b>" )
         self.page_cursor[1] -= 1
@@ -123,7 +123,9 @@ class Crank2(ccp4ez_morda.MoRDa):
         nResults = 0
         rfree    = 1.0
         rfactor  = 1.0
+        spg_info = None
         if os.path.isfile(crank2_xyz):
+            spg_info = self.checkSpaceGroup ( crank2_xyz )
             nResults = 1
             self.mk_std_streams ( None )
             rfree_pattern   = "R-free factor after refinement is "
@@ -147,7 +149,7 @@ class Crank2(ccp4ez_morda.MoRDa):
 
         quit_message = self.saveResults ( "Crank-2",self.crank2_dir(),nResults,
                 rfree,rfactor,"crank2", crank2_xyz,crank2_mtz,crank2_map,crank2_dmap,
-                None,None,columns )
+                None,None,columns,spg_info )
 
         self.quit_branch ( branch_data,self.crank2_dir(),
                            "Automated Experimental Phasing (Crank-2): " +

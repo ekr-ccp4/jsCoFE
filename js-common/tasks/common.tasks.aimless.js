@@ -74,9 +74,9 @@ function TaskAimless()  {
         secMain:
         {
             type     : 'section',
-            title    : 'Essential Controls',
+            title    : 'Basic Options',
             open     : false,
-            position : [1,0,1,8],
+            position : [0,0,1,8],
             contains :
             {
                 PERFORM_SCALING:
@@ -88,12 +88,12 @@ function TaskAimless()  {
                     range    :
                     [
                         'YES|scaling and mergeing',
-                        'NO|no scaling only merge',
+                        'NO|no scaling only merge'
                     ],
                     tooltip  : 'Switch off scaling for scaled unmerged ' +
                                'input data e.g. for INTEGRATED.HKL from ' +
                                'XDS.',
-                    value    : 'YES',
+                    value    : 'YES'
                 },
                 LABEL01:
                 {
@@ -101,7 +101,7 @@ function TaskAimless()  {
                     type     : 'label',
                     label    : 'For (scaling and) merging, use',
                     tooltip  : 'Low and high Resolution cut-offs (&Aring;) ' +
-                               ' for scaling, merging and output dataset(s).',
+                               ' for scaling, merging and output dataset(s).'
                 },
                 RESO_LOW:
                 {
@@ -115,7 +115,8 @@ function TaskAimless()  {
                     tooltip  : 'Low resolution cut-off (&Aring;) ' +
                                'for scaling, merging and output dataset(s). ' +
                                'Leave blank to keep all low resolution data.',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
                 RESO_HIGH:
                 {
@@ -129,39 +130,29 @@ function TaskAimless()  {
                     tooltip  : 'High resolution cut-off (&Aring;) ' +
                                'for scaling, merging and output dataset(s). ' +
                                'Leave blank to keep all high resolution data.',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
                 LABEL02:
                 {
                     position : [4,0,1,8],
                     hideon   :
                     {
-                        'unmerged': [-1, 0, 1],
+                        'unmerged': [-1, 0, 1]
                     },
                     type     : 'label',
-                    label    : '&nbsp;',
-                    tooltip  : '&nbsp;',
+                    label    : 'Scale all input datasets together',
+                    tooltip  : 'Use the option to merge separately for e.g. MAD ' +
+                               'experiment to scale together the input datasets ' +
+                               'from different wavelengths, but to merge them ' +
+                               'in separate output datasets'
                 },
-                LABEL03:
+                MERGE_DATASETS:
                 {
                     position : [5,0,1,8],
                     hideon   :
                     {
-                        'unmerged': [-1, 0, 1],
-                    },
-                    type     : 'label',
-                    label    : 'For two or more input datasets,',
-                    tooltip  : 'Use the option to merge separately for e.g. MAD ' +
-                               'experiment to scale together the input datasets ' +
-                               'from different wavelengths, but to merge them ' +
-                               'in separate output datasets',
-                },
-                MERGE_DATASETS:
-                {
-                    position : [6,0,1,8],
-                    hideon   :
-                    {
-                        'unmerged': [-1, 0, 1],
+                        'unmerged': [-1, 0, 1]
                     },
                     align    : 'right',
                     keyword  : 'MERGE_DATASETS',
@@ -169,15 +160,15 @@ function TaskAimless()  {
                     range    :
                     [
                         'TOGETHER|together',
-                        'SEPARATELY|separately',
+                        'SEPARATELY|separately'
                     ],
-                    label    : 'scale them together and merge',
+                    label    : 'and merge',
                     tooltip  : 'Use the option to merge separately for e.g. MAD ' +
                                'experiment to scale together the input datasets ' +
                                'from different wavelengths, but to merge them ' +
-                               'in separate output datasets',
-                    value    : 'TOGETHER',
-                },
+                               'into separate output datasets',
+                    value    : 'TOGETHER'
+                }
             }
         },
         secSymm:
@@ -185,7 +176,7 @@ function TaskAimless()  {
             type     : 'section',
             title    : 'Symmetry Analysis',
             open     : false,
-            position : [2,0,1,8],
+            position : [1,0,1,8],
             contains :
             {
                 TOLERANCE:
@@ -197,7 +188,8 @@ function TaskAimless()  {
                     label    : 'Tolerance for comparing lattices (&deg;)',
                     tooltip  : 'Tolerance for comparing lattices (degrees or ' +
                                'equivalent on lengths; default 2.0)',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
                 RESOLUTION_SYMM:
                 {
@@ -207,7 +199,7 @@ function TaskAimless()  {
                     range    :
                     [
                         'AUTO|automatic', 
-                        'EXPLICIT|as for output',
+                        'EXPLICIT|as for scaling and merging'
                     ],
                     tooltip  : 'Use the same resolution for output and ' +
                                'symmetry analysis only if automatic ' +
@@ -215,7 +207,7 @@ function TaskAimless()  {
                                'manual symmetry assignment in the final ' +
                                'job',
                     value    : 'AUTO',
-                    label    : 'High resolution limit for symmetry analysis',
+                    label    : 'High resolution limit for symmetry analysis'
                 },
                 CCHALFLIMIT:
                 {
@@ -224,7 +216,7 @@ function TaskAimless()  {
                     align    : 'right',
                     showon   :
                     {
-                        'RESOLUTION_SYMM': ['AUTO'],
+                        'RESOLUTION_SYMM': ['AUTO']
                     },
                     keyword  : 'CCHALFLIMIT',
                     type     : 'real_',
@@ -232,7 +224,9 @@ function TaskAimless()  {
                     tooltip  : 'Maximum resolution for scoring set is ' +
                                'defined by CC(1/2) threshold ' +
                                '(default 0.6)',
-                    value    : '',
+                    min      : '0',
+                    max      : '1',
+                    value    : ''
                 },
                 ISIGLIMIT:
                 {
@@ -241,7 +235,7 @@ function TaskAimless()  {
                     align    : 'right',
                     showon   :
                     {
-                        'RESOLUTION_SYMM': ['AUTO'],
+                        'RESOLUTION_SYMM': ['AUTO']
                     },
                     keyword  : 'ISIGLIMIT',
                     type     : 'real_',
@@ -249,8 +243,9 @@ function TaskAimless()  {
                     tooltip  : 'Maximum resolution for scoring set is ' +
                                'defined by I/sig(I) threshold ' +
                                '(default 6)',
-                    value    : '',
-                },
+                    min      : '0',
+                    value    : ''
+                }
             }
         },
         secObs:
@@ -258,17 +253,17 @@ function TaskAimless()  {
             type     : 'section',
             title    : 'Observations Used',
             open     : false,
-            position : [3,0,1,8],
+            position : [2,0,1,8],
             contains :
             {
-                LABEL04:
+                LABEL03:
                 {
                     //line   : (25, 0),
                     position : [0, 0, 1, 8],
                     tooltip  : 'Accept partials with total fraction between ' +
                                'limits below',
                     label    : 'Only accept partials with total fraction',
-                    type     : 'label',
+                    type     : 'label'
                 },
                 PARTIALS_FRACLOW:
                 {
@@ -279,7 +274,9 @@ function TaskAimless()  {
                     align    : 'right',
                     tooltip  : 'Only accept partials with total fraction ' +
                                'higher than this limit (default 0.95)',
-                    value    : '',
+                    min      : '0',
+                    max      : '2',
+                    value    : ''
                 },
                 PARTIALS_FRACHIGH:
                 {
@@ -290,7 +287,9 @@ function TaskAimless()  {
                     align    : 'right',
                     tooltip  : 'Only accept partials with total fraction ' +
                                'lower than this limit (default 1.05)',
-                    value    : '',
+                    min      : '0',
+                    max      : '2',
+                    value    : ''
                 },
                 ACCEPT_OVERLOADS:
                 {
@@ -303,7 +302,7 @@ function TaskAimless()  {
                     tooltip  : 'Maybe keep overloads if many reflections ' +
                                'are missing',
                     value    : 'False',
-                    label    : 'Accept overloaded observations',
+                    label    : 'Accept overloaded observations'
                 },
                 ACCEPT_EDGES:
                 {
@@ -317,7 +316,7 @@ function TaskAimless()  {
                                'completeness if needed',
                     value    : 'False',
                     label    : 'Accept observations on edge of tile or ' +
-                               'detector',
+                               'detector'
                 },
                 ACCEPT_XDS_MISFITS:
                 {
@@ -331,16 +330,16 @@ function TaskAimless()  {
                                'flagged as outliers (MISFIT) ' +
                                'by XDS (default: no)',
                     value    : 'False',
-                    label    : 'Accept observations flagged by XDS as outliers',
+                    label    : 'Accept observations flagged by XDS as outliers'
                 },
-                LABEL05:
+                LABEL04:
                 {
                     position : [6, 0, 1, 8],
                     tooltip  : '&nbsp;',
                     label    : '&nbsp;',
-                    type     : 'label',
+                    type     : 'label'
                 },
-                LABEL06:
+                LABEL05:
                 {
                     //line   : (22, 0),
                     position : [7, 0, 1, 8],
@@ -351,7 +350,7 @@ function TaskAimless()  {
                                'use partially-recorded observations ' +
                                '(Default: combine, e.g. use profile-fitted ' +
                                'for weak intensities and summation for strong)',
-                    type     : 'label',
+                    type     : 'label'
                 },
                 INTENSITIES_OPTIONS:
                 {
@@ -365,15 +364,15 @@ function TaskAimless()  {
                     [
                         'COMBINE|combined intensities',
                         'PROFILE|profile-fitted intensities',
-                        'SUMMATION|summation intensities',
+                        'SUMMATION|summation intensities'
                     ],
                     tooltip  : 'If both integrated and profile-fitted ' +
                                'observations are available, choose how to ' +
                                'use partially-recorded observations ' +
                                '(Default: combine, e.g. use profile-fitted ' +
                                'for weak intensities and summation for strong)',
-                    value    : 'COMBINE',
-                },
+                    value    : 'COMBINE'
+                }
             }
         },
         secSDCorr:
@@ -381,7 +380,7 @@ function TaskAimless()  {
             type     : 'section',
             title    : 'SD Correction',
             open     : false,
-            position : [4,0,1,8],
+            position : [3,0,1,8],
             contains :
             {
                 SDCORRECTION_REFINE:
@@ -394,7 +393,7 @@ function TaskAimless()  {
                     range    : ['True|refined', 'False|set manually'],
                     tooltip  : 'Refine SDcorrection parameters',
                     value    : 'True',
-                    label    : 'SD correction parameters to be',
+                    label    : 'SD correction parameters to be'
                 },
                 SDCORRECTION_SDFAC:
                 {
@@ -402,13 +401,14 @@ function TaskAimless()  {
                     align    : 'right',
                     showon   :
                     {
-                        'SDCORRECTION_REFINE': ['False'],
+                        'SDCORRECTION_REFINE': ['False']
                     },
                     label    : 'parameter sdFac',
                     keyword  : 'SDCORRECTION_SDFAC',
                     type     : 'real_',
                     tooltip  : 'Parameter sdFac (default 1.0)',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
                 SDCORRECTION_SDB:
                 {
@@ -416,13 +416,14 @@ function TaskAimless()  {
                     align    : 'right',
                     showon   :
                     {
-                        'SDCORRECTION_REFINE': ['False'],
+                        'SDCORRECTION_REFINE': ['False']
                     },
                     label    : 'parameter sdB',
                     keyword  : 'SDCORRECTION_SDB',
                     type     : 'real_',
                     tooltip  : 'Parameter sdB (default 0.0)',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
                 SDCORRECTION_SDADD:
                 {
@@ -430,13 +431,14 @@ function TaskAimless()  {
                     align    : 'right',
                     showon   :
                     {
-                        'SDCORRECTION_REFINE': ['False'],
+                        'SDCORRECTION_REFINE': ['False']
                     },
                     label    : 'parameter sdAdd',
                     keyword  : 'SDCORRECTION_SDADD',
                     type     : 'real_',
                     tooltip  : 'Parameter sdAdd (default 0.03)',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
                 SDCORRECTION_FIXSDB:
                 {
@@ -444,7 +446,7 @@ function TaskAimless()  {
                     position : [4, 0, 1, 8],
                     showon   :
                     {
-                        'SDCORRECTION_REFINE': ['True'],
+                        'SDCORRECTION_REFINE': ['True']
                     },
                     keyword  : 'SDCORRECTION_FIXSDB',
                     type     : 'combobox',
@@ -452,11 +454,11 @@ function TaskAimless()  {
                     [
                         'False|no restrains',
                         'Tie|tie to zero',
-                        'True|fix to zero',
+                        'True|fix to zero'
                     ],
                     tooltip  : 'Treatment of the sdB parameter',
                     value    : 'False',
-                    label    : 'Treatment of the sdB parameter:',
+                    label    : 'Treatment of the sdB parameter:'
                 },
                 SDCORRECTION_TIESDB_SD:
                 {
@@ -467,38 +469,39 @@ function TaskAimless()  {
                     {
                         '_': '&&',
                         'SDCORRECTION_REFINE': ['True'],
-                        'SDCORRECTION_FIXSDB': ['Tie'],
+                        'SDCORRECTION_FIXSDB': ['Tie']
                     },
                     label    : 'restraint on sdB value',
                     keyword  : 'SDCORRECTION_TIESDB_SD',
                     type     : 'real_',
                     tooltip  : 'restraint on sdB value (default 10.0)',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
-                LABEL07:
+                LABEL06:
                 {
                     type     : 'label',
                     //line   : (35, 0),
                     position : [6, 0, 1, 8],
                     showon   :
                     {
-                        'SDCORRECTION_REFINE': ['True'],
+                        'SDCORRECTION_REFINE': ['True']
                     },
                     tooltip  : '&nbsp;',
-                    label    : '&nbsp;',
+                    label    : '&nbsp;'
                 },
-                LABEL08:
+                LABEL07:
                 {
                     type     : 'label',
                     //line   : (35, 0),
                     position : [7, 0, 1, 8],
                     showon   :
                     {
-                        'SDCORRECTION_REFINE': ['True'],
+                        'SDCORRECTION_REFINE': ['True']
                     },
                     tooltip  : 'If processing more than one run, define how ' +
                                'SD parameters for different runs are linked',
-                    label    : 'If processing more than one run,',
+                    label    : 'If processing more than one run,'
                 },
                 SDCORRECTION_OPTIONS:
                 {
@@ -507,7 +510,7 @@ function TaskAimless()  {
                     align    : 'right',
                     showon   :
                     {
-                        'SDCORRECTION_REFINE': ['True'],
+                        'SDCORRECTION_REFINE': ['True']
                     },
                     keyword  : 'SDCORRECTION_OPTIONS',
                     type     : 'combobox',
@@ -515,12 +518,12 @@ function TaskAimless()  {
                     [
                         'INDIVIDUAL|individual',
                         'SAME|same',
-                        'SIMILAR|similar',
+                        'SIMILAR|similar'
                     ],
                     tooltip  : 'Use different, same or similar SDfactors for ' +
                                'each run',
                     value    : 'INDIVIDUAL',
-                    label    : 'SD parameters for each run are',
+                    label    : 'SD parameters for each run are'
                 },
                 SDCORRECTION_SIMILARITY_SDFAC:
                 {
@@ -531,13 +534,14 @@ function TaskAimless()  {
                     {
                         '_': '&&',
                         'SDCORRECTION_REFINE': ['True'],
-                        'SDCORRECTION_OPTIONS': ['SIMILAR'],
+                        'SDCORRECTION_OPTIONS': ['SIMILAR']
                     },
                     label    : 'sigma for restrains on sdFac',
                     keyword  : 'SDCORRECTION_SIMILARITY_SDFAC',
                     type     : 'real_',
                     tooltip  : 'SD(sdFac) for similarity restraints (default 0.05)',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
                 SDCORRECTION_SIMILARITY_SDB:
                 {
@@ -548,13 +552,14 @@ function TaskAimless()  {
                     {
                         '_': '&&',
                         'SDCORRECTION_REFINE': ['True'],
-                        'SDCORRECTION_OPTIONS': ['SIMILAR'],
+                        'SDCORRECTION_OPTIONS': ['SIMILAR']
                     },
                     label    : 'sigma for restrains on sdB',
                     keyword  : 'SDCORRECTION_SIMILARITY_SDB',
                     type     : 'real_',
                     tooltip  : 'SD(sdB) for similarity restraints (default 3.0)',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
                 SDCORRECTION_SIMILARITY_SDADD:
                 {
@@ -565,14 +570,15 @@ function TaskAimless()  {
                     {
                         '_': '&&',
                         'SDCORRECTION_REFINE': ['True'],
-                        'SDCORRECTION_OPTIONS': ['SIMILAR'],
+                        'SDCORRECTION_OPTIONS': ['SIMILAR']
                     },
                     label    : 'sigma for restrains on sdAdd',
                     keyword  : 'SDCORRECTION_SIMILARITY_SDADD',
                     type     : 'real_',
                     tooltip  : 'SD(sdAdd) for similarity restraints (default 0.04)',
-                    value    : '',
-                },
+                    min      : '0',
+                    value    : ''
+                }
             }
         },
         secReject:
@@ -580,17 +586,17 @@ function TaskAimless()  {
             type     : 'section',
             title    : 'Outlier Rejection',
             open     : false,
-            position : [5,0,1,8],
+            position : [4,0,1,8],
             contains :
             {
-                LABEL09:
+                LABEL08:
                 {
                     //line   : (63, 0),
                     position : [0, 0, 1, 8],
                     tooltip  : 'Reject an obserbvation if deviates from mean ' +
                                'by more tham threshold value',
                     label    : 'Thresholds deviation from mean (SDs)',
-                    type     : 'label',
+                    type     : 'label'
                 },
                 OUTLIER_SDMAX:
                 {
@@ -602,7 +608,8 @@ function TaskAimless()  {
                     type     : 'real_',
                     tooltip  : 'for >2 observations, reject if more than this ' +
                                'SDs (default 6.0)',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
                 OUTLIER_SDMAX2:
                 {
@@ -613,7 +620,8 @@ function TaskAimless()  {
                     type     : 'real_',
                     tooltip  : 'for 2 observations, reject if more than this ' +
                                'SDs (default 6.0)',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
                 OUTLIER_SDMAXALL:
                 {
@@ -625,7 +633,8 @@ function TaskAimless()  {
                     type     : 'real_',
                     tooltip  : 'for differences between I+ and I-, reject if ' +
                                'more than this (SDs default 8.0)',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
                 OUTLIER_SDMAXALL_ADJUST:
                 {
@@ -638,7 +647,7 @@ function TaskAimless()  {
                     tooltip  : 'Increase rejection threshold for large ' +
                                'anomalous differences',
                     value    : 'True',
-                    label    : 'increase for large anomalous differences',
+                    label    : 'increase for large anomalous differences'
                 },
                 OUTLIER_COMBINE:
                 {
@@ -651,11 +660,11 @@ function TaskAimless()  {
                     range    :
                     [
                         'True|across all datasets',
-                        'False|within datasets',
+                        'False|within datasets'
                     ],
                     tooltip  : 'test for rejections across all datasets ' +
                                'or within individual datasets',
-                    value    : 'True',
+                    value    : 'True'
                 },
                 OUTLIER_EMAX:
                 {
@@ -667,17 +676,18 @@ function TaskAimless()  {
                     type     : 'real_',
                     tooltip  : 'Maximum allowed E to exclude unreasonably ' +
                                'large intensities (default 5.0)',
-                    value    : '',
-                },
+                    min      : '0',
+                    value    : ''
+                }
             }
         },
         secScOpt:
         {
             type     : 'section',
-            showon   : {'PERFORM_SCALING': ['YES'],},
+            showon   : {'PERFORM_SCALING': ['YES']},
             title    : 'Scaling Protocols',
             open     : false,
-            position : [6,0,1,8],
+            position : [5,0,1,8],
             contains :
             {
                 SCALING_PROTOCOL:
@@ -692,10 +702,10 @@ function TaskAimless()  {
                     [
                         'ROTATION|on rotation axis',
                         'CONSTANT|constant',
-                        'BATCH|by batch (deprecated)',
+                        'BATCH|by batch (deprecated)'
                     ],
                     tooltip  : 'define scaling protocol for all runs',
-                    value    : 'ROTATION',
+                    value    : 'ROTATION'
                 },
                 SCALES_ROTATION_TYPE:
                 {
@@ -703,7 +713,7 @@ function TaskAimless()  {
                     position : [1, 0, 1, 8],
                     showon   :
                     {
-                        'SCALING_PROTOCOL': ['ROTATION'],
+                        'SCALING_PROTOCOL': ['ROTATION']
                     },
                     label    : 'Define scale ranges along rotation axis by',
                     keyword  : 'SCALES_ROTATION_TYPE',
@@ -711,10 +721,10 @@ function TaskAimless()  {
                     range    :
                     [
                         'SPACING|rotation interval',
-                        'NBINS|number of bins',
+                        'NBINS|number of bins'
                     ],
                     tooltip  : 'spacing for scales along primary beam',
-                    value    : 'SPACING',
+                    value    : 'SPACING'
                 },
                 SCALES_ROTATION_SPACING:
                 {
@@ -725,13 +735,14 @@ function TaskAimless()  {
                     {
                         '_': '&&',
                         'SCALING_PROTOCOL': ['ROTATION'],
-                        'SCALES_ROTATION_TYPE': ['SPACING'],
+                        'SCALES_ROTATION_TYPE': ['SPACING']
                     },
                     keyword  : 'SCALES_ROTATION_SPACING',
                     type     : 'real_',
                     tooltip  : 'spacing in degrees (default 5.0)',
                     value    : '',
-                    label    : 'spacing in degrees',
+                    min      : '0',
+                    label    : 'spacing in degrees'
                 },
                 SCALES_ROTATION_NBINS:
                 {
@@ -742,25 +753,26 @@ function TaskAimless()  {
                     {
                         '_': '&&',
                         'SCALING_PROTOCOL': ['ROTATION'],
-                        'SCALES_ROTATION_TYPE': ['NBINS'],
+                        'SCALES_ROTATION_TYPE': ['NBINS']
                     },
                     keyword  : 'SCALES_ROTATION_NBINS',
                     label    : 'number of bins',
                     type     : 'integer_',
                     tooltip  : 'number of primary scales (default 1)',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
-                LABEL10:
+                LABEL09:
                 {
                     //line   : (60, 0),
                     position : [4, 0, 1, 8],
                     showon   :
                     {
-                        'SCALING_PROTOCOL': ['ROTATION'],
+                        'SCALING_PROTOCOL': ['ROTATION']
                     },
                     label    : '&nbsp;',
                     tooltip  : '&nbsp;',
-                    type     : 'label',
+                    type     : 'label'
                 },
                 BFACTOR_SCALE:
                 {
@@ -768,7 +780,7 @@ function TaskAimless()  {
                     position : [5, 0, 1, 8],
                     showon   :
                     {
-                        'SCALING_PROTOCOL': ['ROTATION', 'BATCH'],
+                        'SCALING_PROTOCOL': ['ROTATION', 'BATCH']
                     },
                     label    : 'Refine relative B-factors',
                     keyword  : 'BFACTOR_SCALE',
@@ -776,7 +788,7 @@ function TaskAimless()  {
                     range    : ['True|yes', 'False|no'],
                     iwidth   : 82,
                     tooltip  : 'switch relative B-factor scaling on',
-                    value    : 'True',
+                    value    : 'True'
                 },
                 SCALES_BROTATION_TYPE:
                 {
@@ -786,7 +798,7 @@ function TaskAimless()  {
                     {
                         '_': '&&',
                         'SCALING_PROTOCOL': ['ROTATION'],
-                        'BFACTOR_SCALE': ['True'],
+                        'BFACTOR_SCALE': ['True']
                     },
                     label    : 'Define B-factor ranges along rotation axis by',
                     keyword  : 'SCALES_BROTATION_TYPE',
@@ -794,10 +806,10 @@ function TaskAimless()  {
                     range    :
                     [
                         'SPACING|rotation interval',
-                        'NBINS|number of bins',
+                        'NBINS|number of bins'
                     ],
                     tooltip  : 'spacing for B-factors along primary beam',
-                    value    : 'SPACING',
+                    value    : 'SPACING'
                 },
                 SCALES_BROTATION_SPACING:
                 {
@@ -809,13 +821,14 @@ function TaskAimless()  {
                         '_': '&&',
                         'SCALING_PROTOCOL': ['ROTATION'],
                         'BFACTOR_SCALE': ['True'],
-                        'SCALES_BROTATION_TYPE': ['SPACING'],
+                        'SCALES_BROTATION_TYPE': ['SPACING']
                     },
                     keyword  : 'SCALES_BROTATION_SPACING',
                     type     : 'real_',
                     tooltip  : 'spacing in degrees (default 20.0)',
                     value    : '',
-                    label    : 'spacing in degrees',
+                    min      : '0',
+                    label    : 'spacing in degrees'
                 },
                 SCALES_BROTATION_NBINS:
                 {
@@ -827,25 +840,26 @@ function TaskAimless()  {
                         '_': '&&',
                         'SCALING_PROTOCOL': ['ROTATION'],
                         'BFACTOR_SCALE': ['True'],
-                        'SCALES_BROTATION_TYPE': ['NBINS'],
+                        'SCALES_BROTATION_TYPE': ['NBINS']
                     },
                     keyword  : 'SCALES_BROTATION_NBINS',
                     label    : 'number of bins',
                     type     : 'integer_',
                     tooltip  : 'number of primary scales (default 1)',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
-                LABEL11:
+                LABEL10:
                 {
                     //line   : (60, 0),
                     position : [9, 0, 1, 8],
                     showon   :
                     {
-                        'SCALING_PROTOCOL': ['ROTATION'],
+                        'SCALING_PROTOCOL': ['ROTATION']
                     },
                     label    : '&nbsp;',
                     tooltip  : '&nbsp;',
-                    type     : 'label',
+                    type     : 'label'
                 },
                 SCALES_SECONDARY_CORRECTION:
                 {
@@ -853,7 +867,7 @@ function TaskAimless()  {
                     position : [10, 0, 1, 8],
                     showon   :
                     {
-                        'SCALING_PROTOCOL': ['ROTATION'],
+                        'SCALING_PROTOCOL': ['ROTATION']
                     },
                     label    : 'Apply secondary beam correction',
                     keyword  : 'SCALES_SECONDARY_CORRECTION',
@@ -861,7 +875,7 @@ function TaskAimless()  {
                     range    : ['True|yes', 'False|no'],
                     iwidth   : 82,
                     tooltip  : 'Apply and refine parameters of secondary beam correction',
-                    value    : 'True',
+                    value    : 'True'
                 },
                 SCALES_SECONDARY_NSPHHARMONICS:
                 {
@@ -871,13 +885,14 @@ function TaskAimless()  {
                     {
                         '_': '&&',
                         'SCALES_SECONDARY_CORRECTION': ['True'],
-                        'SCALING_PROTOCOL': ['ROTATION'],
+                        'SCALING_PROTOCOL': ['ROTATION']
                     },
                     label    : 'maximum order of spherical harmonics',
                     keyword  : 'SCALES_SECONDARY_NSPHHARMONICS',
                     type     : 'integer_',
                     tooltip  : 'Number of spherical harmonic terms (eg 4 - 6, default 4)',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
                 SCALES_TILETYPE:
                 {
@@ -888,7 +903,7 @@ function TaskAimless()  {
                     {
                         '_': '&&',
                         'SCALES_SECONDARY_CORRECTION': ['True'],
-                        'SCALING_PROTOCOL': ['ROTATION'],
+                        'SCALING_PROTOCOL': ['ROTATION']
                     },
                     keyword  : 'SCALES_TILETYPE',
                     type     : 'combobox',
@@ -896,10 +911,10 @@ function TaskAimless()  {
                     [
                         'DEFAULT|automatic',
                         'NONE|no tile correction',
-                        'CCD|tile correction',
+                        'CCD|tile correction'
                     ],
                     tooltip  : 'automatically on for 3x3 ADSC detectors',
-                    value    : 'DEFAULT',
+                    value    : 'DEFAULT'
                 },
                 SCALES_NTILEX:
                 {
@@ -911,14 +926,14 @@ function TaskAimless()  {
                         '_': '&&',
                         'SCALES_SECONDARY_CORRECTION': ['True'],
                         'SCALING_PROTOCOL': ['ROTATION'],
-                        'SCALES_TILETYPE': ['CCD'],
+                        'SCALES_TILETYPE': ['CCD']
                     },
                     label    : 'number of tiles on X',
                     keyword  : 'SCALES_NTILEX',
                     type     : 'integer_',
                     tooltip  : 'number of tiles on X (default 3)',
                     min      : '0',
-                    value    : '',
+                    value    : ''
                 },
                 SCALES_NTILEY:
                 {
@@ -929,33 +944,33 @@ function TaskAimless()  {
                         '_': '&&',
                         'SCALES_SECONDARY_CORRECTION': ['True'],
                         'SCALING_PROTOCOL': ['ROTATION'],
-                        'SCALES_TILETYPE': ['CCD'],
+                        'SCALES_TILETYPE': ['CCD']
                     },
                     label    : 'number of tiles on Y',
                     keyword  : 'SCALES_NTILEY',
                     type     : 'integer_',
                     tooltip  : 'number of tiles on Y (default 3)',
                     min      : '0',
-                    value    : '',
-                },
+                    value    : ''
+                }
             }
         },
         secScDtl:
         {
             type     : 'section',
-            showon   : {'PERFORM_SCALING': ['YES'],},
+            showon   : {'PERFORM_SCALING': ['YES']},
             title    : 'Scaling Details',
             open     : false,
-            position : [7,0,1,8],
+            position : [6,0,1,8],
             contains :
             {
-                LABEL12:
+                LABEL11:
                 {
                     //line   : (37, 0),
                     position : [0, 0, 1, 8],
                     type     : 'label',
                     tooltip  : 'Set scale refinement parameters',
-                    label    : 'Set scale refinement parameters',
+                    label    : 'Set scale refinement parameters'
                 },
                 CYCLES_N:
                 {
@@ -967,7 +982,8 @@ function TaskAimless()  {
                     tooltip  : 'Set number of cycles for scale refinement ' +
                                '(default 10)',
                     value    : '',
-                    label    : 'number of refinement cycles',
+                    min      : '0',
+                    label    : 'number of refinement cycles'
                 },
                 SELECT_IOVSDMIN:
                 {
@@ -979,7 +995,8 @@ function TaskAimless()  {
                     tooltip  : 'Set minimum I/sd for 1st round scaling ' +
                                '(default 3.0)',
                     value    : '',
-                    label    : 'minimum I/sd for 1st round scaling',
+                    min      : '0',
+                    label    : 'minimum I/sd for 1st round scaling'
                 },
                 SELECT_EMIN:
                 {
@@ -991,14 +1008,15 @@ function TaskAimless()  {
                     tooltip  : 'set minimum E for 2nd round scaling ' +
                                '(default 1.0)',
                     value    : '',
-                    label    : 'minimum E for 2nd round scaling',
+                    min      : '0',
+                    label    : 'minimum E for 2nd round scaling'
                 },
-                LABEL13:
+                LABEL12:
                 {
                     position : [4, 0, 1, 8],
                     type     : 'label',
                     tooltip  : '&nbsp;',
-                    label    : '&nbsp;',
+                    label    : '&nbsp;'
                 },
                 TIE_DETAILS:
                 {
@@ -1010,11 +1028,11 @@ function TaskAimless()  {
                     range    :
                     [
                         'DEFAULT|automatic',
-                        'ADJUST|adjust settings',
+                        'ADJUST|adjust settings'
                     ],
                     value    : 'DEFAULT',
                     tooltip  : 'Adjust or use automatic settings for ' +
-                               'restarints for scale refinement',
+                               'restarints for scale refinement'
                 },
                 TIE_ROTATION:
                 {
@@ -1022,7 +1040,7 @@ function TaskAimless()  {
                     position : [6, 0, 1, 8],
                     showon   :
                     {
-                        'TIE_DETAILS': ['ADJUST'],
+                        'TIE_DETAILS': ['ADJUST']
                     },
                     keyword  : 'TIE_ROTATION',
                     type     : 'combobox',
@@ -1032,7 +1050,7 @@ function TaskAimless()  {
                                'together',
                     value    : 'False',
                     label    : 'Restrain neighbouring scale factors on ' +
-                               'rotation axis',
+                               'rotation axis'
                 },
                 TIE_ROTATION_SD:
                 {
@@ -1043,14 +1061,15 @@ function TaskAimless()  {
                     {
                         '_': '&&',
                         'TIE_DETAILS': ['ADJUST'],
-                        'TIE_ROTATION': ['True'],
+                        'TIE_ROTATION': ['True']
                     },
                     keyword  : 'TIE_ROTATION_SD',
                     label    : 'SD',
                     type     : 'real_',
                     tooltip  : 'SD for restraints on successive primary beam ' +
                                'scales (default 0.05)',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
                 TIE_SURFACE:
                 {
@@ -1058,7 +1077,7 @@ function TaskAimless()  {
                     position : [8, 0, 1, 8],
                     showon   :
                     {
-                        'TIE_DETAILS': ['ADJUST'],
+                        'TIE_DETAILS': ['ADJUST']
                     },
                     keyword  : 'TIE_SURFACE',
                     type     : 'combobox',
@@ -1066,7 +1085,7 @@ function TaskAimless()  {
                     iwidth   : 82,
                     tooltip  : 'Restrain secondary beam scales to sphere',
                     value    : 'True',
-                    label    : 'Restrain surface parameters to a sphere',
+                    label    : 'Restrain surface parameters to a sphere'
                 },
                 TIE_SURFACE_SD:
                 {
@@ -1077,14 +1096,15 @@ function TaskAimless()  {
                     {
                         '_': '&&',
                         'TIE_DETAILS': ['ADJUST'],
-                        'TIE_SURFACE': ['True'],
+                        'TIE_SURFACE': ['True']
                     },
                     keyword  : 'TIE_SURFACE_SD',
                     label    : 'SD',
                     type     : 'real_',
                     tooltip  : 'SD for restraints on secondary beam scales to ' +
                                'sphere (default 0.005)',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
                 TIE_BFACTOR:
                 {
@@ -1092,7 +1112,7 @@ function TaskAimless()  {
                     position : [10, 0, 1, 8],
                     showon   :
                     {
-                        'TIE_DETAILS': ['ADJUST'],
+                        'TIE_DETAILS': ['ADJUST']
                     },
                     keyword  : 'TIE_BFACTOR',
                     type     : 'combobox',
@@ -1101,7 +1121,7 @@ function TaskAimless()  {
                     label    : 'Restrain successive B-factors together',
                     value    : 'False',
                     tooltip  : 'Restrain neighbouring B-factors on rotation ' +
-                               'axis',
+                               'axis'
                 },
                 TIE_BFACTOR_SD:
                 {
@@ -1112,14 +1132,15 @@ function TaskAimless()  {
                     {
                         '_': '&&',
                         'TIE_DETAILS': ['ADJUST'],
-                        'TIE_BFACTOR': ['True'],
+                        'TIE_BFACTOR': ['True']
                     },
                     keyword  : 'TIE_BFACTOR_SD',
                     label    : 'SD',
                     type     : 'real_',
                     tooltip  : 'SD for restraints on neighbouring B-factors ' +
                                'on rotation axis (default 0.05)',
-                    value    : '',
+                    min      : '0',
+                    value    : ''
                 },
                 TIE_BZERO:
                 {
@@ -1127,7 +1148,7 @@ function TaskAimless()  {
                     position : [12, 0, 1, 8],
                     showon   :
                     {
-                        'TIE_DETAILS': ['ADJUST'],
+                        'TIE_DETAILS': ['ADJUST']
                     },
                     keyword  : 'TIE_BZERO',
                     type     : 'combobox',
@@ -1135,7 +1156,7 @@ function TaskAimless()  {
                     iwidth   : 82,
                     label    : 'Tie B-factors to zero',
                     value    : '',
-                    tooltip  : 'Restrain B-factors to zero',
+                    tooltip  : 'Restrain B-factors to zero'
                 },
                 TIE_BZERO_SD:
                 {
@@ -1146,17 +1167,18 @@ function TaskAimless()  {
                     {
                         '_': '&&',
                         'TIE_DETAILS': ['ADJUST'],
-                        'TIE_BZERO': ['True'],
+                        'TIE_BZERO': ['True']
                     },
                     keyword  : 'TIE_BZERO_SD',
                     label    : 'SD',
                     type     : 'real_',
                     tooltip  : 'SD for restrain on B-factors tied to zero ' +
                                '(default 10.0)',
-                    value    : '',
-                },
+                    min      : '0',
+                    value    : ''
+                }
             }
-        },
+        }
     };
 }
 

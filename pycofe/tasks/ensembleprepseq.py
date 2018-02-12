@@ -198,4 +198,4 @@ class EnsemblePrepSeq(basic.TaskDriver):
 if __name__ == "__main__":
 
     drv = EnsemblePrepSeq ( "",os.path.basename(__file__) )
-    drv.run()
+    drv.start()

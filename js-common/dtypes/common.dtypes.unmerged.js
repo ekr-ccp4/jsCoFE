@@ -88,7 +88,7 @@ if (!__template)  {
     var ranges = '';
     for (var i=0;i<this.dataset.runs.length;i++)
       ranges += '[' + this.dataset.runs[i][1] + ',' + this.dataset.runs[i][2] + ']&nbsp;';
-    dsp.makeRow ( 'Ranges',ranges,'Image ranges' );
+    dsp.makeRow ( 'Batches',ranges,'Batch ranges' );
 
     return dsp;
 
@@ -158,11 +158,12 @@ if (!__template)  {
         customGrid.combosel = new ComboDropdown ( symm,[230,200,180],0 );
         customGrid.setWidget ( customGrid.combosel,row++,0,1,2 );
       } else  {
-        customGrid.setLabel ( 'Ranges:',row,0,1,1 ).setFontItalic(true).setWidth ( '70px' );
+        customGrid.setLabel ( 'Batches:',row,0,1,1 ).setFontItalic(true).setWidth ( '70px' );
         customGrid.setVerticalAlignment ( row,0,'middle' );
-        var tooltip = 'Available ranges:';
+        var range_list = [];
         for (var i=0;i<this.dataset.runs.length;i++)
-          tooltip += '  [' + this.dataset.runs[i][1] + ',' + this.dataset.runs[i][2] + ']';
+          range_list.push(this.dataset.runs[i][1] + '-' + this.dataset.runs[i][2]);
+        tooltip = 'Available batches:<br>' + range_list.join(', ');
         customGrid.runs = customGrid.setInputText ( this.runs,row,1,1,1 )
                                     .setTooltip ( tooltip )
                                     .setWidth ( '440px' );
@@ -217,18 +218,9 @@ if (!__template)  {
         }
         if (!ok)
         {
-          msg = '<b><i>Incorrect batch selection:</i>&nbsp;' + this.runs + '</b><br>'
-              + '<br>Rules:<br>'
-              + '- Selection must contain comma-separated batch ranges;<br>'
-              + '- A range can be a single batch number or two dash-separated batch numbers;<br>'
-              + '- All batch numbers in the selection must be increasing numbers.<br>'
-              + '- Batch numbers outside available ranges are allowed.<br>'
-              + '- Spaces are alloed but not between didgits.<br>'
-//            + '- The numbers of the first and the last available batches canbe skipped.<br>'
-              + 'Examples:<br>'
-              + '1-11,33-99,111,112,114-222<br>'
-//            + ' - 11, 33 - 99, 111, 112, 114 - 99999<br>'
-          ;
+          msg = '<b><i>Incorrect batch selection:</i>&nbsp;' + this.runs + '</b><br>';
+          msg += '<br>An example of a correct selection:<br>';
+          msg += '1-101, 110, 111, 112, 121-222<br>';
         }
       }
     }

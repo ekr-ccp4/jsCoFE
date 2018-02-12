@@ -284,4 +284,4 @@ class Parrot(basic.TaskDriver):
 if __name__ == "__main__":
 
     drv = Parrot ( "",os.path.basename(__file__) )
-    drv.run()
+    drv.start()

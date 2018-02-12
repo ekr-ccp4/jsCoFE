@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    11.01.18   <--  Date of Last Modification.
+ *    12.02.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -152,6 +152,8 @@ var counts    = knowledge.counts;
 var ctotal    = 0;
 var r         = 0;  // grid row
 
+//console.log ( knowledge );
+
   for (var i=0;i<counts.length;i++)  {
     ctotal += counts[i];
     for (var j=i+1;j<counts.length;j++)
@@ -170,6 +172,8 @@ var r         = 0;  // grid row
       ctotal -= counts[i];
     }
 
+  return r;  // indicates whether the tab is empty or not
+
 }
 
 
@@ -179,7 +183,7 @@ var navail   = 0;
 var row      = 0;
 
   this.makeSection = function ( title,task_list )  {
-    var section = grid.setSection ( title,false, row++,0,1,1 );
+    var section = grid.setSection ( title,false, row++,0,1,3 );
     var cnt = 0;
     var r   = 0;
     for (n=0;n<task_list.length;n++)
@@ -202,6 +206,23 @@ var row      = 0;
     }
   }
 
+  /*
+  grid.setLabel ( '<ul style="margin-left:-30px;"><li><b><i>For easy cases without complications ' +
+                  '(experimental):</i></b></li></ul>',
+                  row++,0,1,3 );
+  this.setTask ( new TaskCCP4ez(),grid,row++,true ); //.dataSummary.status>0)
+  grid.setLabel ( '<ul style="margin-left:-30px;"><li><b><i>or a task from ' +
+                  'full list:</i></b></li></ul>',
+                  row++,0,1,3 );
+  */
+
+
+  this.makeSection ( 'Combined Automated Solver <i>"CCP4 Easy"</i>',[
+    'Recommended as first attempt or in easy cases',
+    new TaskCCP4ez()
+  ]);
+  var section1 = section0;
+
   this.makeSection ( 'Data Import',[
     new TaskImport(),
     'Utilities',
@@ -215,8 +236,9 @@ var row      = 0;
   ]);
 
   this.makeSection ( 'Asymmetric Unit Contents',[
-    new TaskASUDef(),
-    new TaskASUMod()
+    new TaskASUDef      (),
+    new TaskASUDefStruct(),
+    new TaskASUMod      ()
   ]);
 
   this.makeSection ( 'Molecular Replacement',[
@@ -276,6 +298,8 @@ var row      = 0;
 
   if (navail==1)
     section0.open();
+  else if (section1)
+    section1.open();
 
 }
 

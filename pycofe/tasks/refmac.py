@@ -141,4 +141,4 @@ class Refmac(basic.TaskDriver):
 if __name__ == "__main__":
 
     drv = Refmac ( "",os.path.basename(__file__) )
-    drv.run()
+    drv.start()

@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    06.02.18   <--  Date of Last Modification.
+#    10.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -19,6 +19,7 @@ import os
 #  ccp4-python imports
 import pyrvapi
 import pyrvapi_ext.parsers
+from   ccp4mg import mmdb2
 
 import mtz
 import datred_utils
@@ -28,11 +29,6 @@ import ccp4ez_base
 # ============================================================================
 
 class PrepareMTZ(ccp4ez_base.Base):
-
-    #def mtz_header_id(self):  return "ccp4ez_mtz_header_tab"
-    #def mtz_page_id  (self):  return "ccp4ez_mtz_tab"
-    #def mtz_logtab_id(self):  return "ccp4ez_mtz_log_tab"
-    #def mtz_errtab_id(self):  return "ccp4ez_mtz_err_tab"
 
     def datared_dir  (self):  return "datared"
     def joined_mtz   (self):  return os.path.join(self.datared_dir(),"joined_tmp.mtz")
@@ -77,15 +73,11 @@ class PrepareMTZ(ccp4ez_base.Base):
             return ""
 
         self.input_hkl = mf[0]
-        #print " name=" + self.input_hkl.name
-        #self.input_hkl.prn()
         if mf.is_merged():
             self.hkl     = self.input_hkl
+            #self.hkl.prn()
             self.mtzpath = self.hklpath
             self.stdout ( " ... given reflections are merged\n" )
-            #self.putMessageLF ( "<b>" + str(self.stage_no) +
-            #                    ". Refection data is merged -- no " +
-            #                    "scaling and merging<b>" )
             return ""
 
 
@@ -99,10 +91,6 @@ class PrepareMTZ(ccp4ez_base.Base):
                                 "CCP4ez Automated Structure Solver: Scaling and Merging",
                                 self.datared_dir(),parent_branch_id )
 
-        #                        self.mtz_page_id  (),self.mtz_logtab_id(),
-        #                        self.mtz_errtab_id() )
-
-        #self.putMessage ( "<h2>Data Reduction with Aimless</h2>" )
         self.putMessage ( "<h3>1. Extracting images</h3>" )
 
         self.open_script  ( "pointless1" )
@@ -263,7 +251,50 @@ class PrepareMTZ(ccp4ez_base.Base):
                                  self.page_cursor[0],self.page_cursor[1],
                                  0,1,1,-1 )
 
+        meta = {}
+        meta["nResults"] = 1
+        meta["mtz"]      = self.mtzpath
+        meta["merged"]   = True
+        meta["spg"]      = self.hkl.HM
+        self.output_meta["results"][self.datared_dir()] = meta
+
         self.quit_branch ( branch_data,self.datared_dir(),
-                           "Refection data scaled and merged (Pointless, Aimless)" )
+                           "Refection data scaled and merged (Pointless, " +
+                           "Aimless), <i>SpG=" + meta["spg"] + "</i>" )
 
         return  branch_data["pageId"]
+
+
+    # ----------------------------------------------------------------------
+
+    def checkSpaceGroup ( self,fpath_xyz ):
+        mm = mmdb2.Manager()
+        mm.ReadCoorFile ( str(fpath_xyz) )
+        spg      = mm.GetSpaceGroup()
+        spg_info = None
+        spg_key  = spg.replace(" ","")
+
+        if spg_key != self.hkl.HM.replace(" ",""):
+            self.file_stdout.write ( " *** space group changed to " + spg + "\n" )
+            spg_info = { 'spg' : spg, 'hkl' : "" }
+            if not spg_key in self.mtz_alt:
+                # reindex first time
+                self.open_script  ( "reindex_" + spg_key )
+                self.write_script ( "SYMM \"" + spg + "\"\n" )
+                self.close_script ()
+                # new hkl file path
+                hklout = os.path.join ( self.datared_dir(),spg_key+".mtz" )
+                cmd = [ "hklin" ,self.mtzpath,
+                        "hklout",hklout ]
+                # run reindex
+                self.runApp ( "reindex",cmd )
+                if os.path.isfile(hklout):
+                    spg_info["hkl"]       = hklout
+                    self.mtz_alt[spg_key] = hklout
+                else:
+                    self.file_stdout.write ( " +++ cannot reindex\n" )
+                    self.file_stderr.write ( " +++ cannot reindex\n" )
+            else:
+                spg_info["hkl"] = self.mtz_alt[spg_key]
+
+        return spg_info

@@ -58,7 +58,8 @@ def run ( body ):  # body is reference to the main Import class
         if os.path.isdir(dirpath):
 
             if k == 0:
-                xraySecId = "xray_sec"
+                xraySecId = "xray_sec_" + str(body.widget_no)
+                body.widget_no += 1
                 pyrvapi.rvapi_add_section ( xraySecId,"X-Ray Diffraction Images",
                                             body.report_page_id(),body.rvrow,
                                             0,1,1,False )

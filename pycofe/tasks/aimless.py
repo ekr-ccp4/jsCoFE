@@ -36,7 +36,8 @@ import pyrvapi
 #  application imports
 import basic
 from  pycofe.proc      import datred_utils, import_merged
-from  pycofe.i2reports import aimless_pipe as i2report
+# does not works after update 7.0.052
+# from  pycofe.i2reports import aimless_pipe as i2report
 
 
 # ============================================================================
@@ -65,50 +66,43 @@ class Aimless(basic.TaskDriver):
 
     # ------------------------------------------------------------------------
 
-    def log(self, *args):
-        self.file_stdout.write(repr(args))
-        self.file_stdout.write('\n')
+#   def log(self, *args):
+#       self.file_stdout.write(repr(args))
+#       self.file_stdout.write('\n')
 
     def run(self):
-        try:
-            reso_high = str(self.input_data.data.ds0[0].dataset.reso)
-            par = ParamStorage()
-            for k1, v1 in sorted(vars(self.task.parameters).items()):
-                for k2, v2 in sorted(vars(v1.contains).items()):
-                    if v2.type != 'label':
-                        assert k2 not in vars(par)
-                        p2 = self.getParameter(v2).strip()
-#                       self.log(k1, k2, p2)
-                        setattr(par, k2, p2)
+        unmerged = self.makeClass ( self.input_data.data.unmerged )
+        merge_separately = len(unmerged) > 1
+        reso_list = [str(ds.dataset.reso) for ds in unmerged]
+        reso_high = min(reso_list, key=lambda x: float(x))
 
-            aimless_lines = list()
-            scalingProtocol(par, aimless_lines)
-            scalingDetails(par, aimless_lines)
-            rejectOutliers(par, aimless_lines)
-            SDcorrection(par, aimless_lines)
-            intensitiesAndPartials(par, aimless_lines)
-            self.log('# Aimless parameters')
-            for line in aimless_lines:
-                self.log(' '.join(line.split()))
+        par = ParamStorage()
+        for k1, v1 in sorted(vars(self.task.parameters).items()):
+            for k2, v2 in sorted(vars(v1.contains).items()):
+                if v2.type != 'label':
+                    assert k2 not in vars(par)
+                    p2 = self.getParameter(v2).strip()
+#                   self.log(k1, k2, p2)
+                    setattr(par, k2, p2)
 
-            pointless_lines = list()
-            pointlessParams(par, pointless_lines, reso_high)
-            self.log('# Pointless parameters')
-            for line in pointless_lines:
-                self.log(' '.join(line.split()))
+        aimless_lines = list()
+        scalingProtocol(par, aimless_lines)
+        scalingDetails(par, aimless_lines)
+        rejectOutliers(par, aimless_lines)
+        SDcorrection(par, aimless_lines)
+        intensitiesAndPartials(par, aimless_lines)
+#       self.log('# Aimless parameters')
+#       for line in aimless_lines:
+#           self.log(' '.join(line.split()))
 
-#           rewrite - depends on No of datasets as well
-            scaCbx = par.MERGE_DATASETS == 'SEPARATELY'
-            trace = ''
+        pointless_lines = list()
+        pointlessParams(par, pointless_lines, reso_high)
+#       self.log('# Pointless parameters')
+#       for line in pointless_lines:
+#           self.log(' '.join(line.split()))
 
-        except:
-            trace = ''.join(traceback.format_exception(*sys.exc_info()))
-            for item in trace.split('\n'):
-                self.log(item)
-        
-        if trace:
-            self.fail(trace, 'failed processing input parameters')
-            return
+        if merge_separately:
+            merge_separately = par.MERGE_DATASETS == 'SEPARATELY'
 
 # for quick tests of parameters:
 #       else:
@@ -116,10 +110,7 @@ class Aimless(basic.TaskDriver):
 #           return
 #   def tmp(self):
 
-        # fetch input data
         ds0      = self.input_data.data.ds0[0]
-        unmerged = self.makeClass ( self.input_data.data.unmerged )
-
         mtzRef      = os.path.join(self.inputDir(),ds0.files[0])
         symm_select = ds0.symm_select if ds0._type=="DataUnmerged" else None
 
@@ -131,7 +122,7 @@ class Aimless(basic.TaskDriver):
         script_list = datred_utils.get_point_script (
                             symm_select,mtzRef,plist,
                             self.pointless_mtz(),self.pointless_xml(),
-                            self.file_stdout,scaCbx )
+                            merge_separately )
 
         if len(script_list)==3:
             title = [ "<h3>1. Extracting selected images</h3>",
@@ -146,6 +137,18 @@ class Aimless(basic.TaskDriver):
                 "wrong number of pointless scripts" )
             return
 
+# print all pointless scripts
+#       self.file_stdout.write('#!/bin/sh -xe\n')
+#       for script in script_list:
+#           self.file_stdout.write('#-------------------------------------\n')
+#           self.file_stdout.write('pointless <<+\n')
+#           for line in pointless_lines:
+#               self.file_stdout.write(line + '\n')
+#
+#           self.file_stdout.write(script)
+#           self.file_stdout.write('+\n')
+#
+#       self.file_stdout.write('#-------------------------------------\n')
         n = 0
         for script in script_list:
             self.open_stdin()
@@ -167,13 +170,8 @@ class Aimless(basic.TaskDriver):
         #self.putSection ( self.symm_det(),"Symmetry determination tables",True )
         pyrvapi.rvapi_add_section ( self.symm_det(),"Symmetry determination tables",
                                     panel_id,3,0,1,1,False )
-        try:
-            table_list = datred_utils.parse_xmlout(self.pointless_xml())
-        except:
-            self.fail(
-                "failed parsing pointless xmlout: possible pointless failure",
-                "failed parsing pointless xmlout" )
-            return
+
+        table_list = datred_utils.parse_xmlout(self.pointless_xml())
         datred_utils.report(table_list, self.symm_det())
 
         # dump_keyargs = dict(sort_keys=True, indent=4, separators=(',', ': '))
@@ -206,7 +204,7 @@ class Aimless(basic.TaskDriver):
 
         # get list of files to import
         output_ok = True
-        if scaCbx and (len(unmerged)>1):
+        if merge_separately:
             self.files_all = []
             for i in range(len(unmerged)):
                 file_i = "aimless_" + str(i+1) + ".mtz"
@@ -271,10 +269,8 @@ class Aimless(basic.TaskDriver):
             self.success()
         else:
             self.file_stdout.write('Aimles has faild, see above.')
-            self.fail ( 'Aimless hass faild, see end of Log file for details',
-                        'Aimless_Failed' )
-        return
-
+            self.fail ( 'Aimless faild, see Log and Error tabs for details',
+                'Aimless_Failed' )
 
 # ============================================================================
 
@@ -500,5 +496,5 @@ def pointlessParams(par, lines, high_data):
 if __name__ == "__main__":
 
     drv = Aimless ( "Data Reduction with Aimless",os.path.basename(__file__) )
-    drv.run()
+    drv.start()
 

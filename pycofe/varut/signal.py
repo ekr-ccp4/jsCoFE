@@ -14,38 +14,53 @@
 # ============================================================================
 #
 
-import os
-import sys
-
-# ============================================================================
+import os, sys
 
 
-def signal_file_name():  return "signal"
+class CofeSignal( Exception ):
+    signal_file_name = "signal"
+    signal_prefix = None
+    returncode = None
+
+    @classmethod
+    def clear(cls):
+        if os.path.isfile( cls.signal_file_name ):
+            os.remove ( cls.signal_file_name )
+
+    def __init__( self, msg="" ):
+        self.msg = msg
+
+    def send_signal( self ):
+        message = self.signal_prefix + self.msg + '\n' + str( self.returncode )
+        with open ( self.signal_file_name, 'w' ) as f:
+            f.write( message )
+
+    def quitApp( self ):
+        self.send_signal()
+        sys.exit(self.returncode)
 
 
 def clear():
-    try:  # quite often, this will try to remove signal file that does not exist
-        os.remove ( signal_file_name() )
-    except:
-        pass
-    return
+    CofeSignal.clear()
 
 
-def import_failed(): # actually this one cannot be used if varut import failed :)
-    with open ( signal_file_name(),'w' ) as f: f.write ( "fail_import\n200" )
-    sys.exit ( 200 )
+class Success( CofeSignal ):
+    returncode = 0
+    signal_prefix = "success"
 
 
-def task_read_failed():
-    with open ( signal_file_name(),'w' ) as f: f.write ( "fail_task_read\n201" )
-    sys.exit ( 201 )
+class ImportFailure( CofeSignal ):
+    returncode = 200
+    signal_prefix = "fail_import"
 
 
-def job_failed ( message_str ):
-    with open ( signal_file_name(),'w') as f: f.write ( "fail_job " + message_str + "\n202" )
-    sys.exit ( 203 )
+class TaskReadFailure( CofeSignal ):
+    returncode = 201
+    signal_prefix = "fail_task_read"
 
 
-def success():
-    with open ( signal_file_name(),'w') as f: f.write ( "success\n0" )
-    sys.exit ( 0 )
+class JobFailure( CofeSignal ):
+    returncode = 203
+    signal_prefix = "fail_job "
+
+

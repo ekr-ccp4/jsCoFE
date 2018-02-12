@@ -62,7 +62,8 @@ def run ( body ):  # body is reference to the main Import class
     body.file_stdout.write ( "%%%%%  IMPORT OF XYZ COORDINATES\n" )
     body.file_stdout.write ( "%"*80 + "\n" )
 
-    xyzSecId = "xyz_sec"
+    xyzSecId = "xyz_sec_" + str(body.widget_no)
+    body.widget_no += 1
 
     pyrvapi.rvapi_add_section ( xyzSecId,"XYZ Coordinates",body.report_page_id(),
                                 body.rvrow,0,1,1,False )

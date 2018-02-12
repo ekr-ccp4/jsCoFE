@@ -84,4 +84,4 @@ if __name__ == "__main__":
 
     drv = Ample ( "Ab-initio Molecular Replacement with AMPLE",os.path.basename(__file__) )
 
-    drv.run()
+    drv.start()

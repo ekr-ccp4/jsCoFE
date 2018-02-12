@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    06.02.18   <--  Date of Last Modification.
+ *    10.02.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -36,7 +36,7 @@ function TaskCCP4ez()  {
   this._type   = 'TaskCCP4ez';
   this.name    = 'ccp4ez';
   this.oname   = 'ccp4ez';  // default output file name template
-  this.title   = 'CCP4ez Automated Structure Solver';
+  this.title   = 'CCP4ez Automated Structure Solver (experimental)';
   this.helpURL = './html/jscofe_task_ccp4ez.html';
 
   this.ha_type = '';
@@ -44,9 +44,11 @@ function TaskCCP4ez()  {
   for (var i=0;i<10;i++)
     this.ligands.push ( { 'source':'none', 'smiles':'', 'code':'' } );
 
+  this.input_dtypes = [1];  // input data types
+
   this.parameters = { // input parameters
     sec1  : { type     : 'section',
-              title    : 'Advanced Parameters',
+              title    : 'Components control (advanced)',
               open     : false,  // true for the section to be initially open
               position : [0,0,1,8],
               contains : {
@@ -79,13 +81,19 @@ function TaskCCP4ez()  {
                         position  : [0,3,1,1],
                         showon    : {'DATASET_SEL':['G']}
                       },
-                */
                 TITLE1 : {
                         type      : 'label',  // just a separator
-                        label     : '<h3>Components controls</h3><i>Uncheck ' +
+                        label     : '<h3>Components control</h3><i>Uncheck ' +
                                     'components which <u>should not</u> ' +
                                     'be used:</i><sub>&nbsp;</sub>',
                         position : [1,0,1,5],
+                      },
+                      */
+                TITLE1 : {
+                        type      : 'label',  // just a separator
+                        label     : '<i>Uncheck components which <u>should not</u> ' +
+                                    'be used:</i><sub>&nbsp;</sub>',
+                        position  : [0,0,1,5],
                       },
                 SIMBAD12_CBX : {
                         type      : 'checkbox',
@@ -96,7 +104,7 @@ function TaskCCP4ez()  {
                                     'contaminants.',
                         iwidth    : 350,
                         value     : true,
-                        position  : [2,0,1,3]
+                        position  : [1,0,1,3]
                       },
                 MORDA_CBX : {
                         type      : 'checkbox',
@@ -106,7 +114,7 @@ function TaskCCP4ez()  {
                                     'molecular replacement.',
                         iwidth    : 350,
                         value     : true,
-                        position  : [3,0,1,3]
+                        position  : [2,0,1,3]
                       },
                 CRANK2_CBX : {
                         type      : 'checkbox',
@@ -114,6 +122,15 @@ function TaskCCP4ez()  {
                         label     : 'Automated Experimental Phasing',
                         tooltip   : 'Uncheck to skip automated experimental ' +
                                     'phasing.',
+                        iwidth    : 350,
+                        value     : true,
+                        position  : [3,0,1,3]
+                      },
+                FITLIGANDS_CBX : {
+                        type      : 'checkbox',
+                        keyword   : 'findligands',
+                        label     : 'Fitting Ligands',
+                        tooltip   : 'Uncheck to skip fitting ligands.',
                         iwidth    : 350,
                         value     : true,
                         position  : [4,0,1,3]

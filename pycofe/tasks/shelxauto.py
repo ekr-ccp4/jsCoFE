@@ -136,4 +136,4 @@ if __name__ == "__main__":
 
     drv = ShelxAuto ( "Automated Experimental Phasing with SHELX (via Crank-2)",
                       os.path.basename(__file__) )
-    drv.run()
+    drv.start()

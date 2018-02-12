@@ -40,6 +40,7 @@
 import os
 import sys
 import shutil
+import traceback
 
 #  ccp4-python imports
 import pyrvapi
@@ -85,6 +86,7 @@ class TaskDriver(object):
 
     def log_page_id       (self): return "log_page"
     def err_page_id       (self): return "err_page"
+    def traceback_page_id (self): return "python_exception"
 
     def file_stdout_path  (self): return "_stdout.log" # reserved name, used in NC
     def file_stderr_path  (self): return "_stderr.log"
@@ -137,6 +139,13 @@ class TaskDriver(object):
     navTreeId     = "" # navigation tree Id
 
     # ========================================================================
+    # cofe config
+
+#   This needs to be obtained from the jscofe config-file.
+#   maintainerEmail = None
+    maintainerEmail = "my.name@gmail.com"
+
+    # ========================================================================
     # initiaisation
 
     def __init__ ( self,title_str,module_name,options={}, args=None ):
@@ -162,7 +171,7 @@ class TaskDriver(object):
         # clear signal file; this is mostly for command-line debugging, the signal
         # should be cleared in JS layer before this script is invoked
 
-        signal.clear()
+        signal.CofeSignal.clear()
 
         # get command line arguments and change to job directory; keep all file names
         # relative to job directory, this is a must
@@ -193,7 +202,7 @@ class TaskDriver(object):
             self.file_stdout.write ( "\n\n *** task read failed in '" + module_name + "'\n\n" )
             self.file_stderr.write ( "\n\n *** task read failed in '" + module_name + "'\n\n" )
             print " task read failed in '" + module_name + "'"
-            signal.task_read_failed()  # terminates inside signal
+            raise signal.TaskReadFailure()
 
         self.input_data = databox.readDataBox ( self.inputDir() )
 
@@ -301,6 +310,12 @@ class TaskDriver(object):
     def getDMapOFName ( self,modifier=-1 ):
         return self.getOFName ( ".diff.map",modifier )
 
+    # ============================================================================
+
+    def getWidgetId ( self,wid ):
+        widgetId = wid + "_" + str(self.widget_no)
+        self.widget_no += 1
+        return widgetId
 
     # ============================================================================
 
@@ -319,7 +334,8 @@ class TaskDriver(object):
     # ============================================================================
 
     def insertReportTab ( self,title_str,focus=True ):
-        pyrvapi.rvapi_insert_tab ( self.report_page_id(),title_str,self.log_page_id(),focus  )
+        pyrvapi.rvapi_insert_tab ( self.report_page_id(),title_str,
+                                   self.log_page_id(),focus  )
         self.rvrow = 0;
         self.putTitle ( title_str )
         pyrvapi.rvapi_flush ()
@@ -332,6 +348,12 @@ class TaskDriver(object):
 
     def putMessage1 ( self,pageId,message_str,row,colSpan=1 ):
         pyrvapi.rvapi_set_text ( message_str,pageId,row,0,1,colSpan )
+        return
+
+    def putMessageLF ( self,message_str ):
+        pyrvapi.rvapi_set_text ( "<font style='font-size:120%;'>" + message_str +
+                        "</font>",self.report_page_id(),self.rvrow,0,1,1 )
+        self.rvrow += 1
         return
 
     def putWaitMessageLF ( self,message_str ):
@@ -567,7 +589,7 @@ class TaskDriver(object):
 
     def setGenericLogParser ( self,panel_id,split_sections_bool,graphTables=False ):
         self.putPanel ( panel_id )
-        self.generic_parser_summary = {}
+        #self.generic_parser_summary = {}
         self.log_parser = pyrvapi_ext.parsers.generic_parser (
                                          panel_id,split_sections_bool,
                                          summary=self.generic_parser_summary,
@@ -628,7 +650,7 @@ class TaskDriver(object):
         self.file_stdin = None
 
         if rc.msg and quitOnError:
-            signal.job_failed ( rc.msg )  # terminates inside signal
+            raise signal.JobFailure ( rc.msg )
 
         return rc
 
@@ -962,7 +984,7 @@ class TaskDriver(object):
     def putStructureWidget1 ( self,pageId,widgetId,title_str,structure,openState,row,colSpan ):
         self.putMessage1 ( pageId,"<b>Assigned name:</b>&nbsp;" +
                                   structure.dname +
-                                  "<font size='-1'><br>&nbsp;</font>", row,1 )
+                                  "<font size='+2'><sub>&nbsp;</sub></font>", row,1 )
         wId     = widgetId + str(self.widget_no)
         self.widget_no += 1
         type    = ["xyz","hkl:map","hkl:ccp4_map","hkl:ccp4_dmap","LIB"]
@@ -996,8 +1018,8 @@ class TaskDriver(object):
 
     def putLigandWidget1 ( self,pageId,widgetId,title_str,ligand,openState,row,colSpan ):
         wId = widgetId + str(self.widget_no)
-        self.putMessage1 ( pageId,"<b>Assigned name:</b>&nbsp;" + ligand.dname +\
-                                  "<br>&nbsp;", row,1 )
+        self.putMessage1 ( pageId,"<b>Assigned name:</b>&nbsp;" + ligand.dname +
+                                  "<font size='+2'><sub>&nbsp;</sub></font>", row,1 )
         pyrvapi.rvapi_add_data ( wId,title_str,
                                  # always relative to job_dir from job_dir/html
                                  os.path.join("..",self.outputDir(),ligand.files[0]),
@@ -1110,8 +1132,8 @@ class TaskDriver(object):
                               sol_spg + "</b></font>" )
             rvrow0      = self.rvrow
             self.rvrow += 1
-            if not self.generic_parser_summary:
-                self.generic_parser_summary = {}
+            #if not self.generic_parser_summary:
+            #    self.generic_parser_summary = {}
             self.generic_parser_summary["z01"] = {'SpaceGroup':sol_spg}
             newHKLFPath = self.getOFName ( "_" + solSpg + "_" + hkl.files[0],-1 )
             os.rename ( mtzfilepath,newHKLFPath )
@@ -1155,6 +1177,8 @@ class TaskDriver(object):
                               sol_spg + "</b></font>" )
             #rvrow0      = self.rvrow
             self.rvrow += 1
+
+            self.generic_parser_summary["z01"] = {'SpaceGroup':sol_spg}
 
             # prepare script for reindexing
             self.open_stdin  ()
@@ -1207,8 +1231,7 @@ class TaskDriver(object):
         pyrvapi.rvapi_flush   ()
         self.file_stdout.close()
         self.file_stderr.close()
-        signal.success()  # the thread terminates inside the signal()
-        return
+        raise signal.Success()
 
     def fail ( self,pageMessage,signalMessage ):
         if self.task and self.generic_parser_summary:
@@ -1224,5 +1247,48 @@ class TaskDriver(object):
         self.file_stderr.write ( msg + "\n" )
         self.file_stdout.close ()
         self.file_stderr.close ()
-        signal.job_failed ( signalMessage )  # terminates inside signal
-        return
+        raise signal.JobFailure ( signalMessage )
+
+    def python_fail_tab ( self ):
+        trace = ''.join( traceback.format_exception( *sys.exc_info() ) )
+        msg = '<h2><i>Job Driver Failure</i></h2>'
+        msg += '<p>Catched error:<pre>' + trace + '</pre>'
+        msg += """
+        <p>This is an internal error, which may be caused by different
+        sort of hardware and network malfunction, but most probably due
+        to a bug or not anticipated properties of input data.
+        """
+        if self.maintainerEmail:
+            msg += """
+            <p>You may contribute to the improvement of jsCoFE by sending this
+            message <b>together with</b> input data <b>and task description</b> to
+            """
+            msg += self.maintainerEmail
+
+        page_id = self.traceback_page_id()
+        pyrvapi.rvapi_add_tab ( page_id, "Error Trace", True )
+        pyrvapi.rvapi_set_text ( msg, page_id, 0, 0, 1, 1 )
+
+    def start(self):
+        try:
+            self.run()
+
+        except signal.Success, s:
+            signal_obj = s
+
+        except signal.CofeSignal, s:
+            self.python_fail_tab()
+            signal_obj = s
+
+        except:
+            self.python_fail_tab()
+            signal_obj = signal.JobFailure()
+
+        else:
+            signal_obj = signal.Success()
+
+        finally:
+            pass
+
+        signal_obj.quitApp()
+

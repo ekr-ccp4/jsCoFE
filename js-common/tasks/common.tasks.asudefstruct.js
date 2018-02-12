@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    12.02.18   <--  Date of Last Modification.
+ *    10.02.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -10,7 +10,7 @@
  *       ~~~~~~~~~
  *  **** Project :  jsCoFE - javascript-based Cloud Front End
  *       ~~~~~~~~~
- *  **** Content :  ASU Definition Task Class
+ *  **** Content :  ASU Definition (from Structure) Task Class
  *       ~~~~~~~~~
  *
  *  (C) E. Krissinel, A. Lebedev 2016-2018
@@ -23,31 +23,29 @@
 var __template = null;
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
-  __template = require ( './common.tasks.template' );
+  __template = require ( './common.tasks.asudef' );
 
 // ===========================================================================
 
-function TaskASUDef()  {
+function TaskASUDefStruct()  {
 
-  if (__template)  __template.TaskTemplate.call ( this );
-             else  TaskTemplate.call ( this );
+  if (__template)  __template.TaskASUDef.call ( this );
+             else  TaskASUDef.call ( this );
 
-  this._type     = 'TaskASUDef';
+  this._type     = 'TaskASUDefStruct';
   this.name      = 'asymmetric unit content';
   this.oname     = 'asu definition';  //'*';   // asterisk here means do not use
-  this.title     = 'Asymmetric Unit Content';
-  this.helpURL   = './html/jscofe_task_asudef.html';
+  this.title     = 'Asymmetric Unit Content from Structure';
+  this.helpURL   = './html/jscofe_task_asudef_struct.html';
   this.fasttrack = true;  // enforces immediate execution
 
   this.input_dtypes = [{   // input data types
-      data_type   : {'DataHKL':[]},  // data type(s) and subtype(s)
-      label       : 'Reflections',   // label for input dialog
-      tooltip     : 'Reflection dataset to be used for phasing and refinement ' +
-                    'in further tasks, or a Structure object.',
-      inputId     : 'hkl',          // input Id for referencing input fields
+      data_type   : {'DataStructure':['xyz']},  // data type(s) and subtype(s)
+      label       : 'Structure',   // label for input dialog
+      tooltip     : 'Structure object with phasing results.',
+      inputId     : 'istruct',       // input Id for referencing input fields
       min         : 1,               // minimum acceptable number of data instances
       max         : 1                // maximum acceptable number of data instances
-      /*
     },{
       // enforce having at least 1 DataHKL in the branch, and also get access to them
       data_type   : {'DataHKL':[]}, // data type(s) and subtype(s)
@@ -55,7 +53,6 @@ function TaskASUDef()  {
       inputId     : 'void1',    // void input Id for not showing the item
       min         : 1,          // minimum acceptable number of data instances
       max         : 100000      // maximum acceptable number of data instances
-      */
     },{
       data_type   : {'DataSequence':['~unknown']}, // data type(s) and subtype(s)
       label       : 'Sequence',    // label for input dialog
@@ -73,6 +70,7 @@ function TaskASUDef()  {
     }
   ];
 
+  /*
   this.parameters = { // input parameters
     sec1 : {  type     : 'section',
               title    : 'Parameters',
@@ -164,58 +162,54 @@ function TaskASUDef()  {
               }
     }
   };
+  */
 
 }
 
 
 if (__template)
-      TaskASUDef.prototype = Object.create ( __template.TaskTemplate.prototype );
-else  TaskASUDef.prototype = Object.create ( TaskTemplate.prototype );
-TaskASUDef.prototype.constructor = TaskASUDef;
+      TaskASUDefStruct.prototype = Object.create ( __template.TaskASUDef.prototype );
+else  TaskASUDefStruct.prototype = Object.create ( TaskASUDef.prototype );
+TaskASUDefStruct.prototype.constructor = TaskASUDefStruct;
 
 
 // ===========================================================================
 // export such that it could be used in both node and a browser
 
-TaskASUDef.prototype.icon_small = function()  { return './images/task_asudef_20x20.svg'; }
-TaskASUDef.prototype.icon_large = function()  { return './images/task_asudef.svg';       }
+TaskASUDefStruct.prototype.icon_small = function()  { return './images/task_asudef_20x20.svg'; }
+TaskASUDefStruct.prototype.icon_large = function()  { return './images/task_asudef.svg';       }
 
-TaskASUDef.prototype.currentVersion = function()  { return 0; }
+TaskASUDefStruct.prototype.currentVersion = function()  { return 0; }
 
 if (__template)  {
   //  for server side
 
   var conf = require('../../js-server/server.configuration');
 
-/*
-  TaskASUDef.prototype.makeInputData = function ( jobDir )  {
+  TaskASUDefStruct.prototype.makeInputData = function ( jobDir )  {
 
     // put hkl in input databox for copying their files in
     // job's 'input' directory
 
-    if (this.input_data.data['hkls'][0]._type=='DataStructure')  {
-      if ('void1' in this.input_data.data)  {
-        var assoc = this.input_data.data['hkls'][0].associated;
-        var hkl = this.input_data.data['void1'];
-        var hkl_sel = [];
-        for (var i=0;i<hkl.length;i++)
-          if (assoc.indexOf(hkl[i].dataId)>=0)
-            hkl_sel.push ( hkl[i] );
-        this.input_data.data['hkl'] = hkl_sel;
-      }
-    }
+    var assoc = this.input_data.data['istruct'][0].associated;
+    var hkl = this.input_data.data['void1'];
+    var hkl_sel = [];
+    for (var i=0;i<hkl.length;i++)
+      if (assoc.indexOf(hkl[i].dataId)>=0)
+        hkl_sel.push ( hkl[i] );
+    this.input_data.data['hkl'] = hkl_sel;
 
-    __template.TaskTemplate.prototype.makeInputData.call ( this,jobDir );
+    __template.TaskASUDef.prototype.makeInputData.call ( this,jobDir );
 
   }
-*/
 
-  TaskASUDef.prototype.getCommandLine = function ( exeType,jobDir )  {
+
+  TaskASUDefStruct.prototype.getCommandLine = function ( exeType,jobDir )  {
     return [conf.pythonName(), '-m', 'pycofe.tasks.asudef', exeType, jobDir, this.id];
   }
 
   // -------------------------------------------------------------------------
 
-  module.exports.TaskASUDef = TaskASUDef;
+  module.exports.TaskASUDefStruct = TaskASUDefStruct;
 
 }

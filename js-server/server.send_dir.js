@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    02.02.18   <--  Date of Last Modification.
+ *    12.02.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -153,7 +153,7 @@ function unpackDir ( dirPath,cleanTmpDir, onReady_func )  {
   // however silly, we separate ungzipping and untaring because using '-xzf'
   // has given troubles on one system
   var unpack_com = 'gzip -d '   + path.join(dirPath,'__*.tar.gz') +
-                   '; tar -xf ' + tarballPath;
+                   '&& tar -xf ' + tarballPath;
 
   if (cleanTmpDir)  {
     var tmpDir = '';
@@ -162,15 +162,19 @@ function unpackDir ( dirPath,cleanTmpDir, onReady_func )  {
     } while (utils.fileExists(tmpDir));
     utils.mkDir ( tmpDir );
     unpack_com += ' -C '      + tmpDir  +
-                  '; rm -rf ' + path.join(dirPath,'*') +
-                  '; mv '     + path.join(tmpDir ,'*') + ' ' + dirPath +
-                  '; rm -rf ' + tmpDir;
+                  '&& rm -rf ' + path.join(dirPath,'*') +
+                  '&& mv '     + path.join(tmpDir ,'*') + ' ' + dirPath +
+                  '&& rm -rf ' + tmpDir;
   } else {
     unpack_com += ' -C ' + dirPath + '; rm ' + tarballPath;
   }
 
   var tar = child_process.spawn ( '/bin/sh',['-c',unpack_com],{
     stdio : ['ignore']
+  });
+
+  tar.stderr.on ( 'data',function(data){
+    log.error ( 15,'tar/unpackDir errors: "' + data + '"; encountered in ' + dirPath );
   });
 
   tar.on('close', function(code){

@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    09.09.17   <--  Date of Last Modification.
+#    11.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -19,7 +19,7 @@
 #                       all successful imports
 #      jobDir/report  : directory receiving HTML report
 #
-#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017
+#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017-2018
 #
 # ============================================================================
 #
@@ -87,6 +87,7 @@ class ChangeSpG(basic.TaskDriver):
             new_hkl.new_spg = hkl.new_spg.replace(" ","")
             revision.setReflectionData ( new_hkl  )
             self.registerRevision      ( revision )
+            self.generic_parser_summary["z01"] = {'SpaceGroup':hkl.new_spg}
 
         else:
             self.putTitle ( "No Output Generated" )
@@ -101,4 +102,4 @@ class ChangeSpG(basic.TaskDriver):
 if __name__ == "__main__":
 
     drv = ChangeSpG ( "",os.path.basename(__file__) )
-    drv.run()
+    drv.start()

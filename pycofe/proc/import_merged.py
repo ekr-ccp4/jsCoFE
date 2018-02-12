@@ -135,7 +135,7 @@ def run ( body,   # body is reference to the main Import class
     if not files_mtz:
         return
 
-    mtzSecId = "mtz_sec"
+    mtzSecId = body.getWidgetId ( "mtz_sec" ) + "_"
 
     k = 0
     for f_orig, f_fmt in files_mtz:
@@ -146,7 +146,6 @@ def run ( body,   # body is reference to the main Import class
             p_mtzin = os.path.splitext(f_orig)[0] + '.mtz'
             sp = subprocess.Popen ( 'pointless', stdin=subprocess.PIPE,
                 stdout=body.file_stdout, stderr=body.file_stderr )
-
             sp.stdin.write('XDSIN ' + p_orig + '\nHKLOUT ' + p_mtzin + '\nCOPY\n')
             sp.stdin.close()
             if sp.wait():
@@ -264,14 +263,19 @@ def run ( body,   # body is reference to the main Import class
                     pyrvapi.rvapi_add_text ( "&nbsp;<p><h2>Data analysis (CTruncate)</h2>",
                                              subSecId,1,0,1,1 )
                     pyrvapi.rvapi_add_panel ( mtzSecId+str(k),subSecId,2,0,1,1 )
-                    log_parser = pyrvapi_ext.parsers.generic_parser ( mtzSecId+str(k),False )
 
+                    """
+                    log_parser = pyrvapi_ext.parsers.generic_parser ( mtzSecId+str(k),
+                            False,body.generic_parser_summary,False )
                     rc = command.call ( "ctruncate",cmd,"./",None,
                                         body.file_stdout,body.file_stderr,log_parser )
+                    """
+                    body.setGenericLogParser ( mtzSecId+str(k),False )
+                    body.runApp ( "ctruncate",cmd )
 
                     body.file_stdout.flush()
 
-                    mtzTableId = "mtz_" + str(k) + "_table"
+                    mtzTableId = body.getWidgetId("mtz") + "_" + str(k) + "_table"
 
                     if rc.msg:
                         msg = "\n\n CTruncate failed with message:\n\n" + \
@@ -291,7 +295,7 @@ def run ( body,   # body is reference to the main Import class
                         makeHKLTable ( body,mtzTableId,subSecId,hkl,hkl,0,"",0 )
                         datasetName = hkl.dname
 
-                        srf.putSRFDiagram ( hkl,body.outputDir(),
+                        srf.putSRFDiagram ( body,hkl,body.outputDir(),
                                             body.reportDir(),subSecId,
                                             3,0,1,1, body.file_stdout,
                                             body.file_stderr, None )
@@ -323,7 +327,7 @@ def run ( body,   # body is reference to the main Import class
                             makeHKLTable ( body,mtzTableId,subSecId,hkl,hkl_data,1,"",0 )
                             datasetName = hkl_data.dname
 
-                            srf.putSRFDiagram ( hkl_data,body.outputDir(),
+                            srf.putSRFDiagram ( body,hkl_data,body.outputDir(),
                                                 body.reportDir(),subSecId,
                                                 3,0,1,1, body.file_stdout,
                                                 body.file_stderr, None )

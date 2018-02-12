@@ -150,4 +150,4 @@ class Molrep(basic.TaskDriver):
 if __name__ == "__main__":
 
     drv = Molrep ( "Molecular Replacement with Molrep",os.path.basename(__file__) )
-    drv.run()
+    drv.start()

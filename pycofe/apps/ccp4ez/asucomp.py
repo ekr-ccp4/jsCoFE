@@ -181,6 +181,24 @@ def getASUComp ( coorFilePath,sequenceList,clustThresh=0.9 ):
     return result
 
 
+# ============================================================================
+
+def getASUComp1 ( coorFilePath,seqFilePath,clustThresh=0.9 ):
+# version with all template sequences taken from file
+    seqlist = []
+    if seqFilePath:
+        with open(seqFilePath,'r') as f:
+            content = f.read()
+        clist = filter ( None,content.split('>') )
+        for i in range(len(clist)):
+            seqdata = clist[i].splitlines()
+            seq = ""
+            for j in range(1,len(seqdata)):
+                seq += seqdata[j].strip()
+            seqlist.append ( seq )
+    return getASUComp ( coorFilePath,seqlist,clustThresh )
+
+
 def main():
 
     import json
@@ -216,6 +234,11 @@ def main():
       "AKPSDLIPELQGRLPIRVELQALTTSDFERILTEPNASITVQYKALMATEGVNIEFTDSGIKRIAEAAWQ" +
       "VNESTENIGARRLHTVLERLMEEISYDASDLSGQNITIDADYVSKHLDALVADEDLSRFIL"
     ])
+    print json.dumps(result,indent=2)
+
+    print " ================================================================"
+    print " SEQUENCE TAKEN FROM FILE:\n"
+    result = getASUComp1 ( "1e94.pdb","1e94.fasta" )
     print json.dumps(result,indent=2)
 
     return

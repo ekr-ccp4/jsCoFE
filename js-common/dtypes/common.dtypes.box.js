@@ -189,6 +189,15 @@ DataBox.prototype.getDataSummary = function ( task )  {
 
   var summary = { status : 2 };
 
+  if ((task.input_dtypes.length==1) && (task.input_dtypes[0]==1))  {
+    var ndata = 0;
+    for (var dtype in this.data)
+      ndata += this.data[dtype].length;
+    if (ndata>0)
+      summary.status = 0;
+    return summary;
+  }
+
   for (var i=0;i<task.input_dtypes.length;i++)  {
 
     var nDTypes  = 0;

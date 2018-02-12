@@ -49,7 +49,8 @@ def run(body):  # body is reference to the main Import class
     body.file_stdout.write ( "%%%%%  Map volume data\n" )
     body.file_stdout.write ( "%"*80 + "\n" )
 
-    mapSecId = "map_sec"
+    mapSecId = "map_sec_" + str(body.widget_no)
+    body.widget_no += 1
 
     pyrvapi.rvapi_add_section ( mapSecId, "Map", body.report_page_id(),
                                 body.rvrow, 0, 1, 1, False )

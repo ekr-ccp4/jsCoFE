@@ -65,4 +65,4 @@ class Xyz2Revision(asudef.ASUDef):
 if __name__ == "__main__":
 
     drv = Xyz2Revision ( "",os.path.basename(__file__) )
-    drv.run()
+    drv.start()

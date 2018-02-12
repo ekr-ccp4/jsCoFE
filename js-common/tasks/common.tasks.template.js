@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    01.02.18   <--  Date of Last Modification.
+ *    09.02.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -71,7 +71,9 @@ function TaskTemplate()  {
   this.informFE     = true;   // end of job and results are sent back to FE
 
   this.upload_files = [];   // list of uploaded files
-  this.input_dtypes = [];   // input data type definitions; []: any input data is allowed
+  this.input_dtypes = [];   // input data type definitions; []: any input data is allowed;
+                            // [1]: no data is required but the task is allowed only
+                            // on the topmost level of job tree
   if (dbx)  {
     this.input_data   = new dbx.DataBox(); // actual input data, represented by DataBox
     this.output_data  = new dbx.DataBox(); // actual output data, represented by DataBox
@@ -364,6 +366,9 @@ if (!dbx)  {
   // Sets dropdown controls for input data from 'dataBox' in grid 'grid'
   // starting from row 'row'
 
+    if ((this.input_dtypes.length==1) && (this.input_dtypes[0]==1))
+      return;
+
     dataBox.extendData();
 
     // this is necessary for proper stacking of dropdown controls:
@@ -387,6 +392,8 @@ if (!dbx)  {
     // allocate dropdown widgets
     var dropdown = [];  // dropdown[i][j] gives jth dropdown widget for ith
                         // input data parameter
+
+    grid.void_data = {};  // collectes data from 'void' data entries
 
     for (var i=0;i<this.input_dtypes.length;i++)  {
       // loop over input data structures in 'this' task
@@ -440,6 +447,15 @@ if (!dbx)  {
               break;
             }
         }
+
+      } else  {
+
+        var void_data = [];
+        for (var dtype in inp_item.data_type)
+          if (dtype in dataBox.data)  // given data type is found in the data box
+            void_data = void_data.concat ( dataBox.data[dtype] );
+
+        grid.void_data[inp_item.inputId] = void_data;
 
       }
 
@@ -905,6 +921,11 @@ if (!dbx)  {
         }
 
       }
+
+      if ('void_data' in widget)
+        for (var inputId in widget.void_data)
+          for (var j=0;j<widget.void_data[inputId].length;j++)
+            inp_data.addCustomData ( inputId,widget.void_data[inputId][j] );
 
       for (var i=0;i<widget.child.length;i++)
         collectData ( widget.child[i] );
@@ -1666,6 +1687,8 @@ if (!dbx)  {
                                       d.R_free   + ' ';
                       break;
           case 'z01'    : S += '<u>SpG=' + d.SpaceGroup  + '</u> ';
+                      break;
+          case 'z02'    : S += 'Solv=' + d.SolventPercent + '% ';
                       break;
           default : ;
         }

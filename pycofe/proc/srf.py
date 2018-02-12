@@ -26,11 +26,12 @@ from pycofe.varut import command
 
 # ============================================================================
 
-def putSRFDiagram ( hkl,          # hkl data object
-                    dirPath,      # directory with hkl object files (outputDir)
-                    reportDir,    # directory with html report (reportDir)
-                    holderId,     # rvapi holder of SRF widget
-                    row,col,      # rvapi coordinates for SRF widget
+def putSRFDiagram ( body,            # reference on Basic class
+                    hkl,             # hkl data object
+                    dirPath,         # directory with hkl object files (outputDir)
+                    reportDir,       # directory with html report (reportDir)
+                    holderId,        # rvapi holder of SRF widget
+                    row,col,         # rvapi coordinates for SRF widget
                     rowSpan,colSpan, # coordinate spans for STF widget
                     file_stdout,     # standard output stream
                     file_stderr,     # standard error stream
@@ -84,7 +85,7 @@ def putSRFDiagram ( hkl,          # hkl data object
     pdfpath = os.path.splitext(hkl.files[0])[0] + ".pdf"
     os.rename ( "molrep_rf.pdf",os.path.join(reportDir,pdfpath) )
 
-    subsecId = holderId + "_srf"
+    subsecId = body.getWidgetId ( holderId ) + "_srf"
     pyrvapi.rvapi_add_section ( subsecId,"Self-Rotation Function",
                                 holderId,row,col,rowSpan,colSpan,False )
 

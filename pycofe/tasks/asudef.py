@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    13.12.17   <--  Date of Last Modification.
+#    11.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -19,7 +19,7 @@
 #                       all successful imports
 #      jobDir/report  : directory receiving HTML report
 #
-#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017
+#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017-2018
 #
 # ============================================================================
 #
@@ -35,7 +35,7 @@ import pyrvapi
 
 #  application imports
 from   pycofe.tasks  import basic
-from   pycofe.dtypes import dtype_revision, dtype_sequence
+from   pycofe.dtypes import dtype_revision, dtype_sequence, dtype_structure
 from   pycofe.proc   import import_sequence
 from   pycofe.varut  import rvapi_utils
 
@@ -293,7 +293,8 @@ def makeRevision ( base,hkl,seq,composition,altEstimateKey,altNRes,
 
 # ------------------------------------------------------------------------
 
-def revisionFromStructure ( base,hkl,structure,name ):
+def revisionFromStructure ( base,hkl,structure,name,useSequences=None,
+                                 make_revision=True ):
 
     chains  = structure.xyzmeta["xyz"][0]["chains"]
     seq     = []
@@ -328,7 +329,8 @@ def revisionFromStructure ( base,hkl,structure,name ):
         else:
             fname = ""
         fname += name + "_" + id[i] + ".fasta"
-        dtype_sequence.writeSeqFile ( fname,name + "_" + id[i],seq[i] )
+        dtype_sequence.writeSeqFile ( os.path.join(base.importDir(),fname),
+                                      name + "_" + id[i],seq[i] )
         base.files_all.append ( fname )
         annot = { "file":fname, "rename":fname, "items":[
           { "rename":fname, "contents": seq[i], "type": stype[i] }
@@ -339,34 +341,66 @@ def revisionFromStructure ( base,hkl,structure,name ):
     f.write ( json.dumps(annotation) )
     f.close ()
 
-    #  import sequence data
-    import_sequence.run ( base,"Sequences imported from " + name )
-    base.rvrow += 1
+    # prepare sequence data
 
-    #  finally, create structure revision
+    seqs = []
 
-    if base.outputFName=="*":
-        base.outputFName = name
+    if not useSequences:   #  import sequence data
 
-    base.putMessage ( "&nbsp;<br><h3>Asymmetric Unit Analysis</h3>" )
+        # take a list of already imported sequences
+        if dtype_sequence.dtype() in base.outputDataBox.data:
+            seqs = base.outputDataBox.data[dtype_sequence.dtype()]
+        seqid0 = []
+        for i in range(len(seqs)):
+            seqid0.append ( seqs[i].dataId )
 
-    seqs = base.outputDataBox.data[dtype_sequence.dtype()]
+        # import new sequences
+        import_sequence.run ( base,"Sequences imported from " + name )
+        base.rvrow += 1
+
+        # subtract previously imported sequences
+        seqs = []
+        if dtype_sequence.dtype() in base.outputDataBox.data:
+            seqs1 = base.outputDataBox.data[dtype_sequence.dtype()]
+            for i in range(len(seqs1)):
+                if seqs1[i].dataId not in seqid0:
+                    seqs.append ( seqs1[i] )
+
+    else:
+        seqs = useSequences
+
+    # check sequence numbers
+    if len(seqs)!=len(nocc):
+        return None
+
     for i in range(len(seqs)):
         seqs[i].ncopies = nocc[i]
 
-    composition = "P"
-    if type_aa<1:
-        composition = "D"
-    elif type_nr>0:
-        composition = "C"
+    #  finally, create structure revision
 
-    revision = makeRevision ( base,hkl,seqs,composition,"NR","1","1",
-                                   "",None,"" )
-    if revision[0]:
-        revision[0].setStructureData ( structure   )
-        base.registerRevision        ( revision[0] )
 
-    return revision[0]
+    if make_revision:
+
+        if base.outputFName=="*":
+            base.outputFName = name
+
+        composition = "P"
+        if type_aa<1:
+            composition = "D"
+        elif type_nr>0:
+            composition = "C"
+
+        base.putMessage ( "&nbsp;<br><h3>Asymmetric Unit Analysis</h3>" )
+
+        revision = makeRevision ( base,hkl,seqs,composition,"NR","1","1",
+                                                            "",None,"" )
+        if revision[0]:
+            revision[0].setStructureData ( structure   )
+            base.registerRevision        ( revision[0] )
+
+        return revision[0]
+
+    return None
 
 
 
@@ -398,6 +432,10 @@ class ASUDef(basic.TaskDriver):
         # Prepare matthews input
 
         # fetch input data
+        istruct = None
+        if hasattr(self.input_data.data,"istruct"):
+            istruct = self.makeClass ( self.input_data.data.istruct[0] )
+
         hkl  = self.makeClass ( self.input_data.data.hkl[0] )
         sec1 = self.task.parameters.sec1.contains
         seq  = []
@@ -432,7 +470,12 @@ class ASUDef(basic.TaskDriver):
                               "</h3>" )
 
         if revision[0]:
+            if istruct:
+                revision[0].setStructureData ( istruct )
             self.registerRevision ( revision[0] )
+            self.generic_parser_summary["z02"] = {
+                'SolventPercent' : int(10*sol0)/10.0
+            }
 
         # close execution logs and quit
         self.success()
@@ -444,4 +487,4 @@ class ASUDef(basic.TaskDriver):
 if __name__ == "__main__":
 
     drv = ASUDef ( "",os.path.basename(__file__) )
-    drv.run()
+    drv.start()

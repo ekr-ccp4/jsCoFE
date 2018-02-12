@@ -34,7 +34,7 @@ class Buccaneer(ccp4ez_crank2.Crank2):
         if datadir.endswith(self.crank2_dir()) or not self.seqpath:
             return ""
 
-        self.putMessage       ( "&nbsp;" )
+        #self.putMessage       ( "&nbsp;" )
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                                 ". Automated Model Building (Buccaneer)</b>" )
         self.page_cursor[1] -= 1
@@ -64,7 +64,7 @@ class Buccaneer(ccp4ez_crank2.Crank2):
             "colin-free "   + columns["FREE"] + "\n" +
             "colin-phifom " + columns["PHI"]  + ","  + columns["FOM"]  + "\n" +
             "pdbout " + os.path.join(resultdir,"buccaneer.pdb") + "\n" +
-            "cycles 5\n" +
+            "cycles 10\n" +
             "buccaneer-anisotropy-correction\n" +
             "buccaneer-build-semet\n" +
             "buccaneer-fast\n" +
@@ -142,7 +142,8 @@ class Buccaneer(ccp4ez_crank2.Crank2):
 
         self.saveResults ( "Buccanneer",resultdir,
             nResults,rfree,rfactor,"buccaneer", buccaneer_xyz,buccaneer_mtz,
-            buccaneer_map,buccaneer_dmap,None,None,buccaneer_columns )
+            buccaneer_map,buccaneer_dmap,None,None,buccaneer_columns,
+            None )  # space group does not change after buccaneer
 
         self.quit_branch ( branch_data,resultdir,
                            "Automated Model Building (Buccaneer): " + quit_message )
