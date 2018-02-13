@@ -121,21 +121,16 @@ class CCP4ez(ccp4ez_fitligands.FitLigands):
         if d and rfree <= 0.45:
             self.buccaneer  ( d,"buccaneer","" )
             d = self.checkResult ( "buccaneer",d,1.0 )
-            self.file_stdout.write ( " xxxx0 d=" + d + " \n" )
             self.acedrg     ( "acedrg","" )
-            self.file_stdout.write ( " xxxx1 " + str(self.output_meta["results"]["acedrg"]["nResults"]) + "\n" )
-            if self.output_meta["results"]["acedrg"]["nResults"] > 0:
-                self.file_stdout.write ( " xxxx2 d=" + d + " \n" )
-                self.dimple  ( d,"dimple_refine","refine","" )
-                self.file_stdout.write ( " xxxx3 \n" )
-                d = self.checkResult ( "dimple_refine",d,1.0 )
-                self.file_stdout.write ( " xxxx4 d=" + d + " \n" )
-                self.fitLigands ( d,"fitligands","" )
-                self.file_stdout.write ( " xxxx5 \n" )
+            if "acedrg" in self.output_meta["results"]:
+                if self.output_meta["results"]["acedrg"]["nResults"] > 0:
+                    self.dimple  ( d,"dimple_refine","refine","" )
+                    d = self.checkResult ( "dimple_refine",d,1.0 )
+                    self.fitLigands ( d,"fitligands","" )
                 #d1 = self.checkResult ( "fitligands",d,1.0 )
                 #if d1!=d:
                 #    self.lorestr ( "fitligands","" )
-            else:
+            if not "fitligands" in self.output_meta["results"]:
                 self.dimple ( d,"dimple_refine","refine","" )
                 #self.lorestr ( d,"lorestr","" )
 

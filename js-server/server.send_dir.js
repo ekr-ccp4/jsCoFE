@@ -156,15 +156,22 @@ function unpackDir ( dirPath,cleanTmpDir, onReady_func )  {
                    '&& tar -xf ' + tarballPath;
 
   if (cleanTmpDir)  {
-    var tmpDir = '';
+    var tmpDir1 = '';
     do {
-      tmpDir = path.join ( cleanTmpDir,crypto.randomBytes(20).toString('hex') );
-    } while (utils.fileExists(tmpDir));
-    utils.mkDir ( tmpDir );
-    unpack_com += ' -C '      + tmpDir  +
+      tmpDir1 = path.join ( cleanTmpDir,crypto.randomBytes(20).toString('hex') );
+    } while (utils.fileExists(tmpDir1));
+    utils.mkDir ( tmpDir1 );
+    tmpDir2 = tmpDir1 + '_JOBDIRCOPY'
+    unpack_com += ' -C '       + tmpDir1 +
+                  '&& mv '     + dirPath + ' ' + tmpDir2 +
+                  '&& mv '     + tmpDir1 + ' ' + dirPath +
+                  '&& rm -rf ' + tmpDir2;
+    /*
+    unpack_com += ' -C '       + tmpDir1  +
                   '&& rm -rf ' + path.join(dirPath,'*') +
-                  '&& mv '     + path.join(tmpDir ,'*') + ' ' + dirPath +
-                  '&& rm -rf ' + tmpDir;
+                  '&& mv '     + path.join(tmpDir1 ,'*') + ' ' + dirPath +
+                  '&& rm -rf ' + tmpDir1;
+    */
   } else {
     unpack_com += ' -C ' + dirPath + '; rm ' + tarballPath;
   }
