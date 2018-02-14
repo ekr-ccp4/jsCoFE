@@ -38,6 +38,9 @@ class Dimple(ccp4ez_mtz.PrepareMTZ):
             self.file_stdout.write ( " *** repeat run of Dimple skipped\n" )
             return ""
 
+        self.file_stdout.write ( " ... run dimple in " + mode + " mode\n" )
+        self.file_stdout.write ( " ... datadir = " + str(datadir) + "\n" )
+
         #self.putMessage       ( "&nbsp;" )
 
         if mode=="mr":
@@ -59,13 +62,15 @@ class Dimple(ccp4ez_mtz.PrepareMTZ):
         if datadir:
             meta    = self.output_meta["results"][datadir]
             columns = meta["columns"]
-            cmd = [ meta["mtz"],meta["pdb"],resultdir,
-                    "--fcolumn",columns["F"],"--sigfcolumn",columns["SIGF"] ]
+            cmd     = [ meta["mtz"],meta["pdb"],resultdir,
+                        "--fcolumn",columns["F"],"--sigfcolumn",columns["SIGF"],
+                        "--free-r-flags","-","--freecolumn",columns["FREE"] ]
             if "lib" in meta:
                 cmd += [ "--libin",meta["lib"] ]
         else:
-            cmd = [ self.mtzpath,self.xyzpath,resultdir ]
-        cmd += [ "--slow","--slow","--free-r-flags","-" ]
+            cmd = [ self.mtzpath,self.xyzpath,resultdir,"--free-r-flags","-",
+                    "--freecolumn",self.hkl.FREE ]
+        cmd += [ "--slow","--slow" ]
         #cmd += [ "--free-r-flags","-" ]
 
         # run dimple

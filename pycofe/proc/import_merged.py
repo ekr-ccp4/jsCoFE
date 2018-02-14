@@ -270,6 +270,9 @@ def run ( body,   # body is reference to the main Import class
                     rc = command.call ( "ctruncate",cmd,"./",None,
                                         body.file_stdout,body.file_stderr,log_parser )
                     """
+                    body.file_stdin = None  # not clear why this is not None at
+                                            # this point and needs to be forced,
+                                            # or else runApp looks for input script
                     body.setGenericLogParser ( mtzSecId+str(k),False )
                     body.runApp ( "ctruncate",cmd )
 

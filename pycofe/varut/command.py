@@ -77,16 +77,22 @@ def call ( executable,command_line,job_dir,stdin_fname,file_stdout,
     file_stdout.write ( "\n" + "="*80 + "\n\n" )
     file_stdout.flush()
 
-    p = subprocess.Popen ( [executable] + command_line,
+    rc = comrc ()
+    try:
+        p = subprocess.Popen ( [executable] + command_line,
                           shell=False,
                           stdin=file_stdin,
                           stdout=subprocess.PIPE if log_parser else file_stdout,
                           stderr=file_stderr )
 
-    if log_parser:
-        log_parser.parse_stream ( p.stdout,file_stdout )
+        if log_parser:
+            log_parser.parse_stream ( p.stdout,file_stdout )
 
-    rc = comrc ( os.wait4(p.pid,0) )
+        rc = comrc ( os.wait4(p.pid,0) )
+
+    except Exception, e:
+        rc.msg = str(e)
+
     if file_stdin:
         file_stdin.close()
 

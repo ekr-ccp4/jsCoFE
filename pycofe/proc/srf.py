@@ -70,7 +70,7 @@ def putSRFDiagram ( body,            # reference on Basic class
                         "molrep_srf.script",file_stdout,file_stderr,log_parser )
 
     if not os.path.isfile("molrep_rf.ps"):
-        file_stderr.write ( "SRF postscript was not generated for " +\
+        file_stderr.write ( "\nSRF postscript was not generated for " +\
                             hkl.files[0] + "\n" )
         return [-2,rc.msg]
 
@@ -78,7 +78,7 @@ def putSRFDiagram ( body,            # reference on Basic class
                         None,file_stdout,file_stderr,log_parser )
 
     if not os.path.isfile("molrep_rf.pdf"):
-        file_stderr.write ( "SRF pdf was not generated for " +\
+        file_stderr.write ( "\nSRF pdf was not generated for " +\
                             hkl.files[0] + "\n" )
         return [-3,rc.msg]
 

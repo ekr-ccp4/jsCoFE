@@ -196,8 +196,8 @@ if (!__template)  {
       var lbl   = setLabel ( rowNo,label,tooltip );
       var fsel  = div.grid.setSelectFile ( false,accept_str,rowNo,2,1,1 );
       fsel.hide();
-      var btn   = div.grid.addButton ( 'Browse','./images/open_file.svg',rowNo,2,1,1 )
-                          .setWidth_px ( 86 );
+      var btn   = div.grid.addButton ( 'Browse','./images/open_file.svg',rowNo,2,1,1 );
+//                          .setWidth_px ( 86 );
       var itext = div.grid.setInputText ( fname,rowNo,3,1,2 )
                           .setWidth_px(300).setReadOnly(true).setNoWrap(true);
       div.grid.setVerticalAlignment ( rowNo,2,'middle' );

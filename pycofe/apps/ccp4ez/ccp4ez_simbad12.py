@@ -137,6 +137,7 @@ class Simbad12(ccp4ez_dimple.Dimple):
                 fpath_map  = os.path.join(self.reportdir,meta["map"])
                 fpath_dmap = os.path.join(self.reportdir,meta["dmap"])
                 asuComp    = asucomp.getASUComp1 ( fpath_xyz,self.seqpath )
+                self.file_stdout.write ( json.dumps ( asuComp,indent=2 ))
                 spg_info   = self.checkSpaceGroup ( fpath_xyz )
         else:
             nResults = -1  # indication of an error

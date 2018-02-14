@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    07.02.18   <--  Date of Last Modification.
+#    13.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -107,11 +107,22 @@ def getASUComp ( coorFilePath,sequenceList,clustThresh=0.9 ):
         chain = model.GetChain ( i )
         seq   = ""
         nres  = chain.GetNumberOfResidues()
+        nAA   = 0
+        nNA   = 0
         for j in range(nres):
             res = chain.GetResidue(j)
             if res.isAminoacid() or res.isNucleotide():
+                if res.isAminoacid():
+                    nAA += 1
+                else:
+                    nNA += 1
                 if res.name in resCodes:
                     seq += resCodes[res.name]
+        if nAA >= nNA:
+            if len(seq) <= 20:  # threshold for protein chains
+                seq = None
+        elif len(seq) <= 6:  # threshold for DNA/RNA chains
+            seq = None
         if seq:
             seqlist.append ( seq )
 

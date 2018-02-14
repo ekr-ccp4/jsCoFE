@@ -205,8 +205,8 @@ if (!dbx)  {
       if (n<0)
         n = text.length;
       var inp = header.setInputText ( text.substring(0,n).trim(),row,col,1,1 )
-                      .setStyle     ( 'text','',prompt.replace(/<(?:.|\n)*?>/gm, '') )
-                      .setHeight    ( '1em' );
+                      .setStyle     ( 'text','',prompt.replace(/<(?:.|\n)*?>/gm, '') );
+                      //.setHeight    ( '1em' );
       header.setVerticalAlignment ( row,col,'middle' );
       header.setCellSize ( '98%','', row,col );
       return inp;
@@ -225,13 +225,13 @@ if (!dbx)  {
     header.uname_lbl = putLabel ( 'job description:&nbsp;',row,0 );
     header.setVerticalAlignment ( row,0,'middle' );
     header.uname_inp = putInput ( this.uname.trim(),this.name,row++,1 )
-                                .setWidth ( '90%' ).setHeight_px ( 18 );
+                                .setWidth ( '90%' ); //.setHeight_px ( 18 );
 
     if (this.oname!='*')  {
       header.uoname_lbl = putLabel ( 'output id:&nbsp;',row,0 );
       header.setVerticalAlignment  ( row,0,'middle' );
       header.uoname_inp = putInput ( this.uoname.trim(),this.oname,row,1 )
-                                   .setWidth_px(200).setHeight_px ( 18 );
+                                   .setWidth_px(200);//.setHeight_px ( 18 );
     }
 
     header.setHLine ( 1, 3,0,1,4 );
