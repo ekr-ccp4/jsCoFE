@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    12.02.18   <--  Date of Last Modification.
+ *    22.02.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -97,7 +97,8 @@ function sendDir ( dirPath, fileSelection, serverURL, command, metaData,
         for (key in metaData)
           formData[key] = metaData[key];
 
-      formData['file'] = fs.createReadStream ( path.join(dirPath,tarballName) );
+      var tarballPath  = path.join(dirPath,tarballName);
+      formData['file'] = fs.createReadStream ( tarballPath );
 
       request.post({
 
@@ -125,7 +126,8 @@ function sendDir ( dirPath, fileSelection, serverURL, command, metaData,
           }
         }
 
-        utils.removeFile ( formData['file'] );
+        //utils.removeFile ( formData['file'] );
+        utils.removeFile ( tarballPath );
 
       });
 

@@ -19,11 +19,11 @@ import os
 #  ccp4-python imports
 #import pyrvapi
 
-import ccp4ez_morda
+import ccp4go_morda
 
 # ============================================================================
 
-class Crank2(ccp4ez_morda.MoRDa):
+class Crank2(ccp4go_morda.MoRDa):
 
     def crank2_dir(self):  return "crank2_results"
 
@@ -45,7 +45,7 @@ class Crank2(ccp4ez_morda.MoRDa):
         self.page_cursor[1] -= 1
 
         branch_data = self.start_branch ( "Auto-EP (Crank-2)",
-                        "CCP4ez Automated Structure Solver: Auto-EP " +
+                        "CCP4go Automated Structure Solver: Auto-EP " +
                         "with Crank-2", self.crank2_dir(),parent_branch_id,
                         "results_tab" )
 
@@ -125,7 +125,7 @@ class Crank2(ccp4ez_morda.MoRDa):
         rfactor  = 1.0
         spg_info = None
         if os.path.isfile(crank2_xyz):
-            spg_info = self.checkSpaceGroup ( crank2_xyz )
+            spg_info = self.checkSpaceGroup ( self.hkl.HM,crank2_xyz )
             nResults = 1
             self.mk_std_streams ( None )
             rfree_pattern   = "R-free factor after refinement is "
@@ -137,6 +137,7 @@ class Crank2(ccp4ez_morda.MoRDa):
                     if line.startswith(rfactor_pattern):
                         rfactor = float(line.replace(rfactor_pattern,""))
         else:
+            spg_info   = { "spg":self.hkl.HM, "hkl":"" }
             crank2_xyz = ""
 
         columns = {

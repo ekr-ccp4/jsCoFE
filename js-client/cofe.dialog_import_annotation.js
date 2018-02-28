@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    18.12.17   <--  Date of Last Modification.
+ *    19.02.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  Import Annotation Dialog (to annotate data before upload)
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -45,7 +45,7 @@ function ImportAnnotationDialog ( annotation,onReady_func )  {
       resizable : true,
       height    : 'auto',
       maxHeight : h,
-      width     : 800,
+      width     : 685,
       modal     : true,
       open      : function(event, ui) {
         $(this).closest('.ui-dialog').find('.ui-dialog-titlebar-close').hide();
@@ -99,24 +99,26 @@ ImportAnnotationDialog.prototype.makePage = function()  {
 
       for (var j=0;j<this.annotation[i].items.length;j++)  {
         //var clist   = this.annotation[i].items[j].contents.match(/^.*([\n\r]+|$)/gm);
-        var clist   = this.annotation[i].items[j].contents.replace('\r','').split('\n');
+        var clist   = this.annotation[i].items[j].contents.replace(/\r/g,'').split('\n');
         var seqline = '<pre>';
-        for (var k=0;k<clist.length;k++)  {
-          var n = 0;
+        if (clist.length>0)
+          seqline += clist[0] + '\n';
+        var n = 0;
+        for (var k=1;k<clist.length;k++)  {
           for (var m=0;m<clist[k].length;m++)  {
-            if (n>=75)  {
+            if (n>=62)  {
               seqline += '\n';
               n = 0;
             }
             seqline += clist[k][m];
             n++;
           }
-          while (n<75)  {
-            seqline += ' ';
-            n++;
-          }
-          seqline += '\n';
         }
+        while (n<62)  {
+          seqline += ' ';
+          n++;
+        }
+        seqline += '\n';
         var contents_lbl = this.grid.setLabel ( seqline+'</pre>',row,1, 1,1 );
         if (this.annotation[i].items[j].type=='none')  {
           var clist = this.annotation[i].items[j].contents.split('\n');
@@ -130,7 +132,7 @@ ImportAnnotationDialog.prototype.makePage = function()  {
           if (isProtein)
             this.annotation[i].items[j].type = 'protein';
         }
-        this.grid.setLabel ( ' ',row,2, 1,1 ).setWidth_px ( 20 );
+        this.grid.setLabel ( '&nbsp;&nbsp;&nbsp;',row,2, 1,1 ); //.setWidth_px ( 200 );
         var dropdown = new Dropdown();
         this.grid.addWidget ( dropdown,row++,3,1,1 );
         dropdown.addItem ( '[select type]','','none',this.annotation[i].items[j].type=='none');

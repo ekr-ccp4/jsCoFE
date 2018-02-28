@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    12.02.18   <--  Date of Last Modification.
+ *    19.02.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -210,16 +210,16 @@ var row      = 0;
   grid.setLabel ( '<ul style="margin-left:-30px;"><li><b><i>For easy cases without complications ' +
                   '(experimental):</i></b></li></ul>',
                   row++,0,1,3 );
-  this.setTask ( new TaskCCP4ez(),grid,row++,true ); //.dataSummary.status>0)
+  this.setTask ( new TaskCCP4go(),grid,row++,true ); //.dataSummary.status>0)
   grid.setLabel ( '<ul style="margin-left:-30px;"><li><b><i>or a task from ' +
                   'full list:</i></b></li></ul>',
                   row++,0,1,3 );
   */
 
 
-  this.makeSection ( 'Combined Automated Solver <i>"CCP4 Easy"</i>',[
+  this.makeSection ( 'Combined Automated Solver <i>"CCP4 Go"</i>',[
     'Recommended as first attempt or in easy cases',
-    new TaskCCP4ez()
+    new TaskCCP4go()
   ]);
   var section1 = section0;
 

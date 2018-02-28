@@ -22,11 +22,11 @@ import shutil
 
 import edmap
 
-import ccp4ez_lorestr
+import ccp4go_lorestr
 
 # ============================================================================
 
-class AceDrg(ccp4ez_lorestr.Lorestr):
+class AceDrg(ccp4go_lorestr.Lorestr):
 
     # ----------------------------------------------------------------------
 
@@ -41,7 +41,7 @@ class AceDrg(ccp4ez_lorestr.Lorestr):
         self.page_cursor[1] -= 1
 
         branch_data = self.start_branch ( "Making ligands",
-                        "CCP4ez Automated Structure Solver: Make " +
+                        "CCP4go Automated Structure Solver: Make " +
                         "Ligands with AceDrg", resultdir,parent_branch_id )
 
         self.flush()

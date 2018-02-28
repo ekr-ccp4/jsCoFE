@@ -21,11 +21,11 @@ import os
 
 import edmap
 
-import ccp4ez_mtz
+import ccp4go_mtz
 
 # ============================================================================
 
-class Dimple(ccp4ez_mtz.PrepareMTZ):
+class Dimple(ccp4go_mtz.PrepareMTZ):
 
     # ----------------------------------------------------------------------
 
@@ -52,22 +52,34 @@ class Dimple(ccp4ez_mtz.PrepareMTZ):
         self.page_cursor[1] -= 1
 
         branch_data = self.start_branch ( title,
-                        "CCP4ez Automated Structure Solver: " + title + " with Dimple",
+                        "CCP4go Automated Structure Solver: " + title + " with Dimple",
                         resultdir,parent_branch_id )
 
         self.flush()
         self.storeReportDocument ( "" )
 
         # make command-line parameters for dimple
+        spg_info = None
         if datadir:
-            meta    = self.output_meta["results"][datadir]
-            columns = meta["columns"]
-            cmd     = [ meta["mtz"],meta["pdb"],resultdir,
+            meta     = self.output_meta["results"][datadir]
+            columns  = meta["columns"]
+            spg      = meta["spg"]
+            cmd      = [ meta["mtz"],meta["pdb"],resultdir,
                         "--fcolumn",columns["F"],"--sigfcolumn",columns["SIGF"],
                         "--free-r-flags","-","--freecolumn",columns["FREE"] ]
             if "lib" in meta:
                 cmd += [ "--libin",meta["lib"] ]
         else:
+            columns = {
+              "F"       : self.hkl.Fmean.value,
+              "SIGF"    : self.hkl.Fmean.sigma,
+              "FREE"    : self.hkl.FREE,
+              "PHI"     : "PHIC_ALL_LS",
+              "FOM"     : "FOM",
+              "DELFWT"  : "DELFWT",
+              "PHDELWT" : "PHDELWT"
+            }
+            spg = self.hkl.HM
             cmd = [ self.mtzpath,self.xyzpath,resultdir,"--free-r-flags","-",
                     "--freecolumn",self.hkl.FREE ]
         cmd += [ "--slow","--slow" ]
@@ -89,7 +101,7 @@ class Dimple(ccp4ez_mtz.PrepareMTZ):
         spg_info    = None
         if os.path.isfile(dimple_xyz):
 
-            spg_info = self.checkSpaceGroup ( dimple_xyz )
+            spg_info = self.checkSpaceGroup ( spg,dimple_xyz )
 
             edmap.calcCCP4Maps ( dimple_mtz,os.path.join(resultdir,"final"),
                    "./",self.file_stdout,self.file_stderr,"refmac",None )
@@ -114,18 +126,9 @@ class Dimple(ccp4ez_mtz.PrepareMTZ):
                                     [ dfpath+".pdb",dfpath+".mtz",dfpath+".map",
                                       dfpath+"_dmap.map" ],-1 )
 
-        else:
+        else: # no solution
+            spg_info   = { "spg":spg, "hkl":"" }
             dimple_xyz = ""
-
-        columns = {
-          "F"       : self.hkl.Fmean.value,
-          "SIGF"    : self.hkl.Fmean.sigma,
-          "FREE"    : self.hkl.FREE,
-          "PHI"     : "PHIC_ALL_LS",
-          "FOM"     : "FOM",
-          "DELFWT"  : "DELFWT",
-          "PHDELWT" : "PHDELWT"
-        }
 
         quit_message = self.saveResults ( "Dimple",resultdir,nResults,
                 rfree,rfactor,"dimple", dimple_xyz,dimple_mtz,dimple_map,dimple_dmap,

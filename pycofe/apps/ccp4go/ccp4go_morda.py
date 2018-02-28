@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    06.02.18   <--  Date of Last Modification.
+#    20.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -19,11 +19,11 @@ import os
 #  ccp4-python imports
 #import pyrvapi
 
-import ccp4ez_simbad12
+import ccp4go_simbad12
 
 # ============================================================================
 
-class MoRDa(ccp4ez_simbad12.Simbad12):
+class MoRDa(ccp4go_simbad12.Simbad12):
 
     def morda_dir(self):  return "morda_results"
 
@@ -37,13 +37,12 @@ class MoRDa(ccp4ez_simbad12.Simbad12):
         if not self.seqpath:
             return ""
 
-        #self.putMessage       ( "&nbsp;" )
         self.putWaitMessageLF ( "<b>" + str(self.stage_no+1) +
                                 ". Automated Molecular Replacement (MoRDa)</b>" )
         self.page_cursor[1] -= 1
 
         branch_data = self.start_branch ( "Auto-MR",
-                        "CCP4ez Automated Structure Solver: Auto-MR with MoRDa",
+                        "CCP4go Automated Structure Solver: Auto-MR with MoRDa",
                         self.morda_dir(),parent_branch_id )
 
         morda_xyz  = os.path.join ( self.morda_dir(),self.outputname + ".pdb" )
@@ -96,7 +95,7 @@ class MoRDa(ccp4ez_simbad12.Simbad12):
         rfactor  = 1.0
         spg_info = None
         if os.path.isfile(morda_xyz):
-            spg_info = self.checkSpaceGroup ( morda_xyz )
+            spg_info = self.checkSpaceGroup ( self.hkl.HM,morda_xyz )
             nResults = 1
             f = open ( os.path.join(self.outputdir,"morda.res") )
             flines = f.readlines()
@@ -107,6 +106,7 @@ class MoRDa(ccp4ez_simbad12.Simbad12):
             rfree   = float(flines[1])
             rfactor = float(flines[0])
         else:
+            spg_info  = { "spg":self.hkl.HM, "hkl":"" }
             morda_xyz = ""
 
         columns = {

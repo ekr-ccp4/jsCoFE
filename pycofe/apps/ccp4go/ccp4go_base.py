@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    11.02.18   <--  Date of Last Modification.
+#    20.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -15,7 +15,7 @@
 #
 #
 #  Invocation:
-#     ccp4-python ccp4ez.py
+#     ccp4-python ccp4go.py
 #                 [--wkdir          workdir]             \
 #                 [--rdir           reportdir]           \
 #                 [--outdir         outputdir]           \
@@ -75,7 +75,7 @@ class Base(object):
     workdir        = None       # work directory (current directory at start)
     reportdir      = "report"   # report directory within work directory
     outputdir      = "output"   # directpry for output files (fixed name)
-    outputname     = "ccp4ez"   # template for output file names
+    outputname     = "ccp4go"   # template for output file names
     scriptsdir     = "scripts"  # directory to keep all scripts
 
     rvapi_prefix   = None       # uri to jstview JS support
@@ -91,9 +91,9 @@ class Base(object):
     tryFitLigands  = True
 
     stage_no       = 0          # stage number for headers
-    summaryTabId   = "ccp4ez_summary_page"     # summary tab Id
+    summaryTabId   = "ccp4go_summary_page"     # summary tab Id
     #strow          = 0          # summary tab output row number
-    navTreeId      = "ccp4ez_navigation_tree"  # navigation tree Id
+    navTreeId      = "ccp4go_navigation_tree"  # navigation tree Id
 
     hklpath        = None       # path to input reflection file, merged or unmerged
     seqpath        = None       # path to file with all sequences expected
@@ -382,7 +382,7 @@ class Base(object):
 
         # cursor0 remembers point og output in parent page
         cursor0 = self.addTab ( tree_header_id,
-                                str(self.stage_no) + ". " + branch_title,True )
+                                str(self.stage_no) + ". " + branch_title,False )
         if page_title:
             if self.jobId:
                 title = "["+self.jobId.zfill(4)+"] " + page_title
@@ -458,7 +458,7 @@ class Base(object):
     def write_meta ( self ):
         self.output_meta["report_row"] = self.page_cursor[1]
         meta = json.dumps ( self.output_meta,indent=2 )
-        with open(os.path.join(self.workdir,"ccp4ez.meta.json"),"w") as f:
+        with open(os.path.join(self.workdir,"ccp4go.meta.json"),"w") as f:
             f.write ( meta )
         if self.rvapi_doc_path:
             pyrvapi.rvapi_put_meta ( meta )
@@ -698,7 +698,8 @@ class Base(object):
         # put space grou info in meta
         if spg_info:
             meta["spg"] = spg_info["spg"]  # resulting space group
-            meta["hkl"] = spg_info["hkl"]  # reindexed hkl if space group changed
+            if spg_info["hkl"]:
+                meta["hkl"] = spg_info["hkl"]  # reindexed hkl if space group changed
 
         self.output_meta["results"][dirname] = meta
 

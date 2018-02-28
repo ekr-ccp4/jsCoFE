@@ -861,22 +861,26 @@ if (!dbx)  {
   TaskTemplate.prototype.trimDropdowns = function ( inpParamRef ) {
     // hide trailing "not used" dropdowns
 
-    var input = inpParamRef.grid.inpDataRef.input;
+    if ('inpDataRef' in inpParamRef.grid) {
 
-    for (var i=0;i<input.length;i++)  {
-      dropdown = input[i].dropdown;
-      if (dropdown.length>1)  {
-        var n0 = -1;
-        for (var n=0;n<dropdown.length;n++)
-          if (dropdown[n].getValue()>=0)
-            n0 = -1;
-          else if (n0<0)
-            n0 = n;
-        if (n0>=0)  {
-          for (var n=0;n<input[i].dropdown.length;n++)
-            inpParamRef.grid.setRowVisible ( dropdown[n].row,(n<=n0) );
+      var input = inpParamRef.grid.inpDataRef.input;
+
+      for (var i=0;i<input.length;i++)  {
+        dropdown = input[i].dropdown;
+        if (dropdown.length>1)  {
+          var n0 = -1;
+          for (var n=0;n<dropdown.length;n++)
+            if (dropdown[n].getValue()>=0)
+              n0 = -1;
+            else if (n0<0)
+              n0 = n;
+          if (n0>=0)  {
+            for (var n=0;n<input[i].dropdown.length;n++)
+              inpParamRef.grid.setRowVisible ( dropdown[n].row,(n<=n0) );
+          }
         }
       }
+
     }
 
   }
@@ -1045,10 +1049,15 @@ if (!dbx)  {
 
   TaskTemplate.prototype.inputChanged = function ( inpParamRef,emitterId,
                                                    emitterValue )  {
-  var inpDataRef = inpParamRef.grid.inpDataRef;
+  //var inpDataRef = inpParamRef.grid.inpDataRef;
   var parameters = inpParamRef.parameters;
-  var input      = inpDataRef.input;
-  var dataState  = this.getDataState ( inpDataRef );
+  //var input      = inpDataRef.input;
+  //var dataState  = this.getDataState ( inpDataRef );
+  var dataState  = null;
+
+    if ('inpDataRef' in inpParamRef.grid)
+          dataState = this.getDataState ( inpParamRef.grid.inpDataRef );
+    else  dataState = {};
 
     for (var key in parameters)  {
       parameters[key].ref.visible = true;

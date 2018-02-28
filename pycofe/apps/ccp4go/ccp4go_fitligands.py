@@ -23,11 +23,11 @@ import shutil
 import edmap
 import coor
 
-import ccp4ez_acedrg
+import ccp4go_acedrg
 
 # ============================================================================
 
-class FitLigands(ccp4ez_acedrg.AceDrg):
+class FitLigands(ccp4go_acedrg.AceDrg):
 
     # ----------------------------------------------------------------------
 
@@ -47,7 +47,7 @@ class FitLigands(ccp4ez_acedrg.AceDrg):
         self.page_cursor[1] -= 1
 
         branch_data = self.start_branch ( "Fitting ligands",
-                        "CCP4ez Automated Structure Solver: Fit " +
+                        "CCP4go Automated Structure Solver: Fit " +
                         "Ligands with Coot", resultdir,parent_branch_id )
         self.flush()
 
@@ -57,12 +57,13 @@ class FitLigands(ccp4ez_acedrg.AceDrg):
             os.mkdir ( dimpledir )
 
         # define dimple log files
-        dstdout = os.path.join ( dimpledir,"dimple_stdout.log" )
-        dstderr = os.path.join ( dimpledir,"dimple_stderr.log" )
+        dstdout  = os.path.join ( dimpledir,"dimple_stdout.log" )
+        dstderr  = os.path.join ( dimpledir,"dimple_stderr.log" )
 
-        strmeta = self.output_meta["results"][datadir]
-        columns = strmeta["columns"]
-        rfree   = strmeta["rfree"]
+        strmeta  = self.output_meta["results"][datadir]
+        columns  = strmeta["columns"]
+        rfree    = strmeta["rfree"]
+        spg_info = { "spg":strmeta["spg"],"hkl":"" }
 
         # copy files in resulting directory
 
@@ -194,7 +195,7 @@ class FitLigands(ccp4ez_acedrg.AceDrg):
 
         self.saveResults ( "FitLigands",resultdir,nResults,
             rfree,rfactor,"fitligands", xyzPath,mtzPath,mapPath,dmapPath,libPath,
-            libIndex,columns,None )  # no space group change at fitting ligands
+            libIndex,columns,spg_info )  # no space group change at fitting ligands
 
         self.quit_branch ( branch_data,resultdir,
                            "Fitting ligands (Coot): " + quit_message )

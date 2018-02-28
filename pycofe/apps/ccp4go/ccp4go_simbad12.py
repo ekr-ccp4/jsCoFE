@@ -21,12 +21,12 @@ import json
 #  ccp4-python imports
 #import pyrvapi
 
-import ccp4ez_dimple
+import ccp4go_dimple
 import asucomp
 
 # ============================================================================
 
-class Simbad12(ccp4ez_dimple.Dimple):
+class Simbad12(ccp4go_dimple.Dimple):
 
     def simbad12_dir(self): return "simbad12_results"
 
@@ -59,7 +59,7 @@ class Simbad12(ccp4ez_dimple.Dimple):
         self.page_cursor[1] -= 1
 
         branch_data = self.start_branch ( "DB Searches",
-                        "CCP4ez Automated Structure Solver: Lattice and " +
+                        "CCP4go Automated Structure Solver: Lattice and " +
                         "Contaminant Searches",
                         self.simbad12_dir(),parent_branch_id,"summary_tab" )
 
@@ -127,7 +127,7 @@ class Simbad12(ccp4ez_dimple.Dimple):
         fpath_map  = ""
         fpath_dmap = ""
         asuComp    = {}
-        spg_info   = None
+        spg_info   = { "spg":self.hkl.HM, "hkl":"" }
         if simbad_meta:
             nResults   = simbad_meta["nResults"]
             meta       = simbad_meta["results"][0]
@@ -138,7 +138,7 @@ class Simbad12(ccp4ez_dimple.Dimple):
                 fpath_dmap = os.path.join(self.reportdir,meta["dmap"])
                 asuComp    = asucomp.getASUComp1 ( fpath_xyz,self.seqpath )
                 self.file_stdout.write ( json.dumps ( asuComp,indent=2 ))
-                spg_info   = self.checkSpaceGroup ( fpath_xyz )
+                spg_info   = self.checkSpaceGroup ( self.hkl.HM,fpath_xyz )
         else:
             nResults = -1  # indication of an error
 

@@ -15,7 +15,7 @@
 #
 #
 #  Invocation:
-#     ccp4-python ccp4ez.py
+#     ccp4-python ccp4go.py
 #                 [--rvapi-prefix   jsrview]             \
 #                 [--rdir           reportdir]           \
 #                 [--rvapi-document rvapi_document]      \
@@ -53,11 +53,11 @@
 #  }
 #
 
-import ccp4ez_fitligands
+import ccp4go_fitligands
 
 # ============================================================================
 
-class CCP4ez(ccp4ez_fitligands.FitLigands):
+class CCP4go(ccp4go_fitligands.FitLigands):
 
     # ----------------------------------------------------------------------
 
@@ -145,5 +145,5 @@ class CCP4ez(ccp4ez_fitligands.FitLigands):
 
 if __name__ == '__main__':
 
-    ccp4ez = CCP4ez()
-    ccp4ez.run()
+    ccp4go = CCP4go()
+    ccp4go.run()

@@ -3,14 +3,14 @@
 #
 # ============================================================================
 #
-#    06.02.18   <--  Date of Last Modification.
+#    20.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
-#  CCP4ez EXECUTABLE MODULE
+#  CCP4go EXECUTABLE MODULE
 #
 #  Command-line:
-#     ccp4-python -m pycofe.tasks.ccp4ez exeType jobDir jobId
+#     ccp4-python -m pycofe.tasks.ccp4go exeType jobDir jobId
 #
 #  where:
 #    exeType  is either SHELL or SGE
@@ -39,20 +39,20 @@ from   pycofe.tasks  import asudef, import_task
 from   pycofe.proc   import import_merged
 
 # ============================================================================
-# Make CCP4ez driver
+# Make CCP4go driver
 
-#class CCP4ez(asudef.ASUDef):
+#class CCP4go(asudef.ASUDef):
 
-class CCP4ez(import_task.Import):
+class CCP4go(import_task.Import):
 
-    def import_page_id    (self):  return "ccp4ez_import_page_id"
-    def import_log_page_id(self):  return "ccp4ez_import_log_page_id"
-    def import_err_page_id(self):  return "ccp4ez_import_err_page_id"
+    def import_page_id    (self):  return "ccp4go_import_page_id"
+    def import_log_page_id(self):  return "ccp4go_import_log_page_id"
+    def import_err_page_id(self):  return "ccp4go_import_err_page_id"
     def import_stdout_path(self):  return "_import_stdout.log"
     def import_stderr_path(self):  return "_import_stderr.log"
 
     # redefine name of input script file
-    def file_stdin_path   (self):  return "ccp4ez.script"
+    def file_stdin_path   (self):  return "ccp4go.script"
 
     # the following will provide for import of generated sequences
 
@@ -60,7 +60,7 @@ class CCP4ez(import_task.Import):
     import_table_id = "import_summary_id"
     id_modifier     = 1
 
-    def importDir        (self):  return self.import_dir  # import directory
+    def importDir        (self):  return self.import_dir       # import directory
     def import_summary_id(self):  return self.import_table_id  # import summary table id
     def getXMLFName      (self):  return os.path.join(self.importDir(),"matthews.xml")
     def seq_table_id     (self):  return "seq_table_" + str(self.id_modifier)
@@ -97,8 +97,8 @@ class CCP4ez(import_task.Import):
                     os.path.join("..",self.import_stderr_path()+'?capsize'),
                                                 True,self.import_err_page_id() )
 
-        self.putTitle ( "CCP4ez Automated Structure Solver: Data Import" )
-        super ( CCP4ez,self ).import_all()
+        self.putTitle ( "CCP4go Automated Structure Solver: Data Import" )
+        super ( CCP4go,self ).import_all()
 
         # redirect everything back to report page and original standard streams
         self.file_stdout.close()
@@ -110,7 +110,7 @@ class CCP4ez(import_task.Import):
             pyrvapi.rvapi_set_tab_proxy ( self.navTreeId,"" )
 
         # -------------------------------------------------------------------
-        # fetch data for CCP4ez pipeline
+        # fetch data for CCP4go pipeline
 
         self.unm     = None   # unmerged dataset
         self.hkl     = None   # selected merged dataset
@@ -143,7 +143,7 @@ class CCP4ez(import_task.Import):
         pyrvapi.rvapi_set_text ( "",self.report_page_id(),self.rvrow,0,1,1 )
         self.putSection ( panelId,"<b>1. Input summary</b>" )
 
-        tableId = "ccp4ez_summary_table"
+        tableId = "ccp4go_summary_table"
         #self.putTable ( tableId,"<font style='font-style:normal;font-size:125%;'>" +
         #                        "1. Input Data</font>",self.report_page_id(),
         #                        self.rvrow,0 )
@@ -215,7 +215,7 @@ class CCP4ez(import_task.Import):
             pyrvapi.rvapi_set_text ( "",self.report_page_id(),row,0,1,1 )
             title = meta["title"]
 
-        if "merged" in meta:  # output from data reduction part
+        if "merged" in meta:  # output from the data reduction part
             # import reflection data and place HKL widgets
             pyrvapi.rvapi_add_section ( panel_id,"<b>" + str(meta["stage_no"]) +
                                         ". Data processing results (<i>Spg=" +
@@ -262,11 +262,13 @@ class CCP4ez(import_task.Import):
                 hkl_sol = self.hkl
 
                 # check if space group changed
-                if "spg" in meta and "hkl" in meta:
-                    self.putMessage ( "<h3>Space group changed to " +
-                                      meta["spg"] + "</h3>" )
+                if "spg" in meta:
                     spgkey = meta["spg"].replace(" ","")
-                    if not spgkey in self.hkl_alt:
+                    if spgkey in self.hkl_alt:
+                        hkl_sol = self.hkl_alt[spgkey]
+                    elif "hkl" in meta:
+                        self.putMessage ( "<h3>Space group changed to " +
+                                          meta["spg"] + "</h3>" )
                         self.import_dir      = "./"
                         self.import_table_id = None
                         hkl0 = self.outputDataBox.data["DataHKL"]
@@ -284,8 +286,6 @@ class CCP4ez(import_task.Import):
                             if not hkl0[i].dataId in id0:
                                 hkl_sol = hkl0[i]
                         self.hkl_alt[spgkey] = hkl_sol
-                    else:
-                        hkl_sol = self.hkl_alt[spgkey]
 
                 # register structure data
                 libPath = None
@@ -369,7 +369,7 @@ class CCP4ez(import_task.Import):
         #self.putMessage ( "&nbsp;" )
         self.flush()
 
-        # run ccp4ez pipeline
+        # run ccp4go pipeline
         if self.unm or self.hkl:
 
             # write input file
@@ -413,14 +413,14 @@ class CCP4ez(import_task.Import):
             meta["summaryTabRow"] = self.rvrow
             meta["navTreeId"]     = self.navTreeId
             meta["outputDir"]     = self.outputDir()
-            meta["outputName"]    = "ccp4ez"
+            meta["outputName"]    = "ccp4go"
 
             self.storeReportDocument ( json.dumps(meta) )
 
-            ccp4ez_path = os.path.normpath ( os.path.join (
+            ccp4go_path = os.path.normpath ( os.path.join (
                                 os.path.dirname(os.path.abspath(__file__)),
-                                "../apps/ccp4ez/ccp4ez.py" ) )
-            cmd = [ ccp4ez_path,
+                                "../apps/ccp4go/ccp4go.py" ) )
+            cmd = [ ccp4go_path,
                     "--sge" if self.exeType == "SGE" else "--mp",
                     "--rdir","report",
                     "--rvapi-document",self.reportDocumentName()
@@ -436,25 +436,27 @@ class CCP4ez(import_task.Import):
             if self.getParameter(sec1.FITLIGANDS_CBX)=="False":
                 cmd += ["--no-fitligands"]
 
+            pyrvapi.rvapi_keep_polling ( True )
             self.runApp ( "ccp4-python",cmd )
+            pyrvapi.rvapi_keep_polling ( False )
             self.restoreReportDocument()
             self.rvrow += 100
 
             # check on resulting metadata file
-            ccp4ez_meta_file = "ccp4ez.meta.json"
-            ccp4ez_meta = None
+            ccp4go_meta_file = "ccp4go.meta.json"
+            ccp4go_meta = None
             try:
-                with open(ccp4ez_meta_file) as json_data:
-                    ccp4ez_meta = json.load(json_data)
+                with open(ccp4go_meta_file) as json_data:
+                    ccp4go_meta = json.load(json_data)
             except:
                 pass
 
-            if ccp4ez_meta:
+            if ccp4go_meta:
 
-                self.rvrow = ccp4ez_meta["report_row"]
+                self.rvrow = ccp4go_meta["report_row"]
 
-                resorder   = ccp4ez_meta["resorder"]
-                results    = ccp4ez_meta["results"]
+                resorder   = ccp4go_meta["resorder"]
+                results    = ccp4go_meta["results"]
                 for i in range(len(resorder)):
                     d = resorder[i]  # stage's result directory
                     if d in results:
@@ -478,7 +480,7 @@ class CCP4ez(import_task.Import):
 
 if __name__ == "__main__":
 
-    drv = CCP4ez ( "CCP4ez Automated Structure Solver",os.path.basename(__file__),
+    drv = CCP4go ( "CCP4go Automated Structure Solver",os.path.basename(__file__),
                   { "report_page" : { "show" : True, "name" : "Report" },
                     "nav_tree"    : { "id"   : "nav_tree_id", "name" : "Workflow" }
                   })

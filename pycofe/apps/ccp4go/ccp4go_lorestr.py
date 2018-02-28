@@ -21,11 +21,11 @@ import os
 
 import edmap
 
-import ccp4ez_buccaneer
+import ccp4go_buccaneer
 
 # ============================================================================
 
-class Lorestr(ccp4ez_buccaneer.Buccaneer):
+class Lorestr(ccp4go_buccaneer.Buccaneer):
 
     # ----------------------------------------------------------------------
 
@@ -41,13 +41,14 @@ class Lorestr(ccp4ez_buccaneer.Buccaneer):
         self.page_cursor[1] -= 1
 
         branch_data = self.start_branch ( "Refinement",
-                        "CCP4ez Automated Structure Solver: Refinement " +
+                        "CCP4go Automated Structure Solver: Refinement " +
                         "with Lorestr", resultdir,parent_branch_id )
         self.flush()
 
         # prepare data
-        meta    = self.output_meta["results"][datadir]
-        columns = meta["columns"]
+        meta     = self.output_meta["results"][datadir]
+        columns  = meta["columns"]
+        spg_info = { "spg":meta["spg"], "hkl":"" }
 
         lorestr_xyz  = os.path.join ( resultdir,"lorestr.pdb" )
         lorestr_mtz  = os.path.join ( resultdir,"lorestr.mtz" )
@@ -143,7 +144,7 @@ class Lorestr(ccp4ez_buccaneer.Buccaneer):
 
         self.saveResults ( "Lorestr",resultdir,nResults,
             rfree,rfactor,"lorestr", lorestr_xyz,lorestr_mtz,lorestr_map,lorestr_dmap,
-            lorestr_lib,libIndex,lorestr_columns,None ) # no space group change
+            lorestr_lib,libIndex,lorestr_columns,spg_info ) # no space group change
 
         self.quit_branch ( branch_data,resultdir,
                            "Refinement (Lorestr): " + quit_message )

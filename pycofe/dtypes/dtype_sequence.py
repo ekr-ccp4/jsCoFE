@@ -110,7 +110,7 @@ class DType(dtype_template.DType):
                 lines = f.readlines()
                 f.close()
                 f     = open(os.path.join(outputDir,self.files[0]),'w')
-                i = 0
+                i     = 0
                 while (i<len(lines)):
                     if lines[i].strip().startswith(">"):
                         break
@@ -120,6 +120,6 @@ class DType(dtype_template.DType):
                     f.write ( lines[i].strip() + "\n" )
                     i += 2
                 while (i<len(lines)):
-                    f.write ( lines[i].strip().replace ( " ","" ) + "\n" )
+                    f.write ( lines[i].strip().upper().replace ( " ","" ) + "\n" )
                     i += 1
         return

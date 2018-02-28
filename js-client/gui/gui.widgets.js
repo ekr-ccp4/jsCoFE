@@ -1110,6 +1110,7 @@ SelectFile.prototype.getFiles = function()  {
   return this.element.files;
 }
 
+
 // -------------------------------------------------------------------------
 // ToolBar class
 

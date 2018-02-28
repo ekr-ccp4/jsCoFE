@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    10.02.18   <--  Date of Last Modification.
+#    20.02.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -24,11 +24,11 @@ from   ccp4mg import mmdb2
 import mtz
 import datred_utils
 
-import ccp4ez_base
+import ccp4go_base
 
 # ============================================================================
 
-class PrepareMTZ(ccp4ez_base.Base):
+class PrepareMTZ(ccp4go_base.Base):
 
     def datared_dir  (self):  return "datared"
     def joined_mtz   (self):  return os.path.join(self.datared_dir(),"joined_tmp.mtz")
@@ -49,6 +49,13 @@ class PrepareMTZ(ccp4ez_base.Base):
     def prepare_mtz ( self,parent_branch_id ):
 
         branch_data = None
+
+        # create work directory for data reduction stage; even if data reduction
+        # is not required, this directory may be used for reindexing reflection
+        # data in other parts of CCP4go.
+        sdir = os.path.join ( self.workdir,self.datared_dir() )
+        if not os.path.isdir(sdir):
+            os.mkdir ( sdir )
 
         # check input data
 
@@ -88,7 +95,7 @@ class PrepareMTZ(ccp4ez_base.Base):
         self.page_cursor[1] -= 1
 
         branch_data = self.start_branch ( "Scaling and Merging",
-                                "CCP4ez Automated Structure Solver: Scaling and Merging",
+                                "CCP4go Automated Structure Solver: Scaling and Merging",
                                 self.datared_dir(),parent_branch_id )
 
         self.putMessage ( "<h3>1. Extracting images</h3>" )
@@ -267,16 +274,16 @@ class PrepareMTZ(ccp4ez_base.Base):
 
     # ----------------------------------------------------------------------
 
-    def checkSpaceGroup ( self,fpath_xyz ):
+    def checkSpaceGroup ( self,hkl_spg,fpath_xyz ):
         mm = mmdb2.Manager()
         mm.ReadCoorFile ( str(fpath_xyz) )
         spg      = mm.GetSpaceGroup()
-        spg_info = None
         spg_key  = spg.replace(" ","")
+        spg_info = { "spg" : spg, "hkl" : "" }
 
-        if spg_key != self.hkl.HM.replace(" ",""):
+        #if spg_key != self.hkl.HM.replace(" ",""):
+        if spg_key != hkl_spg.replace(" ",""):
             self.file_stdout.write ( " *** space group changed to " + spg + "\n" )
-            spg_info = { 'spg' : spg, 'hkl' : "" }
             if not spg_key in self.mtz_alt:
                 # reindex first time
                 self.open_script  ( "reindex_" + spg_key )

@@ -21,11 +21,11 @@ import os
 
 import edmap
 
-import ccp4ez_crank2
+import ccp4go_crank2
 
 # ============================================================================
 
-class Buccaneer(ccp4ez_crank2.Crank2):
+class Buccaneer(ccp4go_crank2.Crank2):
 
     # ----------------------------------------------------------------------
 
@@ -40,15 +40,16 @@ class Buccaneer(ccp4ez_crank2.Crank2):
         self.page_cursor[1] -= 1
 
         branch_data = self.start_branch ( "Auto-Build",
-                        "CCP4ez Automated Structure Solver: Automated Model " +
+                        "CCP4go Automated Structure Solver: Automated Model " +
                         "Building with Buccaneer", resultdir,parent_branch_id )
 
         self.flush()
 
-        ccp4    = os.environ["CCP4"]
-        meta    = self.output_meta["results"][datadir]
-        columns = meta["columns"]
-        refpath = os.path.join(ccp4,"lib","data","reference_structures","reference-1tqw")
+        ccp4     = os.environ["CCP4"]
+        meta     = self.output_meta["results"][datadir]
+        spg_info = { "spg" : meta["spg"], "hkl" : "" }
+        columns  = meta["columns"]
+        refpath  = os.path.join(ccp4,"lib","data","reference_structures","reference-1tqw")
 
         self.open_script  ( "buccaneer" )
         self.write_script (
@@ -143,7 +144,7 @@ class Buccaneer(ccp4ez_crank2.Crank2):
         self.saveResults ( "Buccanneer",resultdir,
             nResults,rfree,rfactor,"buccaneer", buccaneer_xyz,buccaneer_mtz,
             buccaneer_map,buccaneer_dmap,None,None,buccaneer_columns,
-            None )  # space group does not change after buccaneer
+            spg_info )  # space group does not change after buccaneer
 
         self.quit_branch ( branch_data,resultdir,
                            "Automated Model Building (Buccaneer): " + quit_message )
