@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    05.12.17   <--  Date of Last Modification.
+ *    02.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  GESAMT Task Class
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -41,9 +41,9 @@ function TaskGesamt()  {
   this.input_dtypes = [{      // input data types
      data_type   : {'DataStructure':['protein'],
                     'DataXYZ':['protein'] },  // data type(s) and subtype(s)
-     label       : 'Structure',      // label for input dialog
-     inputId     : 'xyz',       // input Id for referencing input fields
-     customInput : 'chain-sel', // lay custom fields next to the selection
+     label       : 'Structure',    // label for input dialog
+     inputId     : 'xyz',          // input Id for referencing input fields
+     customInput : 'chain-sel-protein', // lay custom fields next to the selection
      force       : 2,           // meaning choose, by default, 1 xyz sets if
                                 // available; otherwise, the minimum (1) will
                                 // be selected

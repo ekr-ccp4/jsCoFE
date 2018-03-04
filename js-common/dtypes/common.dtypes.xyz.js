@@ -243,7 +243,7 @@ if (!__template)  {
 
       }
 
-    } else if (dropdown.layCustom=='chain-sel')  {
+    } else if (dropdown.layCustom.startsWith('chain-sel')) {
 
       customGrid.setLabel ( 'Select chain:&nbsp;',0,0,1,1 )
                 .setFontItalic(true).setNoWrap();
@@ -256,7 +256,7 @@ if (!__template)  {
       for (var i=0;i<xyz.length;i++)  {
         var chains = xyz[i].chains;
         for (var j=0;j<chains.length;j++)
-          if (chains[j].type=='AA')  {
+          if ((chains[j].type=='Protein') || (dropdown.layCustom=='chain-sel')) {
             var id = chains[j].id;
             if (xyz.length>1)
               id = '/' + (xyz[i].model+1) + '/' + id;

@@ -78,6 +78,12 @@ class DType(dtype_template.DType):
     def isNucleotide(self):
         return self.isDNA() or self.isRNA()
 
+    def getType(self):
+        if self.isProtein():  return dtype_template.subtypeProtein()
+        if self.isDNA():      return dtype_template.subtypeDNA    ()
+        if self.isRNA():      return dtype_template.subtypeRNA    ()
+        return ""
+
 
     def getSequence(self,dirPath):
         # returns bare sequence from the associated file

@@ -124,12 +124,12 @@ if (!__template)  {
 
     if (dropdown.layCustom.startsWith('asu-content'))  {
 
-      var grid = customGrid.setGrid ( '-compact',row,0,1,2 );
+      var grid = customGrid.setGrid ( '-compact',row++,0,1,2 );
       this.makeASUContentInput ( grid );
 
     } else if (dropdown.layCustom.startsWith('stoichiometry'))  {
 
-      var grid = customGrid.setGrid ( '-compact',row,0,1,2 );
+      var grid = customGrid.setGrid ( '-compact',row++,0,1,2 );
       grid.setLabel ( 'Number of copies in a.s.u.:',0,0,1,1 )
           .setFontItalic ( true ).setNoWrap ( true );
       customGrid.ncopies_inp = grid.setInputText ( this.ncopies,0,1,1,1 )
@@ -298,7 +298,8 @@ if (!__template)  {
     }
     */
 
-    customGrid.setLabel ( ' ',row+1,0,1,2 ).setHeight_px ( 8 );
+    if (row>0)
+      customGrid.setLabel ( ' ',row,0,1,2 ).setHeight_px ( 8 );
 
   }
 
@@ -308,7 +309,9 @@ if (!__template)  {
     var msg = '';   // Ok by default
     var customGrid = dropdown.customGrid;
 
-    this.ncopies = parseInt ( customGrid.ncopies_inp.getValue() );
+    if ((dropdown.layCustom.startsWith('asu-content')) ||
+        (dropdown.layCustom.startsWith('stoichiometry')))
+      this.ncopies = parseInt ( customGrid.ncopies_inp.getValue() );
 
     /*
     this.ensembles = [];  // list of chosen ensemble models for MR

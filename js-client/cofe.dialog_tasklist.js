@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    19.02.18   <--  Date of Last Modification.
+ *    02.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -287,8 +287,12 @@ var row      = 0;
 
   this.makeSection ( 'Validation and Analysis',[
     new TaskZanuda(),
-    new TaskGesamt(),
     new TaskPISA  ()
+  ]);
+
+  this.makeSection ( 'Toolbox',[
+    new TaskGesamt  (),
+    new TaskSeqAlign()
   ]);
 
   if (__login_user=='Developer')

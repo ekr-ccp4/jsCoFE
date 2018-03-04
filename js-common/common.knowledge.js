@@ -105,7 +105,10 @@ var _taskIndex = {
 
   // do not suggest ASUMod
   'd' : { type: 'TaskASUMod'         , after: [] },
-  'e' : { type: 'TaskASUDefStruct'   , after: ['A'] }
+  'e' : { type: 'TaskASUDefStruct'   , after: ['A'] },
+
+  // suggest SeqAlign after Import
+  'f' : { type: 'TaskSeqAlign'       , after: ['B'] }
 
 };
 

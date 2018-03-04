@@ -76,6 +76,7 @@ function Upload ( customData,upl_data,onSelect_func,onReady_func )  {
       this.button = grid.setButton ( 'Select project tarball(s)',
                                      './images/open_file.svg',0,col++,1,1 )
                         .setNoWrap();
+    /*
     } else if (__local_service)  {
       if (getClientCode()==client_code.ccp4)  {
         this.linkDataType = 'X-ray';
@@ -89,6 +90,7 @@ function Upload ( customData,upl_data,onSelect_func,onReady_func )  {
       grid.setCellSize ( '12px','',0,col++ );
       this.button = grid.setButton ( 'Other data','images/open_file.svg',0,col++,1,1 )
                         .setNoWrap();
+    */
     } else {
       this.linkDataType = null;
       this.link_button  = null;
