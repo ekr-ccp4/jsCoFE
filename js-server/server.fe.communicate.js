@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    16.12.17   <--  Date of Last Modification.
+ *    06.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  Front End Server -- Communication Module
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -113,7 +113,16 @@ function Communicate ( server_request )  {
 
     log.debug2 ( 3,"File " + this.filePath);
 
+  } else  {
+    ix = this.filePath.indexOf('manual');
+    if (ix>=0)  {  // request for jsrview library file, load it from js-lib
+                   // REGARDLESS the actual path requested
+
+      this.filePath = this.filePath.substr(ix);
+      log.debug2 ( 2,"calculated path " + this.filePath);
+    }
   }
+
 
   this.mimeType = utils.getMIMEType ( this.filePath );
 

@@ -13,6 +13,7 @@ application.
 #. *Adjust the desktop configuration file*
 #. *Adjust the start shell script*
 #. *Start jsCoFE.*
+#. *jsCoFE client.*
 
 **1. Install Node JS**
   The minimum required Node JS version is 4.4.3. Check if you have it on your
@@ -56,6 +57,11 @@ application.
   http://bazaar.canonical.com . On Linux, you may find ``bzr`` available from
   OS repositories).
 
+  Alternatively, check out jsCoFE source code from GitHub: ::
+
+    $ git clone https://github.com/ekr-ccp4/jsCoFE.git
+
+
 **4. Install Node JS modules**
   Run the Node Package Manager in the source code directory: ::
 
@@ -67,6 +73,13 @@ application.
     $ cd /path/to/jscofe
     $ bzr update
     $ npm install
+
+  or, if jsCoFE was originally checked out from GutHub: ::
+
+      $ cd /path/to/jscofe
+      $ git pull origin master
+      $ npm install
+
 
 **5. Adjust the desktop configuration file**
   Type the following in the Terminal: ::
@@ -138,14 +151,14 @@ application.
   configuration may be reduced to ::
 
     "Emailer" : {
-      "type"            : "desktop"
+      "type" : "desktop"
     }
 
 **6. Adjust the start shell script**
   Type the following in the Terminal: ::
 
     $ cd /path/to/jscofe
-    $ vi config/ccp4/start-desktop.sh
+    $ vi ./start-desktop.sh
 
   In the file, assign correct paths to variables ``server_dir`` (the jsCoFE source
   directory) and ``ccp4_dir`` (CCP4 setup directory). It is useful to have PDB
@@ -157,7 +170,30 @@ application.
 **7. Start jsCoFE.**
   In Terminal, type::
 
-    $ /path/to/jscofe/start.sh
+    $ /path/to/jscofe/start-desktop.sh
 
-  Note that you can copy the ``start.sh`` script to any other location and start
-  jsCoFE from there.
+  Note that you can copy the ``start-desktop.sh`` script to any other location
+  and start jsCoFE from there.
+
+
+**8. jsCoFE client.**
+  jsCoFE client is used for running special CCP4 desktop applications, like Coot,
+  CCP4mg and ViewHKL, while working with jsCoFE installed remotely (not on a
+  local host). You may need to adjust the corresponding configuration file in
+  exactly the same way as described above in Section 5 for the desktop
+  configuration file): ::
+
+      $ cd /path/to/jscofe
+      $ vi config/ccp4/conf.remote.json
+
+  and further edit the corresponding start shell script: ::
+
+      $ vi ./start-remote.sh
+
+  Then just type type: ::
+
+    $ /path/to/jscofe/start-remote.sh
+
+  which will fire up your browser with remote jsCoFE web-site loaded, and local
+  jsCoFE client ready for communication. Note that you can copy the
+  ``start-remote.sh`` script to any other location and start jsCoFE from there.

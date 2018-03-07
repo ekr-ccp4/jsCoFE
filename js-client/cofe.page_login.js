@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    25.10.17   <--  Date of Last Modification.
+ *    07.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  Login page
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -25,10 +25,6 @@
 
 function LoginPage ( sceneId )  {
 
-  //  **********************************
-
-  //if (__login_token)  __login_token.empty();
-  //if (__login_user)   __login_user .empty();
   __login_token = '';
   __login_user  = '';
 
@@ -100,6 +96,11 @@ function LoginPage ( sceneId )  {
   panel.setWidget               ( login_btn,row++,0,1,2 );
   panel.setWidget               ( pwd_btn  ,row++,0,1,2 );
   panel.setWidget               ( reg_btn  ,row++,0,1,2 );
+  panel.setLabel                ( '&nbsp;<br><center><i>jsCoFE is available for ' +
+                                  'local setups,<br>see instructions ' +
+                                  '<a href="manual/html/index.html">here</a>.' +
+                                  '</i></center>',
+                                  row++,0,1,2 );
   panel.setCellSize             ( '','24pt',row++,0 );
 
   reg_btn.addOnClickListener ( function(){ makeRegisterPage      (sceneId) } );

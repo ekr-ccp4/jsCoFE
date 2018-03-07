@@ -105,13 +105,16 @@ The code is obtainable from CCP4's Bazaar repositories: ::
 
   $ bzr checkout http://fg.oisin.rc-harwell.ac.uk/anonscm/bzr/jscofe/trunk /path/to/jscofe
 
-(if ``bzr`` is not installed on your system, obtain and install it from
-http://bazaar.canonical.com). All jsCoFE servers: FE, NC and CS, use the same
-source code, and the source code directory may be shared by any number and
-types of servers, if permitted by the hardware setup. In the absence of shared
-file system, the source code directory must be copied to every machine running
-a jsCoFE server. Make sure that ``.bzr`` sub-directory is copied, too, for
-future updates.
+If ``bzr`` is not installed on your system, download and install it from
+http://bazaar.canonical.com, or get jsCoFE source code from GitHub: ::
+
+      $ git clone https://github.com/ekr-ccp4/jsCoFE.git
+
+All jsCoFE servers: FE, NC and CS, use the same source code, and the source code
+directory may be shared by any number and types of servers, if permitted by
+the hardware setup. In the absence of shared file system, the source code
+directory must be copied to every machine running a jsCoFE server. Make sure
+that ``.bzr`` (or ``.git``) sub-directory is copied, too, for future updates.
 
 After obtaining jsCoFE source code from CCP4 repositories, Node Package Manager
 must be run in every source code directory: ::
@@ -124,6 +127,12 @@ directories: ::
 
   $ cd /path/to/jscofe
   $ bzr update
+  $ npm install
+
+or, if jsCoFE was originally checked out from GutHub: ::
+
+  $ cd /path/to/jscofe
+  $ git pull origin master
   $ npm install
 
 and restarting jsCoFE servers.
