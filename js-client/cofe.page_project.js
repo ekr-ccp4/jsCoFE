@@ -200,6 +200,8 @@ function ProjectPage ( sceneId )  {
     clone_btn .addOnClickListener ( cloneJob  );
     title_lbl .setText ( jobTree.projectData.desc.title );
 
+    __current_project = jobTree.projectData.desc.name;
+
     jobTree.addSignalHandler ( cofe_signals.jobStarted,function(data){
       setButtonState();
     });

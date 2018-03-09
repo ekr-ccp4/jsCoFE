@@ -66,6 +66,7 @@ function Communicate ( server_request )  {
     this.job_token = '';
 
   log.debug2 ( 1,"requested path " + this.filePath );
+  //console.log ( "requested path " + this.filePath );
   var ix = this.filePath.indexOf('jsrview');
   if (ix<0)
     ix = this.filePath.indexOf('ccp4i2_support');

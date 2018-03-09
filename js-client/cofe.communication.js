@@ -268,6 +268,16 @@ var alink = document.getElementById(hiddenALinkID);
 }
 
 
+function downloadJobFile ( jobId,filePath )  {
+  var url = '@/';
+  if (__login_token)
+        url += __login_token;
+  else  url += '404';
+  url += '/' + __current_project + '/' + jobId + '/' + filePath;
+  downloadFile ( url );
+}
+
+
 window.onbeforeunload = function(e)  {
   serverCommand ( fe_command.stop,{},'stopping',null,null,function(){} );
 }

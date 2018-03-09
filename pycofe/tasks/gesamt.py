@@ -183,6 +183,7 @@ class Gesamt(basic.TaskDriver):
                     pyrvapi.rvapi_set_table_type  ( self.hits_table_id(),True,True )
                     pyrvapi.rvapi_set_table_style ( self.hits_table_id(),"",
                                                         "text-align:center;" )
+
                     for j in range(nHits):
                         pyrvapi.rvapi_put_vert_theader ( self.hits_table_id(),
                                                       str(j+1),"Hit number",j )
@@ -192,9 +193,11 @@ class Gesamt(basic.TaskDriver):
                     for i in range(nColumns):
                         column = hitlist.columns[i]
                         pyrvapi.rvapi_put_horz_theader ( self.hits_table_id(),
-                                  column.title,column.tooltip,i )
-                        if i==nColumns-1:
-                            td_css = "text-align:left;"
+                                                column.title,column.tooltip,i )
+                        if i==0:
+                            td_css = "font-family:courier;"
+                        elif i==nColumns-1:
+                            td_css = "text-align:left;font-size:80%;"
                             pyrvapi.rvapi_shape_horz_theader (
                                         self.hits_table_id(),i,td_css,"",1,1 )
                         else:
@@ -209,6 +212,12 @@ class Gesamt(basic.TaskDriver):
                             if td_css:
                                 pyrvapi.rvapi_shape_table_cell (
                                     self.hits_table_id(),j,i,"",td_css,"",1,1 )
+
+
+                    pyrvapi.rvapi_add_button ( "hits_dnl_btn","Export hit list","{function}",
+                        "window.parent.downloadJobFile(" + self.job_id + ",'hits.txt')",
+                        False,self.hits_table_sec_id(), 1,0,1,1 )
+
 
                     if nHits > 1:
 

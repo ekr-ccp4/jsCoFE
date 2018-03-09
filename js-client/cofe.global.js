@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    07.04.18   <--  Date of Last Modification.
+ *    09.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -23,7 +23,7 @@
 // ===========================================================================
 // version tag
 
-var jsCoFE_version = '0.1.0 [07.04.2018]';
+var jsCoFE_version = '0.1.0 [09.03.2018]';
 
 
 // ===========================================================================
@@ -39,8 +39,9 @@ var __login_token  = '';
 var __login_user   = '';
 var __admin        = false;
 
-var __current_page = null;
-var __local_setup  = false;
+var __current_page    = null;
+var __current_project = null;
+var __local_setup     = false;
 
 var __touch_device = ('ontouchstart' in document.documentElement);
 // the following will also include desktops with touch screens:

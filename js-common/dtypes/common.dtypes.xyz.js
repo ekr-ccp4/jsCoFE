@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    18.07.17   <--  Date of Last Modification.
+ *    08.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  XYZ Data Class
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -285,7 +285,7 @@ if (!__template)  {
         if (!customGrid.cbxs[i].getValue())
           this.exclLigs.push ( this.xyzmeta.ligands[i] );
 
-    } else if (dropdown.layCustom=='chain-sel')  {
+    } else if (dropdown.layCustom.startsWith('chain-sel'))  {
 
       this.chainSel = customGrid.chainSel.getValue();
 
