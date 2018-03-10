@@ -321,7 +321,7 @@ class Base(object):
                 pyrvapi.rvapi_set_tab_proxy ( self.navTreeId,"" )
 
             self.page_cursor = self.addTab ( self.summaryTabId,"Summary",True )
-            self.putMessage ( "<h2>CCP4 Easy (Combined Automated Structure Solution)</h2>" )
+            self.putMessage ( "<h2>CCP4go (Combined Automated Structure Solution)</h2>" )
 
         else:  # continue rvapi document given
             pyrvapi.rvapi_restore_document2 ( self.rvapi_doc_path )

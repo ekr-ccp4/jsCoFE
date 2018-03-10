@@ -64,10 +64,23 @@ class Simbad(asudef.ASUDef):
 
     def run(self):
 
-        # fetch input data
-        hkl = self.makeClass ( self.input_data.data.hkl[0] )
+        if self.exeType == "SGE":
+            nSubJobs = "0";
+            if len(sys.argv)>5:
+                nSubJobs = sys.argv[5]
+        else:
+            nSubJobs = "4";
 
-        level = self.getParameter(self.task.parameters.sec1.contains.SEARCH_SEL)
+
+        # fetch input data
+        hkl   = self.makeClass ( self.input_data.data.hkl[0] )
+
+        sec1       = self.task.parameters.sec1.contains
+        level      = self.getParameter(sec1.SEARCH_SEL)
+        maxnlatt   = self.getParameter(sec1.MAXNLATTICES)
+        maxpenalty = self.getParameter(sec1.MAXPENALTY)
+        if not maxpenalty:
+            maxpenalty = "12"
 
         app = ""
         if level == 'L':
@@ -82,15 +95,17 @@ class Simbad(asudef.ASUDef):
             app = "simbad-full"
 
         # Prepare simbad input -- script file
-        cmd = [ "-nproc"          ,"1",
-                "-F"              ,hkl.dataset.Fmean.value,
-                "-SIGF"           ,hkl.dataset.Fmean.sigma,
-                "-FREE"           ,hkl.dataset.FREE,
-                "-pdb_db"         ,os.environ["PDB_DIR"],
-                "--display_gui"   ,
-                "-webserver_uri"  ,"jsrview",
-                "-work_dir"       ,"./",
-                "-rvapi_document" ,self.reportDocumentName(),
+        cmd = [ "-nproc"              ,nSubJobs,
+                "-max_lattice_results",maxnlatt,
+                "-max_penalty_score"  ,maxpenalty,
+                "-F"                  ,hkl.dataset.Fmean.value,
+                "-SIGF"               ,hkl.dataset.Fmean.sigma,
+                "-FREE"               ,hkl.dataset.FREE,
+                "-pdb_db"             ,os.environ["PDB_DIR"],
+                "--display_gui"       ,
+                "-webserver_uri"      ,"jsrview",
+                "-work_dir"           ,"./",
+                "-rvapi_document"     ,self.reportDocumentName(),
                 os.path.join(self.inputDir(),hkl.files[0])
               ]
 

@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    07.03.18   <--  Date of Last Modification.
+ *    10.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -155,17 +155,22 @@ var r         = 0;  // grid row
 //console.log ( knowledge );
 
   for (var i=0;i<counts.length;i++)  {
-    ctotal += counts[i];
     for (var j=i+1;j<counts.length;j++)
       if (counts[j]>counts[i])  {
         var t = tasks [i];  tasks [i] = tasks [j];  tasks [j] = t;
         var c = counts[i];  counts[i] = counts[j];  counts[j] = c;
       }
+    ctotal += counts[i];
   }
 
+
+
   var cthresh = ctotal*__suggested_task_prob;
+// console.log ( 'ctotal='+ctotal + ',  cthresh='+cthresh );
+
   for (var i=0;i<tasks.length;i++)
     if ((i<__suggested_task_nmin) || (ctotal>=cthresh))  {
+      console.log ( 'task=' + tasks[i] + ',  ctotal=' + ctotal );
       var task = eval ( 'new ' + tasks[i] + '()' );
       if (this.setTask(task,grid,r,false))
         r++;

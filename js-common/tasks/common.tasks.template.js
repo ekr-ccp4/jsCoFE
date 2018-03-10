@@ -126,10 +126,14 @@ TaskTemplate.prototype.currentVersion = function()  { return 0; }
 if (!dbx)  {
   // for client side
 
-  TaskTemplate.prototype.canMove = function ( parentId )  {
+/*
+  TaskTemplate.prototype.canMove = function ( parentId,jobTree )  {
   var can_move = false;
     if ((this.state!=job_code.new) && (this.state!=job_code.running) &&
         (this.state!=job_code.exiting))  {
+
+      jobTree.getNodePosition
+
       can_move = true;
       for (var dtype in this.input_data.data)  {
         var d = this.input_data.data[dtype];
@@ -141,6 +145,38 @@ if (!dbx)  {
       }
     }
     return can_move;
+  }
+*/
+
+  TaskTemplate.prototype.canMove = function ( node,jobTree )  {
+  var parent_task = jobTree.getTaskByNodeId(node.parentId);
+  var can_move    = false;
+
+    if (parent_task && (this.state!=job_code.new) &&
+        (this.state!=job_code.running) && (this.state!=job_code.exiting))  {
+
+      var p = jobTree.getNodePosition(node);
+      var pos   = p[0];
+      var pnode = p[1];
+      var pid   = p[2];
+      var clen  = p[3];
+
+      can_move = true;
+      if (pnode && pid && (pos<=0) && (clen<2))  {
+        for (var dtype in this.input_data.data)  {
+          var d = this.input_data.data[dtype];
+          for (var j=0;j<d.length;j++)
+            if (d[j].jobId==parent_task.id)  {
+              can_move = false;
+              break;
+            }
+        }
+      }
+
+    }
+
+    return can_move;
+
   }
 
 

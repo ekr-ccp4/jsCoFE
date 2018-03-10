@@ -95,10 +95,16 @@ function ProjectPage ( sceneId )  {
       add_btn   .setEnabled ( true );
       insert_btn.setEnabled ( true );
       */
+
+      /*
       var parent_task = jobTree.getTaskByNodeId(node.parentId);
       if (parent_task)
-            moveup_btn.setEnabled ( task.canMove(parent_task.id) );
+            moveup_btn.setEnabled ( task.canMove(parent_task.id,jobTree) );
       else  moveup_btn.setEnabled ( false );
+      */
+
+      moveup_btn.setEnabled ( task.canMove(node,jobTree) );
+
       stop_btn  .setEnabled ( dsel && (task.state==job_code.running) );
     } else  {  // root
       add_btn   .setEnabled ( true  );

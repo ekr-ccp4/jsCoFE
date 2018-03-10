@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    03.10.17   <--  Date of Last Modification.
+ *    10.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  SIMBAD Task Class
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -74,6 +74,31 @@ function TaskSimbad()  {
                                   ],
                       value     : 'LC',
                       position  : [0,0,1,1]
+                    },
+                MAXNLATTICES  : {
+                      type     : 'integer_',
+                      keyword  : 'none',
+                      label    : 'Maximum number of candidates',
+                      tooltip  : 'Maximum number of candidate lattices to select ' +
+                                 'and explore. The higher the number, the slower the ' +
+                                 'search.',
+                      range    : [1,100],
+                      value    : '',
+                      default  : '50',
+                      position : [1,0,1,1]
+                    },
+                MAXPENALTY : {
+                      type     : 'integer_',
+                      keyword  : 'none',
+                      label    : 'Maximum penalty score',
+                      tooltip  : 'Maximum penalty score for selected candidate ' +
+                                 'lattices. The higher the score, the slower the ' +
+                                 'search.',
+                      range    : [0,12],
+                      value    : '',
+                      default  : '12',
+                      showon   : {'SEARCH_SEL':['L','LC','LCS']},
+                      position : [2,0,1,1]
                     }
               }
     }

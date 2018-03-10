@@ -159,11 +159,13 @@ class Simbad12(ccp4go_dimple.Dimple):
 
         self.output_meta["results"][self.simbad12_dir()]["pdbcode"] = meta["name"]
         self.output_meta["results"][self.simbad12_dir()]["asucomp"] = asuComp
+        """
         if self.output_meta["retcode"] != "not solved" and self.seqpath:
             if asuComp["retcode"] == 1:
                 self.output_meta["retcode"] = "sequence problem"
             elif asuComp["minseqid"]<0.7:
                 self.output_meta["retcode"] = "sequence mismatch"
+        """
 
         self.quit_branch ( branch_data,self.simbad12_dir(),
                            "Lattice and Contaminant Searches (Simbad): " +
