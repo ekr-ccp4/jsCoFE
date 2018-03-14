@@ -73,7 +73,7 @@ class Simbad(asudef.ASUDef):
 
 
         # fetch input data
-        hkl   = self.makeClass ( self.input_data.data.hkl[0] )
+        hkl = self.makeClass ( self.input_data.data.hkl[0] )
 
         sec1       = self.task.parameters.sec1.contains
         level      = self.getParameter(sec1.SEARCH_SEL)

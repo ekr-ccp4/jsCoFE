@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    06.12.17   <--  Date of Last Modification.
+ *    14.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  Common Client/Server Modules -- Structure Revision Class
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -29,6 +29,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
 var revision_subtype = {
   asu          : 'asu',
   hkl          : 'hkl',
+  seq          : 'seq',
   anomalous    : 'anomalous',
   xyz          : 'xyz',
   substructure : 'substructure',

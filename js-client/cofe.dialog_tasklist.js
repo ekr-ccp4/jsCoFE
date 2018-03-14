@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    10.03.18   <--  Date of Last Modification.
+ *    13.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -228,11 +228,19 @@ var row      = 0;
   ]);
   var section1 = section0;
 
-  this.makeSection ( 'Data Import',[
-    new TaskImport(),
-    'Utilities',
-    new TaskXyz2Revision()
-  ]);
+  if (__login_user=='Developer')
+    this.makeSection ( 'Data Import',[
+      new TaskICAT  (),
+      new TaskImport(),
+      'Utilities',
+      new TaskXyz2Revision()
+    ]);
+  else
+    this.makeSection ( 'Data Import',[
+      new TaskImport(),
+      'Utilities',
+      new TaskXyz2Revision()
+    ]);
 
   this.makeSection ( 'Data Processing',[
     new TaskAimless  (),
@@ -249,6 +257,8 @@ var row      = 0;
   this.makeSection ( 'Molecular Replacement',[
     'No-sequence methods',
     new TaskSimbad(),
+    'No-model methods',
+    new TaskAmple (),
     'Automated MR',
     new TaskBalbes(),
     new TaskMorda (),

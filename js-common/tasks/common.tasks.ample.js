@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    26.04.17   <--  Date of Last Modification.
+ *    14.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  Ample Task Class
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -31,43 +31,19 @@ function TaskAmple()  {
   if (__template)  __template.TaskTemplate.call ( this );
              else  TaskTemplate.call ( this );
 
-  this._type      = 'TaskAmple';
-  this.name       = 'ample';
-  this.oname      = 'ample';  // default output file name template
-  this.title      = 'Ab-Initio Molecular Replacement with Ample';
-  //this.icon_small = './images/task_ample_20x20.svg';
-  //this.icon_large = './images/task_ample.svg';
+  this._type  = 'TaskAmple';
+  this.name   = 'ample';
+  this.oname  = 'ample';  // default output file name template
+  this.title  = 'Ab-Initio Molecular Replacement with Ample';
 
   this.input_dtypes = [{  // input data types
-      data_type   : {'DataHKL':[]},  // data type(s) and subtype(s)
-      label       : 'Reflections',   // label for input dialog
-      inputId     : 'hkl',      // input Id for referencing input fields
+      data_type   : {'DataRevision':['hkl']}, // data type(s) and subtype(s)
+      label       : 'Structure revision',     // label for input dialog
+      inputId     : 'revision', // input Id for referencing input fields
+      //customInput : 'molrep',   // lay custom fields below the dropdown
+      version     : 0,          // minimum data version allowed
       min         : 1,          // minimum acceptable number of data instances
       max         : 1           // maximum acceptable number of data instances
-    },{
-      data_type   : {'DataSequence':[]}, // data type(s) and subtype(s)
-      label       : 'Sequence',          // label for input dialog
-      inputId     : 'seq',      // input Id for referencing input fields
-      min         : 1,          // minimum acceptable number of data instances
-      max         : 1           // maximum acceptable number of data instances
-    },{
-      data_type : {'DataEnsemble':[]},  // data type(s) and subtype(s)
-      label       : 'Model',            // label for input dialog
-      inputId     : 'model',  // input Id for referencing input fields
-      customInput : 'model',  // lay custom fields below the dropdown
-      min         : 0,        // minimum acceptable number of data instances
-      max         : 10000000  // maximum acceptable number of data instances
-    /*
-    },{
-      data_type   : {'DataStructure':[]}, // data type(s) and subtype(s)
-      label       : 'Fixed model',        // label for input dialog
-      inputId     : 'xmodel',   // input Id for referencing input fields
-      force       : 1,          // meaning choose, by default, 1 structure if
-                                // available; otherwise, 0 (do not use) will
-                                // be selected
-      min         : 0,          // minimum acceptable number of data instances
-      max         : 1           // maximum acceptable number of data instances
-    */
     }
   ];
 
@@ -92,6 +68,21 @@ if (__template)  {
   //  for server side
 
   var conf = require('../../js-server/server.configuration');
+
+  TaskAmple.prototype.makeInputData = function ( jobDir )  {
+
+    // put hkl and structure data in input databox for copying their files in
+    // job's 'input' directory
+
+    if ('revision' in this.input_data.data)  {
+      var revision = this.input_data.data['revision'][0];
+      this.input_data.data['hkl'] = [revision.HKL];
+      this.input_data.data['seq'] = revision.ASU.seq;
+    }
+
+    __template.TaskTemplate.prototype.makeInputData.call ( this,jobDir );
+
+  }
 
   TaskAmple.prototype.getCommandLine = function ( exeType,jobDir )  {
     return [conf.pythonName(), '-m', 'pycofe.tasks.ample', exeType, jobDir, this.id];

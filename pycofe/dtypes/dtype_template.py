@@ -28,6 +28,7 @@ def dtype(): return "DataTemplate"  # must coincide with data definitions in JS
 def subtypeHKL         (): return "hkl"
 def subtypeAnomalous   (): return "anomalous"
 def subtypeASU         (): return "asu"
+def subtypeSequence    (): return "seq"
 def subtypeXYZ         (): return "xyz"
 def subtypeSubstructure(): return "substructure"
 def subtypeAnomSubstr  (): return "substructure-am"

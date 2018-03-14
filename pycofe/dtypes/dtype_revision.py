@@ -3,13 +3,13 @@
 #
 # ============================================================================
 #
-#    04.12.17   <--  Date of Last Modification.
+#    14.03.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
-#  XRAY IMAGES DATA TYPE
+#  REVISION DATA TYPE
 #
-#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017
+#  Copyright (C) Eugene Krissinel, Andrey Lebedev 2017-2018
 #
 # ============================================================================
 #
@@ -75,7 +75,8 @@ class DType(dtype_template.DType):
             if st in incl:
                 if asutype:  asutype += ","
                 asutype += st
-        excl = [dtype_template.subtypeHKL(),dtype_template.subtypeAnomalous()] + incl
+        excl = [dtype_template.subtypeHKL(),dtype_template.subtypeAnomalous(),
+                dtype_template.subtypeSequence()] + incl
         for st in self.subtype:
             if not st in excl:
                 if f:  self.dname += ","
@@ -97,6 +98,8 @@ class DType(dtype_template.DType):
     def setASUData ( self,seq,nRes,molWeight,dataKey,mc1,sol1,prb1 ):
         self.ASU.seq        = seq     # list of sequences, may be empty []?
         self.addSubtype ( dtype_template.subtypeASU() )
+        if len(seq)>0:
+            self.addSubtype ( dtype_template.subtypeSequence() )
         for i in range(len(self.ASU.seq)):
             self.ASU.seq[i].nfind = self.ASU.seq[i].ncopies
             self.addSubtypes ( seq[i].subtype )
