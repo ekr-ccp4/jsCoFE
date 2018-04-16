@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    11.01.18   <--  Date of Last Modification.
+ *    23.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -29,7 +29,7 @@ var emailer  = require('./server.emailer');
 var conf     = require('./server.configuration');
 var utils    = require('./server.utils');
 var send_dir = require('./server.send_dir');
-var pd       = require('../js-common/common.project_data');
+var pd       = require('../js-common/common.data_project');
 var cmd      = require('../js-common/common.commands');
 var task_t   = require('../js-common/tasks/common.tasks.template');
 
@@ -761,6 +761,7 @@ module.exports.getProjectData         = getProjectData;
 module.exports.saveProjectData        = saveProjectData;
 module.exports.importProject          = importProject;
 module.exports.getProjectDirPath      = getProjectDirPath;
+module.exports.getUserProjectsDirPath = getUserProjectsDirPath;
 module.exports.getJobDirPath          = getJobDirPath;
 module.exports.getSiblingJobDirPath   = getSiblingJobDirPath;
 module.exports.getJobDataPath         = getJobDataPath;

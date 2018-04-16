@@ -2,18 +2,18 @@
 /*
  *  =================================================================
  *
- *    15.12.17   <--  Date of Last Modification.
+ *    23.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
- *  **** Module  :  js-common/common.user_data.js
+ *  **** Module  :  js-common/common.data_user.js
  *       ~~~~~~~~~
  *  **** Project :  jsCoFE - javascript-based Cloud Front End
  *       ~~~~~~~~~
  *  **** Content :  User Data Class
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *

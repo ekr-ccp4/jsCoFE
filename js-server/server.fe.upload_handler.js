@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    30.11.17   <--  Date of Last Modification.
+ *    10.04.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  Front End Server -- Uploads Handler
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -35,6 +35,9 @@ var utils    = require('./server.utils');
 //  prepare log
 var log = require('./server.log').newLog(9);
 
+// ==========================================================================
+
+function uploadDir()  { return 'uploads'; }
 
 // ==========================================================================
 
@@ -46,6 +49,7 @@ var upload_meta = {};
 
   // create an incoming form object
   var form = new formidable.IncomingForm();
+  form.maxFileSize = 100 * 1024 * 1024 * 1024;  // 100 Gb
 
   // specify that we want to allow the user to upload multiple files in a single request
   form.multiples = true;
@@ -95,7 +99,7 @@ var upload_meta = {};
                                            upload_meta.job_id );
           if (utils.fileExists(jobDir))  {
 
-            var uploadDir = path.join ( jobDir,'uploads' );
+            var uploadDir = path.join ( jobDir,uploadDir() );
             if (!utils.fileExists(uploadDir))  {
               if (!utils.mkDir(uploadDir))
                 uploadDir = '';
@@ -196,4 +200,5 @@ var upload_meta = {};
 
 // ==========================================================================
 // export for use in node
+module.exports.uploadDir    = uploadDir;
 module.exports.handleUpload = handleUpload;

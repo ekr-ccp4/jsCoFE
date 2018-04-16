@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    18.12.17   <--  Date of Last Modification.
+ *    23.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  Front End Server -- User Support Module
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -29,7 +29,7 @@ var emailer = require('./server.emailer');
 var conf    = require('./server.configuration');
 var utils   = require('./server.utils');
 var pl      = require('./server.fe.projects');
-var ud      = require('../js-common/common.user_data');
+var ud      = require('../js-common/common.data_user');
 var cmd     = require('../js-common/common.commands');
 
 //  prepare log

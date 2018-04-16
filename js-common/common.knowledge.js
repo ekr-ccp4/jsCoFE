@@ -1,7 +1,7 @@
 /*
  *  =================================================================
  *
- *    19.02.18   <--  Date of Last Modification.
+ *    16.04.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -108,7 +108,10 @@ var _taskIndex = {
   'e' : { type: 'TaskASUDefStruct'   , after: ['A'] },
 
   // suggest SeqAlign after Import
-  'f' : { type: 'TaskSeqAlign'       , after: ['B'] }
+  'f' : { type: 'TaskSeqAlign'       , after: ['B'] },
+
+  // do not suggest FacilityImport
+  'g' : { type: 'TaskFacilityImport' , after: [] }
 
 };
 

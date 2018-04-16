@@ -27,8 +27,9 @@
   <script src="js-lib/jsrview/js/jsrview.viewer.js"></script>
   <script src="js-lib/jstree/jstree.min.js"></script>
 
-  <script src="js-common/common.user_data.js"></script>
-  <script src="js-common/common.project_data.js"></script>
+  <script src="js-common/common.data_user.js"></script>
+  <script src="js-common/common.data_project.js"></script>
+  <script src="js-common/common.data_facility.js"></script>
   <script src="js-common/common.commands.js"></script>
   <script src="js-common/common.knowledge.js"></script>
   <script src="js-common/common.utils.js"></script>
@@ -44,7 +45,6 @@
   <script src="js-client/gui/gui.tree.js"></script>
   <script src="js-client/gui/gui.dialogs.js"></script>
 
-  <script src="js-client/cofe.jobtree.js"></script>
   <script src="js-client/cofe.local_service.js"></script>
   <script src="js-client/cofe.dialog_announce.js"></script>
   <script src="js-client/cofe.dialog_export_project.js"></script>
@@ -55,6 +55,7 @@
   <script src="js-client/cofe.dialog_licence.js"></script>
   <script src="js-client/cofe.dialog_taskdata.js"></script>
   <script src="js-client/cofe.dialog_tasklist.js"></script>
+  <script src="js-client/cofe.dialogs_facility.js"></script>
   <script src="js-client/cofe.dialogs.js"></script>
   <script src="js-client/cofe.page_base.js"></script>
   <script src="js-client/cofe.page_account.js"></script>
@@ -65,6 +66,8 @@
   <script src="js-client/cofe.page_project_list.js"></script>
   <script src="js-client/cofe.page_project.js"></script>
   <script src="js-client/cofe.page_register.js"></script>
+  <script src="js-client/cofe.tree_facilities.js"></script>
+  <script src="js-client/cofe.tree_job.js"></script>
   <script src="js-client/cofe.upload.js"></script>
 
   <script src="js-common/dtypes/common.dtypes.box.js"></script>
@@ -95,11 +98,11 @@
   <script src="js-common/tasks/common.tasks.deposition.js"></script>
   <script src="js-common/tasks/common.tasks.ensembleprepseq.js"></script>
   <script src="js-common/tasks/common.tasks.ensembleprepxyz.js"></script>
+  <script src="js-common/tasks/common.tasks.facilityimport.js"></script>
   <script src="js-common/tasks/common.tasks.fitligand.js"></script>
   <script src="js-common/tasks/common.tasks.fitwaters.js"></script>
   <script src="js-common/tasks/common.tasks.freerflag.js"></script>
   <script src="js-common/tasks/common.tasks.gesamt.js"></script>
-  <script src="js-common/tasks/common.tasks.icat.js"></script>
   <script src="js-common/tasks/common.tasks.import.js"></script>
   <script src="js-common/tasks/common.tasks.lorestr.js"></script>
   <script src="js-common/tasks/common.tasks.makeligand.js"></script>
@@ -174,11 +177,19 @@ if (dev_switch==1)  {
 
       makeAccountPage('scene');
 
+//} else if (dev_switch==4)  {
+//      makeFacilitiesPage('scene');
+
 } else if (__admin)  {
+
       makeAdminPage('scene');
+
 } else  {
+
       makeProjectPage('scene');
+
 }
+
 }
 
     });

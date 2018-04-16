@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    13.03.18   <--  Date of Last Modification.
+ *    27.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -170,7 +170,7 @@ var r         = 0;  // grid row
 
   for (var i=0;i<tasks.length;i++)
     if ((i<__suggested_task_nmin) || (ctotal>=cthresh))  {
-      console.log ( 'task=' + tasks[i] + ',  ctotal=' + ctotal );
+      //console.log ( 'task=' + tasks[i] + ',  ctotal=' + ctotal );
       var task = eval ( 'new ' + tasks[i] + '()' );
       if (this.setTask(task,grid,r,false))
         r++;
@@ -228,19 +228,12 @@ var row      = 0;
   ]);
   var section1 = section0;
 
-  if (__login_user=='Developer')
-    this.makeSection ( 'Data Import',[
-      new TaskICAT  (),
-      new TaskImport(),
-      'Utilities',
-      new TaskXyz2Revision()
-    ]);
-  else
-    this.makeSection ( 'Data Import',[
-      new TaskImport(),
-      'Utilities',
-      new TaskXyz2Revision()
-    ]);
+  this.makeSection ( 'Data Import',[
+    new TaskImport        (),
+    new TaskFacilityImport(),
+    'Utilities',
+    new TaskXyz2Revision  ()
+  ]);
 
   this.makeSection ( 'Data Processing',[
     new TaskAimless  (),

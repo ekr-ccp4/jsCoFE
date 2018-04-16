@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    18.12.17   <--  Date of Last Modification.
+ *    16.04.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  Common GUI widgets
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -305,6 +305,11 @@ Widget.prototype.addOnDblClickListener = function ( listener_func )  {
 
 Widget.prototype.addOnChangeListener = function ( listener_func )  {
   this.element.addEventListener('change',listener_func );
+  return this;
+}
+
+Widget.prototype.addOnInputListener = function ( listener_func )  {
+  this.element.addEventListener('input',listener_func );
   return this;
 }
 
@@ -732,10 +737,12 @@ InputText.prototype.setValue = function ( text )  {
   return this.element.value = text;
 }
 
+/*
 InputText.prototype.addOnInputListener = function ( listener_func )  {
   this.element.addEventListener('input',listener_func );
   return this;
 }
+*/
 
 InputText.prototype.setOnEnterListener = function ( socket_function )  {
   (function(self){

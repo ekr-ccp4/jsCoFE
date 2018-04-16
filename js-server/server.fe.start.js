@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    24.06.17   <--  Date of Last Modification.
+ *    25.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  Front End Server
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -27,6 +27,7 @@ var request = require('request');
 var conf  = require('./server.configuration');
 var pp    = require('./server.process_post');
 var user  = require('./server.fe.user');
+var fcl   = require('./server.fe.facilities');
 var rj    = require('./server.fe.run_job');
 var comm  = require('./server.fe.communicate');
 var rh    = require('./server.fe.request_handler');
@@ -49,6 +50,16 @@ function start ( callback_func )  {
     log.standard ( 2,'NC[' + i + ']: type=' + ncConfigs[i].exeType +
                      ' url=' + ncConfigs[i].url() );
   log.standard ( 3,'Emailer: ' + conf.getEmailerConfig().type );
+
+  // initialize facilities
+  /*
+  if (!fcl.checkFacilities(''))  {
+    if (!fcl.initFacilities(''))  {
+      log.standard ( 4,'facilities fault -- stop.' );
+      return;
+    }
+  }
+  */
 
   // read user login hash
   user.readUserLoginHash();
@@ -111,11 +122,11 @@ function start ( callback_func )  {
 
       case cmd.fe_command.stop :
           if (conf.getFEConfig().stoppable)  {
-            log.standard ( 5,'stopping' );
+            log.standard ( 6,'stopping' );
             cmd.sendResponse ( server_response,cmd.fe_retcode.ok,'','' );
             stopServer ( 0 );
           } else {
-            log.detailed ( 5,'stop command issued -- ignored according configuration' );
+            log.detailed ( 6,'stop command issued -- ignored according configuration' );
           }
         break;
 
@@ -135,10 +146,10 @@ function start ( callback_func )  {
     feConfig.port = server.address().port;  // reassigned if port was zero
 
     if (feConfig.exclusive)
-      log.standard ( 4,'front-end started, listening to ' +
+      log.standard ( 5,'front-end started, listening to ' +
                      feConfig.url() + ' (exclusive)' );
     else
-      log.standard ( 4,'front-end started, listening to ' +
+      log.standard ( 5,'front-end started, listening to ' +
                      feConfig.url() + ' (non-exclusive)' );
 
     if (callback_func)

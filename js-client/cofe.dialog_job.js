@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    11.01.18   <--  Date of Last Modification.
+ *    10.04.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -131,10 +131,14 @@ JobDialog.prototype.constructor = JobDialog;
 
 
 JobDialog.prototype.displayInputErrors = function ( input_msg )  {
-  new MessageBox ( 'Input errors',
-    'The following errors have been encountered at processing input parameters:' +
-    '<p><ul>' + input_msg.split('<b>').join('<li><b>') +
-    '</ul><p>Please adjust input parameters as appropriate.' );
+  if (input_msg.startsWith('#'))  {
+    new MessageBox ( 'Input errors',input_msg.substring(1) );
+  } else  {
+    new MessageBox ( 'Input errors',
+      'The following errors have been encountered at processing input parameters:' +
+      '<p><ul>' + input_msg.split('<b>').join('<li><b>') +
+      '</ul><p>Please adjust input parameters as appropriate.' );
+  }
 }
 
 
@@ -229,7 +233,7 @@ JobDialog.prototype.close = function()  {
 
 JobDialog.prototype.loadReport = function()  {
   var reportURL;
-  if (this.task.clientjob && (this.task.state==job_code.running) &&
+  if ((this.task.nc_type=='client') && (this.task.state==job_code.running) &&
       __local_service && this.task.job_dialog_data.job_token)
         reportURL = __local_service + '/@/' + this.task.job_dialog_data.job_token +
                                         '/' + this.task.getLocalReportPath();
@@ -376,7 +380,7 @@ JobDialog.prototype.makeLayout = function ( onRun_func )  {
 
               addWfKnowledge ( dlg.task,dlg.ancestors.slice(1) );
 
-              if (dlg.task.clientjob)  {
+              if (dlg.task.nc_type=='client')  {
 
                 dlg.task.job_dialog_data.job_token = rdata.job_token;
                 var data_obj       = {};

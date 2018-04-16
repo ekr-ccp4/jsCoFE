@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    06.03.18   <--  Date of Last Modification.
+ *    27.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -102,7 +102,7 @@ function Communicate ( server_request )  {
       // now check whether the job is currently running, in which case the
       // requested file should be fetched from the respective number cruncher
       var jobEntry = rj.getEFJobEntry ( login,flist[2],flist[3] );
-      if (jobEntry && (!jobEntry.clientjob))  {  // yes the job is running
+      if (jobEntry && (jobEntry.nc_type=='ordinary'))  {  // yes the job is running
         // form a URL request to forward
         this.ncURL = conf.getNCConfig(jobEntry.nc_number).url() + '/@/' +
                                       jobEntry.job_token + '/'  + localPath;

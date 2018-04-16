@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    09.02.18   <--  Date of Last Modification.
+ *    16.04.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -66,7 +66,7 @@ function TaskTemplate()  {
   this.uoname       = '';         // output file name template given by user
   this.state        = job_code.new;  // 'new', 'running', 'finished'
   this.helpURL      = null;   // (relative) url to help file, null will hide the help button
-  this.clientjob    = false;  // if true, the job may be run only on client NC
+  this.nc_type      = 'ordinary'; // required Number Cruncher type
   this.fasttrack    = false;  // no fasttrack requirements
   this.informFE     = true;   // end of job and results are sent back to FE
 
@@ -1366,6 +1366,37 @@ if (!dbx)  {
                               }(inpParamRef,key,checkbox,this));
                           break;
 
+            case 'textarea_':
+            case 'textarea' : inpParamRef.parameters[key]     = {};
+                              inpParamRef.parameters[key].ref = item;
+                              inpParamRef.parameters[key].ref.visible  = true;
+                              inpParamRef.parameters[key].ref._visible = true;
+                              var placeholder = '';
+                              var nrows       = 5;
+                              var ncols       = 80;
+                              if (item.hasOwnProperty('placeholder'))
+                                placeholder = item.placeholder;
+                              if (item.hasOwnProperty('nrows'))
+                                nrows = item.nrows;
+                              if (item.hasOwnProperty('ncols'))
+                                ncols = item.ncols;
+                              var textarea = grid.setTextArea ( item.value,
+                                        placeholder, nrows,ncols, r,c, rs,cs );
+                              textarea.setTooltip ( item.tooltip );
+                              $(textarea.element).css ( {'resize':'none'} );
+                              if (item.hasOwnProperty('iwidth'))  {
+                                if (item.iwidth.toString().endsWith('%'))
+                                      textarea.setWidth    ( item.iwidth );
+                                else  textarea.setWidth_px ( item.iwidth );
+                              } else  textarea.setWidth    ( '100%' );
+                              inpParamRef.parameters[key].input = textarea;
+                              (function(paramRef,Id,txa,task){
+                                txa.addOnInputListener(function() {
+                                  task.inputChanged ( paramRef,Id,txa.getValue() );
+                                });
+                              }(inpParamRef,key,textarea,this));
+                          break;
+
             default : break;
 
           }
@@ -1626,7 +1657,7 @@ if (!dbx)  {
                          break;
 
            case 'string_'  :
-           case 'string'   : text = param.input.getValue().trim();
+           case 'string'   : var text = param.input.getValue().trim();
                              if (text.length<=0)  {
                                if (item.type=='string_')  {
                                  if ('default' in item) item.value = item.default;
@@ -1639,6 +1670,18 @@ if (!dbx)  {
 
            case 'checkbox' :
            case 'combobox' : item.value = param.input.getValue();
+                         break;
+
+           case 'textarea_' :
+           case 'textarea'  : var text = param.input.getValue();
+                             if (text.length<=0)  {
+                               if (item.type=='textarea_')  {
+                                 if ('default' in item) item.value = item.default;
+                                                   else item.value = '';
+                               } else
+                                 addMessage ( item,key,'no value given' );
+                             } else
+                               item.value = text;
                          break;
 
            default : ;
@@ -1696,9 +1739,9 @@ if (!dbx)  {
   }
 
 
-  //  This function is called when task is finally sent to FE to run. Should
-  // execute function given as argument, or issue an error message if run
-  // should not be done.
+  //  This function is called just before the task is finally sent to FE to run.
+  // It should execute function given as argument, or issue an error message if
+  // run should not be done.
   TaskTemplate.prototype.doRun = function ( inputPanel,run_func )  {
     run_func();
   }

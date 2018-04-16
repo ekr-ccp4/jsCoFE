@@ -85,7 +85,7 @@ application.
   Type the following in the Terminal: ::
 
     $ cd /path/to/jscofe
-    $ vi config/ccp4/conf.desktop.json
+    $ vi config/conf.desktop.json
 
   (you may use any text editor of your choice). In the file, find and edit
   the following lines: ::
@@ -184,7 +184,7 @@ application.
   configuration file): ::
 
       $ cd /path/to/jscofe
-      $ vi config/ccp4/conf.remote.json
+      $ vi config/conf.remote.json
 
   and further edit the corresponding start shell script: ::
 

@@ -80,6 +80,8 @@ class Refmac(basic.TaskDriver):
 
             print >>scr_file, 'end'
 
+        #self.file_stdout.write ( "keywords=" + self.task.parameters.sec1.contains.KEYWORDS.value )
+
         self.file_stdin = 1 # a trick necessary because of using 'print' above
 
         # make command-line parameters for bare morda run on a SHELL-type node

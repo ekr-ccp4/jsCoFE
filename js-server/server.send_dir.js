@@ -203,6 +203,7 @@ function receiveDir ( jobDir,tmpDir,server_request,onFinish_func )  {
 
   // create an incoming form object
   var form = new formidable.IncomingForm();
+  form.maxFileSize = 100 * 1024 * 1024 * 1024;  // 100 Gb
 
   // specify that we want to allow the user to upload multiple files in a single request
   form.multiples = true;

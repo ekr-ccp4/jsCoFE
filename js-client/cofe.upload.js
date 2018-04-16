@@ -337,7 +337,6 @@ Upload.prototype.setUploadedFiles = function ( file_list )  {
 }
 
 
-
 // ===========================================================================
 
 function UploadDialog ( title,files,customData,autoClose_bool,onReady_func )  {

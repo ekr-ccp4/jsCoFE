@@ -20,11 +20,13 @@
  */
 
 
-var cmd  = require('../js-common/common.commands');
 var user = require('./server.fe.user');
 var prj  = require('./server.fe.projects');
+var fcl  = require('./server.fe.facilities');
 var rj   = require('./server.fe.run_job');
 var adm  = require('./server.fe.admin');
+var fcl  = require('./server.fe.facilities');
+var cmd  = require('../js-common/common.commands');
 
 //  prepare log
 //var log = require('./server.log').newLog(7);
@@ -115,6 +117,18 @@ var response = null;
 
     case cmd.fe_reqtype.stopJob :
           response = rj.stopJob ( login,data );
+       break;
+
+    case cmd.fe_reqtype.getFacilityData :
+          response = fcl.getUserFacilityList ( login );
+       break;
+
+    case cmd.fe_reqtype.updateFacility :
+          response = fcl.updateFacility ( login,data );
+       break;
+
+    case cmd.fe_reqtype.checkFclUpdate :
+          response = fcl.checkFacilityUpdate ( login,data );
        break;
 
     case cmd.fe_reqtype.getAdminData :

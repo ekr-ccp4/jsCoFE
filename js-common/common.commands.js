@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    11.01.18   <--  Date of Last Modification.
+ *    07.04.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -43,28 +43,31 @@ var fe_command = {
 // type as a field.
 
 var fe_reqtype = {
-  logout           : '-logout',           // request to log out
-  getUserData      : '-getUserData',      // request for user data
-  saveHelpTopics   : '-saveHelpTopics',   // request to save list of help topics
-  updateUserData   : '-updateUserData',   // request to update user data
-  getProjectList   : '-getProjectList',   // request for project list
-  saveProjectList  : '-saveProjectList',  // request to save project list
-  getProjectData   : '-getProjectData',   // request for project data
-  saveProjectData  : '-saveProjectData',  // request to save project data
-  preparePrjExport : '-preparePrjExport', // request to prepare project for export
-  checkPrjExport   : '-checkPrjExport',   // request to check project export state
-  finishPrjExport  : '-finishPrjExport',  // request to finish project export
-  checkPrjImport   : '-checkPrjImport',   // request to check project import state
-  finishPrjImport  : '-finishPrjImport',  // request to finish project import
-  importProject    : '-importProject',    // request to save import a project
-  saveJobData      : '-saveJobData',      // request to save job data
-  runJob           : '-runJob',           // request to run job
-  stopJob          : '-stopJob',          // request to stop job
-  checkJobs        : '-checkJobs',        // request to check on jobs' state
-  getJobFile       : '-getJobFile',       // request to download a job's file
-  getAdminData     : '-getAdminData',     // request to serve data for admin page
-  sendAnnouncement : '-sendAnnouncement', // request to send announcement to users
-  getUserKnowledge : '-getUserKnowledge'  // request to send user knowledge data
+  logout            : '-logout',           // request to log out
+  getUserData       : '-getUserData',      // request for user data
+  saveHelpTopics    : '-saveHelpTopics',   // request to save list of help topics
+  updateUserData    : '-updateUserData',   // request to update user data
+  getProjectList    : '-getProjectList',   // request for project list
+  saveProjectList   : '-saveProjectList',  // request to save project list
+  getProjectData    : '-getProjectData',   // request for project data
+  saveProjectData   : '-saveProjectData',  // request to save project data
+  preparePrjExport  : '-preparePrjExport', // request to prepare project for export
+  checkPrjExport    : '-checkPrjExport',   // request to check project export state
+  finishPrjExport   : '-finishPrjExport',  // request to finish project export
+  checkPrjImport    : '-checkPrjImport',   // request to check project import state
+  finishPrjImport   : '-finishPrjImport',  // request to finish project import
+  importProject     : '-importProject',    // request to save import a project
+  saveJobData       : '-saveJobData',      // request to save job data
+  runJob            : '-runJob',           // request to run job
+  stopJob           : '-stopJob',          // request to stop job
+  checkJobs         : '-checkJobs',        // request to check on jobs' state
+  getJobFile        : '-getJobFile',       // request to download a job's file
+  getAdminData      : '-getAdminData',     // request to serve data for admin page
+  sendAnnouncement  : '-sendAnnouncement', // request to send announcement to users
+  getUserKnowledge  : '-getUserKnowledge', // request to send user knowledge data
+  getFacilityData   : '-getFacilityData',  // request for facility metadata
+  updateFacility    : '-updateFacility',   // request to update facility metadata
+  checkFclUpdate    : '-checkFclUpdate'    // request to check facility update
 }
 
 
@@ -86,7 +89,10 @@ var fe_retcode = {
   noUploadDir   : 'noUploadDir',   // no upload directory within a job directory
   noTempDir     : 'noTempDir',     // no temporary directory
   noJobDir      : 'noJobDir',      // job directory not found
-  noJobRunning  : 'noJobRunning'   // requested job was not found as running
+  noJobRunning  : 'noJobRunning',  // requested job was not found as running
+  fileNotFound  : 'fileNotFound',  // file not found
+  inProgress    : 'inProgress',    // process in progress
+  askPassword   : 'askPassword'    // request password
 }
 
 

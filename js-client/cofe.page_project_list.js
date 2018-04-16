@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    06.12.17   <--  Date of Last Modification.
+ *    18.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  Project list page
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -164,10 +164,10 @@ function ProjectListPage ( sceneId )  {
 
   this.makeHeader ( 3,null );
   // Make Main Menu
-  var account_mi = this.headerPanel.menu.addItem('My Account','./images/settings.svg');
+  var account_mi = this.headerPanel.menu.addItem('My Account'   ,'./images/settings.svg'  );
   var admin_mi   = null;
   if (__admin)
-    admin_mi   = this.headerPanel.menu.addItem('Admin Page','./images/admin.png');
+    admin_mi = this.headerPanel.menu.addItem('Admin Page','./images/admin.png');
   this.headerPanel.menu.addSeparator ();
   var logout_mi  = this.headerPanel.menu.addItem('Log out'   ,'./images/logout.svg');
 

@@ -78,7 +78,7 @@ function readObject ( path ) {
 }
 
 
-function readClass ( path ) {  // same as object but with functions attached
+function readClass ( path ) {  // same as object but with class functions
   try {
     return class_map.getClassInstance ( fs.readFileSync(path).toString() );
   } catch (e)  {

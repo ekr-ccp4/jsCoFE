@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    02.02.18   <--  Date of Last Modification.
+#    10.04.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -75,8 +75,13 @@ class Import(basic.TaskDriver):
         # ============================================================================
         # get list of uploaded files
 
-        self.files_all = [f for f in os.listdir(self.importDir()) if os.path.isfile(os.path.join(self.importDir(),f))]
+        #self.files_all = [f for f in os.listdir(self.importDir()) if os.path.isfile(os.path.join(self.importDir(),f))]
 
+        self.files_all = []
+        for dirName, subdirList, fileList in os.walk(self.importDir(),topdown=False):
+            dName = dirName[len(self.importDir())+1:]
+            for fname in fileList:
+                self.files_all.append ( os.path.join(dName,fname) )
 
         # ============================================================================
         # do individual data type imports

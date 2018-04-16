@@ -118,6 +118,19 @@ function TaskRefmac()  {
                        range    : ['no|No','yes|Yes'],
                        value    : 'no',
                        position : [7,0,1,1]
+                /*
+                     },
+                KEYWORDS: {
+                       type        : 'textarea_',  // can be also 'textarea'
+                       keyword     : 'none',       // optional
+                       tooltip     : 'Advanced keywords',  // mandatory
+                       placeholder : 'type in keywords and values as in command prompt', // optional
+                       nrows       : 3,         // optional
+                       ncols       : 90,        // optional
+                       iwidth      : 500,       // optional
+                       value       : '',        // mandatory
+                       position    : [8,0,1,4]  // mandatory
+                */
                      }
              }
            }

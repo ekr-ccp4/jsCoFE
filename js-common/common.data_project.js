@@ -6,7 +6,7 @@
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
- *  **** Module  :  js-common/tasks/common.project_data.js
+ *  **** Module  :  js-common/tasks/common.data_project.js
  *       ~~~~~~~~~
  *  **** Project :  jsCoFE - javascript-based Cloud Front End
  *       ~~~~~~~~~

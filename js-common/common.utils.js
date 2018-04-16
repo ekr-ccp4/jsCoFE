@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    28.04.17   <--  Date of Last Modification.
+ *    05.04.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  Common Utils
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -77,6 +77,21 @@ function isInteger ( value_str ) {
 function isFloat ( value_str ) {
   return __regexp_float.test(value_str);
 //  return !isNaN(value) && (function(x) { return (x | 0) === x; })(parseFloat(value))
+}
+
+function isObject(obj) {
+  return obj === Object(obj);
+}
+
+function shallowCopy ( object )  {
+// returns copy of given object which does not contain object and array parameters
+  if (!object)
+    return object;
+  var copy = {};
+  for (var property in object)
+    if (object.hasOwnProperty(property) && (!isObject(object[property])))
+      copy[property] = object[property];
+  return copy;
 }
 
 // ===========================================================================

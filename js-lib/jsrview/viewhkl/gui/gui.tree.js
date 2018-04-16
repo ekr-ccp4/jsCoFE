@@ -504,6 +504,16 @@ Tree.prototype.selectSingle = function ( node )  {
 
 }
 
+Tree.prototype.deselectNode = function ( node )  {
+  if (this.created)
+    $(this.root.element).jstree(true).deselect_node('#'+node.id);
+}
+
+Tree.prototype.deselectNodeById = function ( nodeId )  {
+  if (this.created)
+    $(this.root.element).jstree(true).deselect_node('#'+nodeId);
+}
+
 
 Tree.prototype.selectSingleById = function ( nodeId )  {
   if (nodeId in this.node_map)

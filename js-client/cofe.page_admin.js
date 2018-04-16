@@ -138,13 +138,13 @@ AdminPage.prototype.constructor = AdminPage;
 /*
 AdminPage.prototype.destructor = function ( function_ready )  {
   this.tabs = null;  // in order to stop refreshes on resize
-  BasePage.prototype.destructor.call ( this,function_ready );
+  BasePage.prototype.destructor.call ( this,function0ready );
 }
 */
 
 AdminPage.prototype.onResize = function ( width,height )  {
   this.tabs.setWidth_px  ( width -50  );
-  this.tabs.setHeight_px ( height-105 );
+  this.tabs.setHeight_px ( height-100 );
   this.tabs.refresh();
 }
 

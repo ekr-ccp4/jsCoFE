@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    12.09.17   <--  Date of Last Modification.
+ *    27.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  Coot Task Class (for local server)
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -31,20 +31,20 @@ function TaskCoot()  {
   if (__template)  __template.TaskTemplate.call ( this );
              else  TaskTemplate.call ( this );
 
-  this._type     = 'TaskCoot';
-  this.name      = 'coot';
-  this.oname     = 'coot';  // default output file name template
-  this.title     = 'Model Building with Coot';
-  this.helpURL   = './html/jscofe_task_coot.html';
-  this.clientjob = true;  // if true, the job may be run only on client NC
+  this._type   = 'TaskCoot';
+  this.name    = 'coot';
+  this.oname   = 'coot';  // default output file name template
+  this.title   = 'Model Building with Coot';
+  this.helpURL = './html/jscofe_task_coot.html';
+  this.nc_type = 'client';  // job may be run only on client NC
 
   this.input_dtypes = [{      // input data types
-      data_type   : {'DataRevision':['xyz']}, // data type(s) and subtype(s)
-      label       : 'Structure revision',     // label for input dialog
-      inputId     : 'revision', // input Id for referencing input fields
-      version     : 0,          // minimum data version allowed
-      min         : 1,          // minimum acceptable number of data instances
-      max         : 1           // maximum acceptable number of data instances
+      data_type : {'DataRevision':['xyz']}, // data type(s) and subtype(s)
+      label     : 'Structure revision',     // label for input dialog
+      inputId   : 'revision', // input Id for referencing input fields
+      version   : 0,          // minimum data version allowed
+      min       : 1,          // minimum acceptable number of data instances
+      max       : 1           // maximum acceptable number of data instances
     }
   ];
 

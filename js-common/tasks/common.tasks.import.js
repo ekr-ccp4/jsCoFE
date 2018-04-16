@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    01.02.18   <--  Date of Last Modification.
+ *    13.04.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -82,6 +82,7 @@ if (!__template)  {
                         '<b><i>Import</i></b> button to process ' +
                         'files uploaded.<br>&nbsp;',
                         0,0, 1,1 ).setFontSize('80%');
+    div.grid.setWidth ( '100%' );
 
     div.customData = {};
     div.customData.login_token = __login_token;

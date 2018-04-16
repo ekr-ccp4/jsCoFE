@@ -37,6 +37,8 @@ import pyrvapi
 
 #  application imports
 import basic
+from   pycofe.proc   import xyzmeta
+
 
 # ============================================================================
 # Make Morda driver
@@ -53,7 +55,7 @@ class Ample(basic.TaskDriver):
         # Prepare ample job
 
         # fetch input data
-        hkl = self.input_data.data.hkl[0]
+        hkl = self.makeClass ( self.input_data.data.hkl[0] )
         seq = self.input_data.data.seq[0]
 
         # make command line parameters
@@ -72,12 +74,14 @@ class Ample(basic.TaskDriver):
         """
         self.storeReportDocument ( self.log_page_id() )
 
-        test_ample_path = os.path.join ( os.environ["CCP4"],"bin","ample_mock.py" )
+        #test_ample_path = os.path.join ( os.environ["CCP4"],"bin","ample_mock.py" )
 
         # run ample
-        self.runApp ( "ccp4-python",[test_ample_path] + cmd )
+        #self.runApp ( "ccp4-python",[test_ample_path] + cmd )
+        self.runApp ( "ample",cmd )
 
         self.restoreReportDocument()
+
         f = open ( 'xxx.json','w' )
         f.write ( pyrvapi.rvapi_get_meta() )
         f.close()
@@ -111,12 +115,57 @@ class Ample(basic.TaskDriver):
             try:
                 ample_meta = json.loads ( rvapi_meta )
             except:
-                self.putMessage ( "<b>Program error:</b> <i>unparseable metadata from Simbad</i>" +
+                self.putMessage ( "<b>Program error:</b> <i>unparseable metadata from Ample</i>" +
                                   "<p>'" + rvapi_meta + "'" )
         else:
-            self.putMessage ( "<b>Program error:</b> <i>no metadata from Simbad</i>" )
+            self.putMessage ( "<b>Program error:</b> <i>no metadata from Ample</i>" )
             ample_meta = {}
-            ample_meta["nResults"] = 0
+            ample_meta["results"] = []
+
+        results = ample_meta["results"]
+        if len(results)<=0:
+            self.putTitle ( "Solution Not Found" )
+        else:
+
+            generic_parser_summary = None
+            for i in range(len(results)):
+                result = results[i]
+                self.putTitle ( "Solution " + result["name"] )
+
+                mtzfile   = os.path.join ( self.reportDir(),result["mtz"] )
+                final_pdb = os.path.join ( self.reportDir(),result["pdb"] )
+                sol_hkl   = hkl
+
+                meta = xyzmeta.getXYZMeta ( final_pdb,self.file_stdout,
+                                            self.file_stderr )
+                if "cryst" in meta:
+                    sol_spg    = meta["cryst"]["spaceGroup"]
+                    spg_change = self.checkSpaceGroupChanged ( sol_spg,hkl,mtzfile )
+                    if spg_change:
+                        mtzfile = spg_change[0]
+                        sol_hkl = spg_change[1]
+
+                # ================================================================
+                # make output structure and register it
+
+                structure = self.finaliseStructure ( final_pdb,self.outputFName,
+                                                     sol_hkl,None,[seq],1,False,"" )
+
+                if structure:
+                    # update structure revision
+                    revision = self.makeClass  ( self.input_data.data.revision[0] )
+                    revision.setReflectionData ( sol_hkl   )
+                    revision.setStructureData  ( structure )
+                    self.registerRevision      ( revision,i+1,"" )
+                    if not generic_parser_summary:
+                        generic_parser_summary = self.generic_parser_summary.copy()
+
+                else:
+                    self.putMessage ( "Structure Data cannot be formed (probably a bug)" )
+
+            if generic_parser_summary:
+                self.generic_parser_summary = generic_parser_summary.copy()
+
 
         # close execution logs and quit
         self.success()

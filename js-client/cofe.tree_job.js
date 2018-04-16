@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    02.02.18   <--  Date of Last Modification.
+ *    27.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -75,6 +75,8 @@ function JobTree()  {
 JobTree.prototype = Object.create ( Tree.prototype  );
 JobTree.prototype.constructor = JobTree;
 
+
+// -------------------------------------------------------------------------
 
 JobTree.prototype.customIcon = function() {
 //  var ci = new TreeNodeCustomIcon ( './images/brass_gears.gif','32px','22px','hidden' );
@@ -599,7 +601,7 @@ JobTree.prototype.stopJob = function ( nodeId )  {
       // FE receives back from NC upon job termination.
       data.meta.state = job_code.exiting;
 
-      if (data.meta.clientjob)
+      if (data.meta.nc_type=='client')
            localCommand  ( nc_command.stopJob,data,data.meta.title,null );
       else serverRequest ( fe_reqtype.stopJob,data,data.meta.title,null,null,null );
 
@@ -717,7 +719,7 @@ JobTree.prototype.cloneJob = function ( onAdd_func )  {
           'be cloned.<br>Please create the job as a new one, using ' +
           '"<i>Add Job</i>" button from the<br>control bar.' );
       } else  {
-        if (task._type!='TaskImport')  {
+        if ((task._type!='TaskImport') && (task._type!='TaskFacilityImport'))  {
           task.uname      = task0.uname;
           task.uoname     = task0.uoname;
           task.input_data = $.extend ( true,{},task0.input_data );

@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    11.01.18   <--  Date of Last Modification.
+ *    27.03.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -55,7 +55,7 @@ FEJobRegister.prototype.addJob = function (
                                    job_token,nc_number,login,project,jobId )  {
   this.job_map[job_token] = {
     nc_number  : nc_number,
-    clientjob  : false,
+    nc_type    : 'ordinary',
     job_token  : job_token,  // job_token issued by NC
     login      : login,
     project    : project,
@@ -136,17 +136,7 @@ var n          = last_number_cruncher;
 var maxcap0    = Number.MIN_SAFE_INTEGER;
 var n0         = -1;
 
-/*
-  if (task.clientjob)  {
-    for (var i=0;(i<nc_servers.length) && (nc_number<0);i++)  {
-      if (nc_servers[i].exeType=='CLIENT')
-        nc_number = i;
-    }
-    if (nc_number>=0)
-      return nc_number;
-  }
-*/
-  if (task.clientjob)
+  if (task.nc_type!='ordinary')
     return 0;  // this will not be used for client job, just make a valid return
 
   if (task.fasttrack)  { // request for fast track
@@ -251,7 +241,7 @@ function runJob ( login,data, callback_func )  {
     var jobDir = prj.getJobDirPath ( login,task.project,task.id );
 
     var nc_number = 0;
-    if (!task.clientjob)  {
+    if (task.nc_type=='ordinary')  {
 
       nc_number = selectNumberCruncher ( task );
 
@@ -278,7 +268,7 @@ function runJob ( login,data, callback_func )  {
     // prepare input data
     task.makeInputData ( jobDir );
 
-    if (task.clientjob)  {
+    if (task.nc_type=='client')  {
       // job for client NC, just pack the job directory and inform client
 
       send_dir.packDir ( jobDir,'*', function(code){
@@ -288,7 +278,7 @@ function runJob ( login,data, callback_func )  {
           var job_token = crypto.randomBytes(20).toString('hex');
           feJobRegister.addJob ( job_token,nc_number,login,
                                  task.project,task.id );
-          feJobRegister.getJobEntryByToken(job_token).clientjob = true;
+          feJobRegister.getJobEntryByToken(job_token).nc_type = task.nc_type;
           writeFEJobRegister();
 
           rdata = {};

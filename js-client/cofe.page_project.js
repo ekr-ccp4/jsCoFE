@@ -142,7 +142,7 @@ function ProjectPage ( sceneId )  {
     }
 
     if (!$(moveup_btn.element).button('option','disabled'))  {
-      items.insertJobItem = { // The "Add job" menu item
+      items.moveJobUpItem = { // The "Add job" menu item
         label : "Move up",
         icon  : './images/moveup_20x20.svg',
         action: moveJobUp
@@ -377,6 +377,7 @@ function ProjectPage ( sceneId )  {
 
 ProjectPage.prototype = Object.create ( BasePage.prototype );
 ProjectPage.prototype.constructor = ProjectPage;
+
 
 ProjectPage.prototype.destructor = function ( function_ready )  {
   this.getJobTree().stopTaskLoop();

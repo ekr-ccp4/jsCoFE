@@ -33,7 +33,7 @@ class CofeSignal( Exception ):
     def send_signal( self ):
         message = self.signal_prefix + self.msg + '\n' + str( self.returncode )
         with open ( self.signal_file_name, 'w' ) as f:
-            f.write( message )
+            f.write ( message )
 
     def quitApp( self ):
         self.send_signal()
@@ -62,5 +62,3 @@ class TaskReadFailure( CofeSignal ):
 class JobFailure( CofeSignal ):
     returncode = 203
     signal_prefix = "fail_job "
-
-
