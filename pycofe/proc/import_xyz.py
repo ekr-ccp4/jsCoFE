@@ -3,7 +3,7 @@
 #
 # ============================================================================
 #
-#    06.02.18   <--  Date of Last Modification.
+#    18.04.18   <--  Date of Last Modification.
 #                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ----------------------------------------------------------------------------
 #
@@ -73,7 +73,7 @@ def run ( body ):  # body is reference to the main Import class
         body.files_all.remove ( f )
 
         fpath = os.path.join ( body.importDir(),f );
-        coor.stripLigWat ( fpath,fpath )  #  strip ligands and waters
+        #coor.stripLigWat ( fpath,fpath )  #  strip ligands and waters
 
         # split input file to chains
         scr_file = open ( "pdbcur.script","w" )
@@ -165,6 +165,7 @@ def run ( body ):  # body is reference to the main Import class
 
                 body.putSummaryLine ( f,"XYZ",xyz.dname )
 
+                """
                 if nChains>1:
                     irow = 2
                     for model in xyzMeta["xyz"]:
@@ -224,7 +225,7 @@ def run ( body ):  # body is reference to the main Import class
                                 body.addSummaryLine ( "XYZ",xyz.dname )
 
                                 irow += 3
-
+                """
 
         body.file_stdout.write ( "... processed: " + f + "\n" )
         k += 1

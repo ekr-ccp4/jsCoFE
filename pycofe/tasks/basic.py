@@ -298,6 +298,9 @@ class TaskDriver(object):
         else:
             return self.outputFName + extention
 
+    def getCIFOFName ( self,modifier=-1 ):
+        return self.getOFName ( ".cif",modifier )
+
     def getXYZOFName ( self,modifier=-1 ):
         return self.getOFName ( ".pdb",modifier )
 
@@ -1291,4 +1294,3 @@ class TaskDriver(object):
             pass
 
         signal_obj.quitApp()
-

@@ -327,7 +327,7 @@ JobDialog.prototype.makeLayout = function ( onRun_func )  {
   toolBar.setCellSize ( '40%','',0,6 );
 
   if ((this.task.state!='new') && (this.task.job_dialog_data.panel=='output') &&
-      (this.outputPanel.element.src.length<=0))
+      (this.outputPanel.getURL().length<=0))
     this.loadReport();
 
   this.inputPanel .setVisible ( this.task.job_dialog_data.panel=='input'  );

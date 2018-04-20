@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    10.04.18   <--  Date of Last Modification.
+ *    18.04.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -99,13 +99,13 @@ var upload_meta = {};
                                            upload_meta.job_id );
           if (utils.fileExists(jobDir))  {
 
-            var uploadDir = path.join ( jobDir,uploadDir() );
-            if (!utils.fileExists(uploadDir))  {
-              if (!utils.mkDir(uploadDir))
-                uploadDir = '';
+            var uplDir = path.join ( jobDir,uploadDir() );
+            if (!utils.fileExists(uplDir))  {
+              if (!utils.mkDir(uplDir))
+                uplDir = '';
             }
 
-            if (uploadDir.length>0)  {
+            if (uplDir.length>0)  {
 
               var fdata       = {};
               var file_mod    = null;
@@ -123,7 +123,7 @@ var upload_meta = {};
                   redundant_files.push ( file_mod.annotation[i].file );
                   for (var j=0;j<file_mod.annotation[i].items.length;j++)  {
                     var fname = file_mod.annotation[i].items[j].rename;
-                    utils.writeString ( path.join(uploadDir,fname),
+                    utils.writeString ( path.join(uplDir,fname),
                                         file_mod.annotation[i].items[j].contents );
                     fdata.files.push ( fname );
                   }
@@ -137,7 +137,7 @@ var upload_meta = {};
                 } else  {
                   if (fname in file_rename)
                     fname = file_rename[fname];
-                  if (!utils.moveFile(key,path.join(uploadDir,fname)))
+                  if (!utils.moveFile(key,path.join(uplDir,fname)))
                     errs = 'error';
                   fdata.files.push ( fname );
                 }
@@ -153,7 +153,7 @@ var upload_meta = {};
                   ext = '.em.link';
                   fdata.files.push  ( ldir + ' [EM micrograms,link]' );
                 }
-                utils.writeString ( path.join(uploadDir,ldir + ext),
+                utils.writeString ( path.join(uplDir,ldir + ext),
                                     upload_meta.link_directory );
               }
 

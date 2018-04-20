@@ -65,7 +65,7 @@ def putSRFDiagram ( body,            # reference on Basic class
     scr_file.close ()
     """
 
-    # Start pdbcur
+    # Start molrep
     rc = command.call ( "molrep",["-i"],"./",
                         "molrep_srf.script",file_stdout,file_stderr,log_parser )
 

@@ -140,6 +140,8 @@ TaskDeposition.prototype.constructor = TaskDeposition;
 TaskDeposition.prototype.icon_small = function()  { return './images/task_deposition_20x20.svg'; }
 TaskDeposition.prototype.icon_large = function()  { return './images/task_deposition.svg';       }
 
+TaskDeposition.prototype.cleanJobDir = function ( jobDir )  {}
+
 TaskDeposition.prototype.currentVersion = function()  { return 1; } // from 16.12.2007
 
 if (__template)  {

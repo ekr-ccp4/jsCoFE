@@ -2,7 +2,7 @@
 /*
  *  =================================================================
  *
- *    12.12.17   <--  Date of Last Modification.
+ *    18.04.18   <--  Date of Last Modification.
  *                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  -----------------------------------------------------------------
  *
@@ -13,7 +13,7 @@
  *  **** Content :  Ensemble Preparation from Coordinates Task Class
  *       ~~~~~~~~~
  *
- *  (C) E. Krissinel, A. Lebedev 2016-2017
+ *  (C) E. Krissinel, A. Lebedev 2016-2018
  *
  *  =================================================================
  *
@@ -48,29 +48,30 @@ function TaskEnsemblePrepXYZ()  {
   this.helpURL = './html/jscofe_task_ensembleprepxyz.html';
 
   this.input_dtypes = [{  // input data types
-      data_type : {'DataSequence':[]}, // data type(s) and subtype(s)
-      label     : 'Sequence',          // label for input dialog
-      tooltip   : 'Specify optional sequence to associate the resulting ' +
-                  'model with. If no sequence is given, a void one will be ' +
-                  'created for reference using the name of leading coordinate ' +
-                  'set.',
-      inputId   : 'seq',      // input Id for referencing input fields
-      force     : 1,          // show no sequence by default if zero
-      min       : 0,          // minimum acceptable number of data instances
-      max       : 1           // maximum acceptable number of data instances
+      data_type   : {'DataSequence':[]}, // data type(s) and subtype(s)
+      label       : 'Sequence',          // label for input dialog
+      tooltip     : 'Specify optional sequence to associate the resulting ' +
+                    'model with. If no sequence is given, a void one will be ' +
+                    'created for reference using the name of leading coordinate ' +
+                    'set.',
+      inputId     : 'seq',      // input Id for referencing input fields
+      force       : 1,          // show no sequence by default if zero
+      min         : 0,          // minimum acceptable number of data instances
+      max         : 1           // maximum acceptable number of data instances
     },{
 //      data_type : {'DataStructure':['~substructure','~substructure-am'],
-      data_type : {'DataStructure':['protein','dna','rna'],
-                   'DataXYZ':[]},  // data type(s) and subtype(s)
-      label     : 'Coordinates',   // label for input dialog
-      tooltip   : 'Specify coordinate sets to be merged in an ensamble for ' +
-                  'further use in Molecular Replacement. Usually you will ' +
-                  'choose homologous single chains of approximately equal ' +
-                  'length. The resulting ensemble will be named after the ' +
-                  'leading coordinat set.',
-      inputId   : 'xyz',      // input Id for referencing input fields
-      min       : 1,          // minimum acceptable number of data instances
-      max       : 100000      // maximum acceptable number of data instances
+      data_type   : {'DataStructure':['protein','dna','rna'],
+                     'DataXYZ':[]},  // data type(s) and subtype(s)
+      label       : 'Coordinates',   // label for input dialog
+      tooltip     : 'Specify coordinate sets to be merged in an ensamble for ' +
+                    'further use in Molecular Replacement. Usually you will ' +
+                    'choose homologous single chains of approximately equal ' +
+                    'length. The resulting ensemble will be named after the ' +
+                    'leading coordinat set.',
+      inputId     : 'xyz',      // input Id for referencing input fields
+      customInput : 'chain-sel', // lay custom fields next to the selection
+      min         : 1,          // minimum acceptable number of data instances
+      max         : 100000      // maximum acceptable number of data instances
     }
   ];
 

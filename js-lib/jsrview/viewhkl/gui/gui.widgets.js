@@ -1133,16 +1133,51 @@ ToolBar.prototype.constructor = ToolBar;
 // -------------------------------------------------------------------------
 // IFrame class
 
+/*
+function IFrame ( uri )  {
+  Widget.call ( this,'object' );
+  if (uri.length>0)
+    this.element.setAttribute ( 'data',uri );
+  $(this.element).css ( {'border':'none'} );
+}
+
+IFrame.prototype = Object.create ( Widget.prototype );
+IFrame.prototype.constructor = IFrame;
+
+IFrame.prototype.loadPage = function ( uri )  {
+  //this.setVisible ( false );
+  this.element.data = uri;
+}
+
+IFrame.prototype.setHTML = function ( html )  {
+  //this.setVisible ( false );
+  this.element.data = 'data:text/html;charset=utf-8,' + encodeURI(html);
+}
+
+IFrame.prototype.getURL = function()  {
+  return this.element.data;
+}
+
+IFrame.prototype.clear = function()  {
+  //this.setVisible ( false );
+  this.element.data = 'about:blank';
+}
+
+IFrame.prototype.reload = function()  {
+  //this.setVisible ( false );
+  this.element.data = this.element.src;
+}
+*/
+
 function IFrame ( uri )  {
   Widget.call ( this,'iframe' );
   if (uri.length>0)
     this.element.setAttribute ( 'src',uri );
+  //this.element.setAttribute ( 'sandbox','allow-same-origin' );
   $(this.element).css ( {'border':'none'} );
-  /*
-  (function(iframe){
-    iframe.element.onload = function(){ iframe.setVisible(true); };
-  }(this))
-  */
+  //(function(iframe){
+  //  iframe.element.onload = function(){ iframe.setVisible(true); };
+  //}(this))
 }
 
 IFrame.prototype = Object.create ( Widget.prototype );

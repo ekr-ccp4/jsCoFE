@@ -34,7 +34,7 @@ import pyrvapi
 
 #  application imports
 import basic
-from   pycofe.proc   import analyse_ensemble
+from   pycofe.proc   import analyse_ensemble, coor
 from   pycofe.dtypes import dtype_template, dtype_sequence
 
 
@@ -88,7 +88,15 @@ class EnsemblePrepXYZ(basic.TaskDriver):
 
             for i in range(len(xyz)):
                 xyz[i] = self.makeClass ( xyz[i] )
-                self.write_stdin ( "\nmodel = " + xyz[i].getFilePath(self.inputDir()) )
+                fpath  = xyz[i].getFilePath ( self.inputDir() )
+                if xyz[i].chainSel != "(all)":
+                    base, ext = os.path.splitext ( xyz[i].getFileName(0) )
+                    fpath_sel = base + "_" + xyz[i].chainSel + ext
+                    coor.fetchChains ( fpath,-1,[xyz[i].chainSel],True,True,fpath_sel )
+                    self.write_stdin ( "\nmodel = " + fpath_sel )
+                else:
+                    self.write_stdin ( "\nmodel = " + fpath )
+                #xyz[i].chainSel
 
             output_style = "merged"
             #if len(xyz)==1:
@@ -149,7 +157,14 @@ class EnsemblePrepXYZ(basic.TaskDriver):
 
         else:
             # single xyz dataset on input
-            os.rename ( self.makeClass(xyz[0]).getFilePath(self.inputDir()),outputFile )
+            xyz0  = self.makeClass ( xyz[0] )
+            fpath = xyz0.getFilePath ( self.inputDir() )
+            coor.fetchChains ( fpath,-1,[xyz0.chainSel],True,True,outputFile )
+            #if xyz0.chainSel != "(all)":
+            #    coor.fetchChains ( fpath,-1,[xyz0.chainSel],True,True,outputFile )
+            #else:
+            #    coor.fetchChains ( fpath,-1,['(all)'],True,True,outputFile )
+            #    os.rename ( fpath,outputFile )
 
         if os.path.isfile(outputFile):
 

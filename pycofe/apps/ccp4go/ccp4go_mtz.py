@@ -19,7 +19,8 @@ import os
 #  ccp4-python imports
 import pyrvapi
 import pyrvapi_ext.parsers
-from   ccp4mg import mmdb2
+#from   ccp4mg import mmdb2
+import gemmi
 
 import mtz
 import datred_utils
@@ -275,9 +276,10 @@ class PrepareMTZ(ccp4go_base.Base):
     # ----------------------------------------------------------------------
 
     def checkSpaceGroup ( self,hkl_spg,fpath_xyz ):
-        mm = mmdb2.Manager()
-        mm.ReadCoorFile ( str(fpath_xyz) )
-        spg      = mm.GetSpaceGroup()
+        #mm = mmdb2.Manager()
+        #mm.ReadCoorFile ( str(fpath_xyz) )
+        #spg      = mm.GetSpaceGroup()
+        spg      = gemmi.read_structure(str(fpath_xyz)).sg_hm
         spg_key  = spg.replace(" ","")
         spg_info = { "spg" : spg, "hkl" : "" }
 

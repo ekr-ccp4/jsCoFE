@@ -31,6 +31,7 @@ import uuid
 
 #  application imports
 import basic
+from proc import valrep
 
 
 # ============================================================================
@@ -47,8 +48,8 @@ class Deposition(basic.TaskDriver):
 
         # Just in case (of repeated run) remove the output xyz file. When deposition
         # succeeds, this file is created.
-        if os.path.isfile(self.getXYZOFName()):
-            os.remove(self.getXYZOFName())
+        if os.path.isfile(self.getCIFOFName()):
+            os.remove(self.getCIFOFName())
 
         # Prepare deposition input
         # fetch input data
@@ -58,32 +59,15 @@ class Deposition(basic.TaskDriver):
         for i in range(len(seq)):
             seq[i] = self.makeClass ( seq[i] )
 
-        with open(self.file_stdin_path(),'w') as scr_file:
-            #print >>scr_file, 'make hydr', str(self.task.parameters.sec1.contains.MKHYDR.value)
-            print >>scr_file, 'ncyc 0'
-            #ncsrv = str(self.task.parameters.sec1.contains.NCSR.value)
-            #if ncsrv in ('local', 'global'):
-            #     print >>scr_file, 'ncsr', ncsrv
-
-            #if str(self.task.parameters.sec1.contains.RIDGE_YES.value) == 'yes':
-            #    print >>scr_file, 'ridg dist sigm', self.task.parameters.sec1.contains.RIDGE_VAL.value
-
-            #if str(self.task.parameters.sec1.contains.WAUTO_YES.value) == 'yes':
-            #    print >>scr_file, 'weight auto'
-
-            #else:
-            #    print >>scr_file, 'weight matrix', self.task.parameters.sec1.contains.WAUTO_VAL.value
-
-            #if str(self.task.parameters.sec1.contains.TWIN.value) == 'yes':
-            #    print >>scr_file, 'twin'
-
-            print >>scr_file, "labin  FP=" + hkl.dataset.Fmean.value, \
-                              " SIGFP=" + hkl.dataset.Fmean.sigma, \
-                              " FREE=" + hkl.dataset.FREE
-
-            print >>scr_file, 'end'
-
-        self.file_stdin = 1 # a trick necessary because of using 'print' above
+        self.open_stdin()
+        self.write_stdin ( "pdbout format mmcif\n" +
+                           "make hydrogen YES hout YES\n" +
+                           "ncyc 0\n"   +
+                           "labin  FP=" + hkl.dataset.Fmean.value +
+                           " SIGFP="    + hkl.dataset.Fmean.sigma +
+                           " FREE="     + hkl.dataset.FREE + "\n" +
+                           "end\n" )
+        self.close_stdin()
 
         # make command-line parameters for bare morda run on a SHELL-type node
         cmd = [ "hklin" ,hkl.getFilePath(self.inputDir()),
@@ -102,8 +86,70 @@ class Deposition(basic.TaskDriver):
         # Start refmac
         self.runApp ( "refmac5",cmd )
 
+        modelFilePath = os.path.splitext(self.getXYZOFName())[0] + ".cif"
+        fin  = open ( self.getXYZOFName(),"r" )
+        fout = open ( modelFilePath,"wt" )
+        for line in fin:
+            if line.startswith("_symmetry.entry_id"):
+                fout.write ( "_exptl.entry_id          XXXX\n" +
+                             "_exptl.method            'X-RAY DIFFRACTION'\n" +
+                             "_exptl.crystals_number   ?\n" +
+                             "#\n" +
+                             "_exptl_crystal.id                    1\n" +
+                             "_exptl_crystal.density_meas          ?\n" +
+                             "_exptl_crystal.density_Matthews      2.33\n" +
+                             "_exptl_crystal.density_percent_sol   47.15\n" +
+                             "_exptl_crystal.description           ?\n" +
+                             "#\n"
+                            )
+            fout.write ( line )
+        fin .close()
+        fout.close()
+
+        #os.rename ( self.getXYZOFName(),modelFilePath )
+
+        # Prepare CIF with structure factors
+
+        anomcols  = hkl.getAnomalousColumns()
+        anomlabin = ""
+        if anomcols[4]=="I":
+            anomlabin = " I(+)=" + anomcols[0] + " SIGI(+)=" + anomcols[1] +\
+                        " I(-)=" + anomcols[2] + " SIGI(-)=" + anomcols[3]
+        elif anomcols[4]=="F":
+            anomlabin = " F(+)=" + anomcols[0] + " SIGF(+)=" + anomcols[1] +\
+                        " F(-)=" + anomcols[2] + " SIGF(-)=" + anomcols[3]
+
+        self.open_stdin()
+        self.write_stdin ( "OUTPUT CIF -\n"  +
+                           "    data_ccp4\n" +
+                           "labin  FP=" + hkl.dataset.Fmean.value +
+                           " SIGFP="    + hkl.dataset.Fmean.sigma +
+                           anomlabin    +
+                           " FREE="     + hkl.dataset.FREE + "\n" +
+                           "end\n" )
+        self.close_stdin()
+
+        sfCIF = self.getOFName ( "_sf.cif" )
+        cmd   = ["HKLIN",hkl.getFilePath(self.inputDir()), "HKLOUT",sfCIF]
+
+        # Start mtz2various
+        self.runApp ( "mtz2various",cmd )
+        self.unsetLogParser()
+
+        repFilePath = os.path.splitext(self.getXYZOFName())[0] + ".pdf"
+
+        self.file_stdout.write ( "modelFilePath=" + modelFilePath + "\n" )
+        self.file_stdout.write ( "sfCIF=" + sfCIF + "\n" )
+        self.file_stdout.write ( "repFilePath=" + repFilePath + "\n" )
+
+        modelFilePath = "/Users/eugene/Projects/jsCoFE/tmp/valrep/1sar.cif"
+        sfCIF = "/Users/eugene/Projects/jsCoFE/tmp/valrep/1sar-sf.cif"
+
+        valrep.getValidationReport ( modelFilePath,sfCIF,repFilePath,self.file_stdout )
+
+        """
         # check solution and register data
-        if os.path.isfile(self.getXYZOFName()):
+        if os.path.isfile(self.getCIFOFName()):
 
             self.putTitle ( "Deposition Output" )
             self.unsetLogParser()
@@ -133,6 +179,7 @@ class Deposition(basic.TaskDriver):
 
         else:
             self.putTitle ( "No Output Generated" )
+        """
 
         # close execution logs and quit
         self.success()

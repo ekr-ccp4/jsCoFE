@@ -110,7 +110,7 @@ class Aimless(basic.TaskDriver):
 #           return
 #   def tmp(self):
 
-        ds0      = self.input_data.data.ds0[0]
+        ds0         = self.input_data.data.ds0[0]
         mtzRef      = os.path.join(self.inputDir(),ds0.files[0])
         symm_select = ds0.symm_select if ds0._type=="DataUnmerged" else None
 
@@ -497,4 +497,3 @@ if __name__ == "__main__":
 
     drv = Aimless ( "Data Reduction with Aimless",os.path.basename(__file__) )
     drv.start()
-

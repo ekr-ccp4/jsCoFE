@@ -27,7 +27,7 @@ class comrc():
             self.utime = retcode[2].ru_utime
             self.stime = retcode[2].ru_stime
             self.umem  = retcode[2].ru_maxrss/104448.0
-            self.msg = ""
+            self.msg   = ""
             if returncode:
                 self.msg = "Error in command.call\n"
                 self.msg += "Return code: " + str(returncode) + "\n"
@@ -84,7 +84,6 @@ def call ( executable,command_line,job_dir,stdin_fname,file_stdout,
                           stdin=file_stdin,
                           stdout=subprocess.PIPE if log_parser else file_stdout,
                           stderr=file_stderr )
-
         if log_parser:
             log_parser.parse_stream ( p.stdout,file_stdout )
 

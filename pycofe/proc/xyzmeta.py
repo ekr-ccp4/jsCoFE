@@ -24,12 +24,6 @@ import sys
 #  application imports
 from pycofe.varut import command
 
-#sys.path.append ( os.path.join(os.path.dirname(os.path.abspath(__file__)),os.pardir) )
-#try:
-#    from varut import command
-#except:
-#    print " import failed in 'proc/edmap'"
-#    sys.exit ( 200 )
 
 # ============================================================================
 
@@ -48,15 +42,35 @@ def XYZMeta ( json_str ):
 
 
 def getXYZMeta ( fpath,file_stdout,file_stderr,log_parser=None ):
-# returns chain information as the following list:
-#  [  { 'model':1,
-#       'chains': [
-#         {'id': 'A', 'file': 'fname_A.pdb', 'type': 'Protein', 'size': 100 },  // aminoacids
-#         {'id': 'B', 'file': 'fname_B.pdb', 'type': 'DNA', 'size': 50 },   // DNA
-#         {'id': 'C', 'file': 'fname_C.pdb', 'type': 'RNA', 'size': 50 },   // RNA
-#       ]
-#    }
-#  ]
+# returns chain information as the following disctionary:
+
+"""
+{
+  'cryst' : {
+      'spaceGroup': 'P 21 21 21',
+      'a'     : 64.897,
+      'b'     : 78.323,
+      'c'     : 38.792,
+      'alpha' : 90.00,
+      'beta'  : 90.00,
+      'gamma' : 90.00
+    },
+  'xyz' : [
+  { 'model':1,
+    'chains': [
+      { 'id':'A', 'file':'rnase_model_1_A.pdb', 'type':'AA',
+        'seq':'DVSGTVCLSALPPEATDTLNLIASDGPFPYSQDGVVFQNRESVLPTQSYGYYHEYTVITPGARTRGTRRIICGEATQEDYYTGDHYATFSLIDQTC',
+        'size':96, 'ligands':[] },
+      { 'id':'B', 'file':'rnase_model_1_B.pdb', 'type':'AA',
+        'seq':'DVSGTVCLSALPPEATDTLNLIASDGPFPYSQDGVVFQNRESVLPTQSYGYYHEYTVITPGARTRGTRRIICGEATQEDYYTGDHYATFSLIDQTC',
+        'size':96, 'ligands':['35S'] }
+              ]
+  }
+],
+  'ligands': ['35S']
+}
+"""
+
 
     scr_file = open ( "pdbcur.script","w" )
     scr_file.write  ( "PDB_META\nEND\n" )
